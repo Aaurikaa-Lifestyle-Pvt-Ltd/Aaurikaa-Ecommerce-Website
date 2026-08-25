@@ -1,4 +1,4 @@
-import type { AdminOrder, OrderLine, OrderStatus } from "@/types/admin";
+import type { AdminOrder, AdminOrderPricing, OrderLine, OrderStatus } from "@/types/admin";
 import { idString, resolveMediaUrl } from "./media";
 import { FULFILMENT_STATUSES, mapOrderStatusLabel } from "./helpers";
 
@@ -13,6 +13,81 @@ function formatAddress(value: unknown): string {
   if (typeof value === "string") return value;
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
+}
+
+function numberOrZero(value: unknown): number {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function sumLineSubtotal(
+  items: Array<{ price?: number; originalPrice?: number; quantity?: number }>,
+): number {
+  return items.reduce((sum, item) => {
+    const unit = numberOrZero(item.originalPrice ?? item.price);
+    const qty = Math.max(1, Math.floor(numberOrZero(item.quantity) || 1));
+    return sum + unit * qty;
+  }, 0);
+}
+
+/**
+ * Map persisted order money fields for Admin display.
+ * Reads server values only — does not recompute coupon/tax engines.
+ */
+export function mapAdminOrderPricing(
+  raw: Record<string, unknown> | null | undefined,
+): AdminOrderPricing | null {
+  if (!raw) return null;
+
+  const coupon = (raw.coupon ?? {}) as {
+    code?: string;
+    discountAmount?: number;
+  };
+  const bulk = (raw.bulkDiscountSummary ?? {}) as {
+    totalOriginalAmount?: number;
+    totalDiscountAmount?: number;
+  };
+  const tax = (raw.tax ?? {}) as {
+    totalTaxAdded?: number;
+    totalTaxAmount?: number;
+    taxType?: string;
+  };
+  const items = Array.isArray(raw.items) ? raw.items : [];
+
+  const couponDiscount = numberOrZero(coupon.discountAmount);
+  const bulkDiscount = numberOrZero(bulk.totalDiscountAmount);
+  const discountAmount = couponDiscount + bulkDiscount;
+  const shippingCharge = numberOrZero(raw.shippingCharge);
+  const taxAmount =
+    tax.totalTaxAdded !== undefined && tax.totalTaxAdded !== null
+      ? numberOrZero(tax.totalTaxAdded)
+      : numberOrZero(tax.totalTaxAmount);
+  const total = numberOrZero(raw.totalAmount);
+  const subtotal =
+    typeof bulk.totalOriginalAmount === "number" && bulk.totalOriginalAmount > 0
+      ? numberOrZero(bulk.totalOriginalAmount)
+      : sumLineSubtotal(
+          items as Array<{ price?: number; originalPrice?: number; quantity?: number }>,
+        );
+  const taxType = String(tax.taxType || "").toLowerCase();
+  const subtotalLabel =
+    taxType.includes("inclusive") || taxType.includes("mixed")
+      ? "Subtotal (incl. GST)"
+      : "Subtotal";
+  const couponCode =
+    coupon.code != null && String(coupon.code).trim() ? String(coupon.code).trim() : null;
+
+  return {
+    subtotal,
+    subtotalLabel,
+    couponCode,
+    couponDiscount,
+    bulkDiscount,
+    discountAmount,
+    shippingCharge,
+    taxAmount,
+    total,
+  };
 }
 
 function mapLine(raw: {
@@ -58,6 +133,7 @@ export function mapAdminOrder(raw: Record<string, unknown> | null | undefined): 
     "Customer";
   const paymentMethod = String(raw.paymentMethod ?? "");
   const paymentStatus = String(raw.paymentStatus ?? "");
+  const pricing = mapAdminOrderPricing(raw);
 
   return {
     id,
@@ -77,6 +153,7 @@ export function mapAdminOrder(raw: Record<string, unknown> | null | undefined): 
       phone: String(shipping.phone ?? ""),
     },
     lines: items.map((item) => mapLine(item as Parameters<typeof mapLine>[0])),
+    pricing,
     backendStatus: String(raw.status ?? "pending"),
     paymentStatus,
     fulfilmentKind: String(raw.fulfilmentKind || "sale"),

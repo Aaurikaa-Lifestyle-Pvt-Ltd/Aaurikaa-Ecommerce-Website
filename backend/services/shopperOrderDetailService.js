@@ -339,6 +339,7 @@ function buildPricingSummary(order) {
   const subtotal = taxVisibility.itemsNetSubtotal;
   const shippingApplicability = resolveOrderShippingApplicability(order);
   const requiresShipping = orderRequiresShipping(order);
+  const couponCode = taxVisibility.couponCode;
 
   return {
     shippingApplicability,
@@ -349,6 +350,9 @@ function buildPricingSummary(order) {
     shippingCharge: requiresShipping ? taxVisibility.shippingCharge : 0,
     taxAmount: taxVisibility.totalTaxAdded,
     discountAmount: taxVisibility.discountAmount,
+    couponCode,
+    couponDiscount: taxVisibility.couponDiscount,
+    bulkDiscount: taxVisibility.bulkDiscount,
     total: taxVisibility.total,
     gst: {
       cgst: Number(order.tax?.cgst) || 0,
@@ -364,6 +368,7 @@ function buildPricingSummary(order) {
       shippingCharge: requiresShipping ? taxVisibility.shippingCharge : 0,
       shippingGst: requiresShipping ? taxVisibility.shippingGst : 0,
       discountAmount: taxVisibility.showDiscountLine ? taxVisibility.discountAmount : 0,
+      couponCode,
       total: taxVisibility.total,
     },
   };

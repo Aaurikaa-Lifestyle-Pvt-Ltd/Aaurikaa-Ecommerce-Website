@@ -91,6 +91,13 @@ export default function OrdersPage() {
                 </div>
                 <div className="text-right">
                   <p className="font-semibold">{formatMoney(order.amount)}</p>
+                  {order.pricing && order.pricing.discountAmount > 0 ? (
+                    <p className="text-xs text-danger">
+                      {order.pricing.couponCode
+                        ? `Discount (${order.pricing.couponCode}) −${formatMoney(order.pricing.discountAmount)}`
+                        : `Discount −${formatMoney(order.pricing.discountAmount)}`}
+                    </p>
+                  ) : null}
                   <p className="text-xs text-muted-foreground">{formatDate(order.date)}</p>
                 </div>
               </div>

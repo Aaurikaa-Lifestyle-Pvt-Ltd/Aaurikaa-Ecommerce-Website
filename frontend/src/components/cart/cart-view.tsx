@@ -6,21 +6,14 @@ import { ButtonLink } from "@/components/ui/button";
 import { useCart } from "./cart-provider";
 import { CartLineItem } from "./cart-line-item";
 import { CartSummary } from "./cart-summary";
-import { Field, TextInput } from "@/components/checkout/checkout-field";
-import { readCheckoutCoupon, writeCheckoutCoupon } from "@/lib/coupon";
-import { useEffect, useState } from "react";
 
 /**
  * Full cart page body (client) — populated table-like layout on desktop,
  * stacked lines on mobile, polished empty state.
+ * Coupons are entered at checkout (server pricing quote) — not on the bag.
  */
 export function CartView() {
   const { items, itemCount, ready, error, source } = useCart();
-  const [coupon, setCoupon] = useState("");
-
-  useEffect(() => {
-    setCoupon(readCheckoutCoupon());
-  }, []);
 
   if (!ready) {
     return (
@@ -108,22 +101,9 @@ export function CartView() {
           <aside className="h-fit rounded-card border border-border bg-surface p-5 sm:p-6 lg:sticky lg:top-28">
             <h2 className="font-serif text-xl tracking-tight">Order summary</h2>
             <CartSummary className="mt-5" />
-            <div className="mt-5">
-              <Field id="cart-coupon" label="Promo code">
-                <TextInput
-                  id="cart-coupon"
-                  value={coupon}
-                  onChange={(e) => {
-                    const next = e.target.value.toUpperCase();
-                    setCoupon(next);
-                    writeCheckoutCoupon(next);
-                  }}
-                />
-              </Field>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Applied and validated at checkout by the backend.
-              </p>
-            </div>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Promo codes are applied at checkout by the backend pricing quote.
+            </p>
             <ButtonLink
               href="/checkout"
               variant="primary"

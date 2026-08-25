@@ -286,9 +286,13 @@ function renderFinancialSummary(doc, order, taxVisibility, y) {
   }
 
   if (taxVisibility.showDiscountLine) {
+    const code =
+      taxVisibility.couponCode != null && String(taxVisibility.couponCode).trim()
+        ? String(taxVisibility.couponCode).trim()
+        : null;
     y = drawSummaryLine(
       doc,
-      "Discount:",
+      code ? `Discount (${code}):` : "Discount:",
       formatMoneyNegative(taxVisibility.discountAmount),
       y
     );

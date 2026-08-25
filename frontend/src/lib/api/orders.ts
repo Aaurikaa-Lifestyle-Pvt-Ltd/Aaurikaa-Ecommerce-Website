@@ -38,6 +38,9 @@ export type ShopperOrderListItem = {
   orderId: string;
   createdAt: string | null;
   total: number;
+  /** Combined coupon + bulk discount from server snapshot; 0 when none. */
+  discountAmount?: number;
+  couponCode?: string | null;
   orderStatus: string;
   paymentVisibility?: ShopperPaymentVisibility;
   invoiceAvailable?: boolean;
@@ -85,6 +88,7 @@ export type ShopperOrderSummary = {
   shippingCharge?: number;
   shippingGst?: number;
   discountAmount?: number;
+  couponCode?: string | null;
   total?: number;
 };
 
@@ -94,6 +98,9 @@ export type ShopperOrderDetail = ShopperOrderListItem & {
     shippingCharge?: number;
     taxAmount?: number;
     discountAmount?: number;
+    couponCode?: string | null;
+    couponDiscount?: number;
+    bulkDiscount?: number;
     total?: number;
     requiresShipping?: boolean;
     gst?: {

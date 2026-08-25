@@ -314,11 +314,10 @@ export function CheckoutView() {
       setQuote(null);
       return;
     }
-    if (!values.shipping.state.trim() || !/^\d{6}$/.test(values.shipping.pinCode.trim())) {
-      setQuote(null);
-      setQuoteError(null);
-      return;
-    }
+
+    const hasShipDest =
+      Boolean(values.shipping.state.trim()) &&
+      /^\d{6}$/.test(values.shipping.pinCode.trim());
 
     const selected =
       selectedAddressId !== "new"
@@ -335,19 +334,23 @@ export function CheckoutView() {
           options: item.options,
         })),
         coupon,
-        shipping: {
-          name: values.shipping.fullName,
-          email: values.customer.email,
-          phone: values.shipping.phone,
-          address1: values.shipping.addressLine1,
-          address2: values.shipping.addressLine2?.trim() || undefined,
-          city: values.shipping.city,
-          state: values.shipping.state,
-          zip: values.shipping.pinCode,
-          country: values.shipping.countryName || selected?.countryName || "India",
-          stateId: values.shipping.stateId || selected?.stateId,
-          countryId: values.shipping.countryId || selected?.countryId,
-        },
+        ...(hasShipDest
+          ? {
+              shipping: {
+                name: values.shipping.fullName,
+                email: values.customer.email,
+                phone: values.shipping.phone,
+                address1: values.shipping.addressLine1,
+                address2: values.shipping.addressLine2?.trim() || undefined,
+                city: values.shipping.city,
+                state: values.shipping.state,
+                zip: values.shipping.pinCode,
+                country: values.shipping.countryName || selected?.countryName || "India",
+                stateId: values.shipping.stateId || selected?.stateId,
+                countryId: values.shipping.countryId || selected?.countryId,
+              },
+            }
+          : {}),
       })
         .then((next) => {
           if (cancelled) return;
@@ -1085,8 +1088,9 @@ export function CheckoutView() {
                   />
                 </Field>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  The code is validated by the backend pricing quote and again when you
-                  place the order. Invalid codes block order create.
+                  Coupons are applied by the backend pricing quote as you type. Shipping
+                  and tax finalize after you enter a delivery address. Invalid codes
+                  block order create.
                 </p>
                 {quote && coupon.trim() && quote.couponValid === false ? (
                   <p className="mt-2 text-sm text-sale" role="alert">

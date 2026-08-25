@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test src/lib/api/*.test.ts src/lib/mappers/*.test.ts src/lib/rich-text/*.test.ts src/lib/static-pages/*.test.ts src/lib/cart.test.ts src/lib/buy-now.test.ts src/lib/buy-again-messages.test.ts src/lib/checkout.test.ts src/lib/commerce-errors.test.ts src/lib/guest-cart-merge.test.ts src/lib/discovery.test.ts src/lib/taxonomy.test.ts src/lib/search-suggestions.test.ts src/lib/label-collections.test.ts src/lib/data-api-mode.test.ts src/lib/product-quantity.test.ts src/lib/product-gallery.test.ts src/lib/ux-hardening.test.ts"
+    "test": "node --experimental-strip-types --test src/lib/api/*.test.ts src/lib/mappers/*.test.ts src/lib/rich-text/*.test.ts src/lib/static-pages/*.test.ts src/lib/cart.test.ts src/lib/buy-now.test.ts src/lib/buy-again-messages.test.ts src/lib/checkout.test.ts src/lib/checkout-coupon-wiring.test.ts src/lib/commerce-errors.test.ts src/lib/guest-cart-merge.test.ts src/lib/discovery.test.ts src/lib/taxonomy.test.ts src/lib/search-suggestions.test.ts src/lib/label-collections.test.ts src/lib/data-api-mode.test.ts src/lib/product-quantity.test.ts src/lib/product-gallery.test.ts src/lib/ux-hardening.test.ts"
   },
   "dependencies": {
     "next": "16.3.0",

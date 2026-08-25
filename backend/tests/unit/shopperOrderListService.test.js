@@ -61,6 +61,8 @@ describe("shopperOrderListService", () => {
       expect(dto._id).toBe("507f1f77bcf86cd799439011");
       expect(dto.orderId).toBe("INV-20260101-0001");
       expect(dto.total).toBe(499);
+      expect(dto.discountAmount).toBe(0);
+      expect(dto.couponCode).toBeNull();
       expect(dto.orderStatus).toBe("pending");
       expect(dto.cancelEligibility).toEqual({
         eligible: true,
@@ -87,6 +89,20 @@ describe("shopperOrderListService", () => {
         quantity: 2,
         variantSummary: "Color: Red, Size: M",
       });
+    });
+
+    it("exposes server discount amount and coupon code when present", () => {
+      const dto = shopperOrderListDTO({
+        _id: "507f1f77bcf86cd799439011",
+        invoiceNumber: "INV-DISC-1",
+        status: "paid",
+        totalAmount: 900,
+        coupon: { code: "SAVE100", discountAmount: 100 },
+        items: [{ quantity: 1, price: 1000, product: { name: "Ring" } }],
+      });
+
+      expect(dto.discountAmount).toBe(100);
+      expect(dto.couponCode).toBe("SAVE100");
     });
   });
 });

@@ -108,6 +108,12 @@ function buildOrderTaxVisibility(order) {
     shippingCharge,
     discountAmount,
     showDiscountLine: discountAmount > 0 && !discountEmbeddedInItems,
+    couponCode:
+      plain.coupon?.code != null && String(plain.coupon.code).trim()
+        ? String(plain.coupon.code).trim()
+        : null,
+    couponDiscount: snapshot.couponDiscount,
+    bulkDiscount: snapshot.bulkDiscount,
     total,
     totalTaxAdded,
     includedGstInProductPrices,

@@ -121,6 +121,8 @@ export type PricingQuote = {
   shippingMethod: string | null;
   /** Human label from shipping engine (e.g. rule name). */
   shippingLabel: string | null;
+  /** True when quote ran without a delivery destination (shipping not final). */
+  shippingPending: boolean;
   discount: number;
   /** Amount actually added to payable (exclusive GST + shipping GST). Prefer over `tax`. */
   taxAdded: number;
@@ -277,6 +279,10 @@ export function mapPricingQuote(
     shipping: numberOrZero(raw?.shipping?.amount),
     shippingMethod: raw?.shipping?.method ? String(raw.shipping.method) : null,
     shippingLabel: raw?.shipping?.label ? String(raw.shipping.label) : null,
+    shippingPending:
+      String(raw?.shipping?.method || "").toLowerCase() === "pending" ||
+      Boolean((raw?.shipping as { breakdown?: { pendingAddress?: boolean } } | undefined)?.breakdown
+        ?.pendingAddress),
     discount: numberOrZero(raw?.discount?.total),
     taxAdded,
     tax: taxAdded,

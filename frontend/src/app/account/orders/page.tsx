@@ -70,6 +70,19 @@ function OrderListCard({ order }: { order: ShopperOrderListItem }) {
                 ? formatMoney({ amount: order.total, currency: "INR" })
                 : "—"}
             </p>
+            {typeof order.discountAmount === "number" && order.discountAmount > 0 ? (
+              <p className="text-xs text-sale">
+                {order.couponCode?.trim()
+                  ? `Discount (${order.couponCode.trim()}) −${formatMoney({
+                      amount: order.discountAmount,
+                      currency: "INR",
+                    })}`
+                  : `Discount −${formatMoney({
+                      amount: order.discountAmount,
+                      currency: "INR",
+                    })}`}
+              </p>
+            ) : null}
           </div>
         </div>
       </div>

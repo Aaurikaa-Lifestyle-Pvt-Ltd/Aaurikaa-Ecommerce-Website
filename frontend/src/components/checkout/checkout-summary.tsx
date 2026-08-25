@@ -48,6 +48,7 @@ function shippingRowLabel(quote: PricingQuote): string {
 }
 
 function shippingRowValue(quote: PricingQuote): string {
+  if (quote.shippingPending) return "Enter delivery address";
   if (quote.shipping === 0 || quote.freeShipping) return "Complimentary";
   return inr(quote.shipping);
 }
@@ -154,7 +155,7 @@ export function CheckoutSummary({
         ) : null}
         {couponValid ? (
           <p className="text-sm text-muted-foreground" role="status">
-            Promo code applied.
+            Promo code {couponCode.trim().toUpperCase()} applied.
           </p>
         ) : null}
         {quote ? (
@@ -163,14 +164,20 @@ export function CheckoutSummary({
 
             {quote.discount > 0 ? (
               <SummaryRow
-                label="Discount"
+                label={
+                  couponValid && couponCode.trim()
+                    ? `Discount (${couponCode.trim().toUpperCase()})`
+                    : "Discount"
+                }
                 value={`−${inr(quote.discount)}`}
                 discount
               />
             ) : null}
 
             {/* Exclusive: payable GST components (ANBAZAR addedCgst/sgst/…) */}
-            {!quote.taxIncluded && hasAddedTaxBreakdown(quote) ? (
+            {!quote.shippingPending &&
+            !quote.taxIncluded &&
+            hasAddedTaxBreakdown(quote) ? (
               <>
                 {quote.addedIgst > 0 ? (
                   <SummaryRow
@@ -215,7 +222,8 @@ export function CheckoutSummary({
               </>
             ) : null}
 
-            {!quote.taxIncluded &&
+            {!quote.shippingPending &&
+            !quote.taxIncluded &&
             !hasAddedTaxBreakdown(quote) &&
             quote.taxAdded > 0 ? (
               <SummaryRow
@@ -229,7 +237,9 @@ export function CheckoutSummary({
             ) : null}
 
             {/* Inclusive: only Shipping GST — no product CGST/SGST breakout (ANBAZAR) */}
-            {quote.taxIncluded && quote.shippingTax > 0 ? (
+            {!quote.shippingPending &&
+            quote.taxIncluded &&
+            quote.shippingTax > 0 ? (
               <div className="space-y-1">
                 <SummaryRow
                   label={shippingGstLabel}
@@ -247,14 +257,22 @@ export function CheckoutSummary({
               value={shippingRowValue(quote)}
             />
 
+            {quote.shippingPending ? (
+              <p className="text-xs text-muted-foreground">
+                Shipping and destination GST update after you enter a delivery address.
+              </p>
+            ) : null}
+
             <div className="flex justify-between border-t border-border pt-3 text-base">
-              <span className="font-medium">Total</span>
+              <span className="font-medium">
+                {quote.shippingPending ? "Items total" : "Total"}
+              </span>
               <span className="font-medium">{inr(quote.total)}</span>
             </div>
           </>
         ) : (
           <p className="text-sm text-muted-foreground">
-            Enter a delivery address to see shipping and tax.
+            Sign in to calculate coupons, shipping, and tax.
           </p>
         )}
       </div>

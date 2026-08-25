@@ -332,7 +332,6 @@ function OrderDetailView({
           <CardHeader title="Payment" />
           <div className="p-4 text-sm sm:p-5">
             <p className="font-medium">{seed.payment}</p>
-            <p className="mt-1 text-muted-foreground">Total {formatMoney(seed.amount)}</p>
           </div>
         </Card>
 
@@ -349,10 +348,73 @@ function OrderDetailView({
         </Card>
 
         <Card>
-          <CardHeader title="Total" />
-          <div className="flex items-center justify-between p-4 sm:p-5">
-            <span className="text-sm text-muted-foreground">Order total</span>
-            <span className="text-xl font-semibold">{formatMoney(seed.amount)}</span>
+          <CardHeader title="Order totals" />
+          <div className="space-y-2 p-4 text-sm sm:p-5">
+            {seed.pricing ? (
+              <>
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">{seed.pricing.subtotalLabel}</span>
+                  <span className="font-medium">{formatMoney(seed.pricing.subtotal)}</span>
+                </div>
+                {seed.pricing.couponDiscount > 0 ? (
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">
+                      {seed.pricing.couponCode
+                        ? `Coupon (${seed.pricing.couponCode})`
+                        : "Coupon discount"}
+                    </span>
+                    <span className="font-medium text-danger">
+                      −{formatMoney(seed.pricing.couponDiscount)}
+                    </span>
+                  </div>
+                ) : null}
+                {seed.pricing.bulkDiscount > 0 ? (
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">Bulk discount</span>
+                    <span className="font-medium text-danger">
+                      −{formatMoney(seed.pricing.bulkDiscount)}
+                    </span>
+                  </div>
+                ) : null}
+                {seed.pricing.discountAmount > 0 &&
+                seed.pricing.couponDiscount <= 0 &&
+                seed.pricing.bulkDiscount <= 0 ? (
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">
+                      {seed.pricing.couponCode
+                        ? `Discount (${seed.pricing.couponCode})`
+                        : "Discount"}
+                    </span>
+                    <span className="font-medium text-danger">
+                      −{formatMoney(seed.pricing.discountAmount)}
+                    </span>
+                  </div>
+                ) : null}
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">Shipping</span>
+                  <span className="font-medium">
+                    {seed.pricing.shippingCharge === 0
+                      ? "Complimentary"
+                      : formatMoney(seed.pricing.shippingCharge)}
+                  </span>
+                </div>
+                {seed.pricing.taxAmount > 0 ? (
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">GST / tax</span>
+                    <span className="font-medium">{formatMoney(seed.pricing.taxAmount)}</span>
+                  </div>
+                ) : null}
+                <div className="flex justify-between gap-4 border-t border-border pt-3 text-base">
+                  <span className="font-medium">Order total</span>
+                  <span className="font-semibold">{formatMoney(seed.pricing.total || seed.amount)}</span>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Order total</span>
+                <span className="text-xl font-semibold">{formatMoney(seed.amount)}</span>
+              </div>
+            )}
           </div>
         </Card>
       </div>

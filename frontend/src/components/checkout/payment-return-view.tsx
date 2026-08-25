@@ -5,8 +5,12 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { ButtonLink } from "@/components/ui/button";
+import { OrderPricingBreakdown } from "@/components/orders/order-pricing-breakdown";
 import { verifyPhonePePayment } from "@/lib/api/payments";
-import { fetchShopperOrder } from "@/lib/api/orders";
+import {
+  fetchShopperOrder,
+  type ShopperOrderDetail,
+} from "@/lib/api/orders";
 import { useShopperAuth } from "@/lib/auth/shopper-provider";
 import { formatMoney } from "@/lib/format";
 import { formatCommerceApiError } from "@/lib/commerce-errors";
@@ -19,7 +23,10 @@ export function PaymentReturnView() {
   const [failed, setFailed] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
-  const [total, setTotal] = useState<number | null>(null);
+  const [pricingSummary, setPricingSummary] = useState<
+    ShopperOrderDetail["pricingSummary"] | null
+  >(null);
+  const [fallbackTotal, setFallbackTotal] = useState<number | null>(null);
   const [invoiceNumber, setInvoiceNumber] = useState<string | null>(null);
 
   useEffect(() => {
@@ -69,7 +76,8 @@ export function PaymentReturnView() {
         const order = await fetchShopperOrder(orderId);
         if (cancelled) return;
         setInvoiceNumber(order.orderId);
-        setTotal(order.pricingSummary?.total ?? order.total ?? null);
+        setPricingSummary(order.pricingSummary ?? null);
+        setFallbackTotal(order.pricingSummary?.total ?? order.total ?? null);
         if (order.orderStatus) setStatus(order.orderStatus);
         const pay = order.paymentVisibility?.paymentStatus ?? null;
         setPaymentStatus(pay);
@@ -121,11 +129,6 @@ export function PaymentReturnView() {
               Payment {paymentStatus}
             </p>
           ) : null}
-          {typeof total === "number" ? (
-            <p className="mt-4 text-sm">
-              Server total {formatMoney({ amount: total, currency: "INR" })}
-            </p>
-          ) : null}
           {failed ? (
             <p className="mt-4 text-xs text-muted-foreground">
               No refund is created from this screen. Open the order for the current
@@ -133,6 +136,20 @@ export function PaymentReturnView() {
             </p>
           ) : null}
         </div>
+
+        {pricingSummary ? (
+          <div className="mx-auto mt-10 max-w-md rounded-card border border-border bg-surface p-5 text-left sm:p-6">
+            <OrderPricingBreakdown
+              pricingSummary={pricingSummary}
+              fallbackTotal={fallbackTotal ?? undefined}
+            />
+          </div>
+        ) : typeof fallbackTotal === "number" ? (
+          <p className="mt-10 text-center text-sm">
+            Server total {formatMoney({ amount: fallbackTotal, currency: "INR" })}
+          </p>
+        ) : null}
+
         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
           {orderId ? (
             <ButtonLink href={`/account/orders/${orderId}`} variant="primary" size="md">

@@ -97,6 +97,7 @@ test("mapPricingQuote treats numeric coupon as valid when amount or free shippin
     { couponCode: "SAVE50" },
   );
   assert.equal(withDiscount.couponValid, true);
+  assert.equal(withDiscount.shippingPending, false);
 
   const freeShip = mapPricingQuote(
     {
@@ -122,6 +123,19 @@ test("mapPricingQuote treats numeric coupon as valid when amount or free shippin
     { couponCode: "BADCODE" },
   );
   assert.equal(invalid.couponValid, false);
+});
+
+test("mapPricingQuote marks shippingPending when method is pending", () => {
+  const quote = mapPricingQuote({
+    subtotal: 1390,
+    total: 1290,
+    shipping: { amount: 0, method: "pending", label: "Shipping" },
+    discount: { total: 100, coupon: 100 },
+    tax: { taxAdded: 0, included: true },
+  }, { couponCode: "TESTSPIN" });
+  assert.equal(quote.shippingPending, true);
+  assert.equal(quote.discount, 100);
+  assert.equal(quote.couponValid, true);
 });
 
 test("mapPricingQuote maps exclusive added GST splits without inventing totals", () => {

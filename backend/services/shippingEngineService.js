@@ -155,6 +155,18 @@ async function calculateShipping({ cartItems, shippingAddress, couponCode, force
         shippableSubtotal: Math.round(totalSalePrice * 100) / 100,
     };
 
+    // Quote preview before checkout destination is known: allow coupon/subtotal
+    // calculation with shipping deferred (not complimentary — UI must not label FREE).
+    if (!forceZoneId && isShippingAddressInsufficient(shippingAddress)) {
+        return {
+            ...result,
+            shippingCharge: 0,
+            shippingMethod: "pending",
+            applicable: true,
+            pendingAddress: true,
+        };
+    }
+
     // 2. Validate distinct WeightClasses (active) — one query
     const weightClasses = await WeightClass.find({ _id: { $in: distinctClassIds } }).lean();
     const weightClassMap = new Map(weightClasses.map((wc) => [String(wc._id), wc]));
@@ -298,6 +310,14 @@ async function calculateShipping({ cartItems, shippingAddress, couponCode, force
  * Resolve Zone from Address
  * State (ID then Name) -> Pincode prefix -> Country
  */
+function isShippingAddressInsufficient(address) {
+  if (!address || typeof address !== "object") return true;
+  const hasState = Boolean(address.stateId || address.state);
+  const hasPin = Boolean(address.pincode || address.zip);
+  const hasCountry = Boolean(address.countryId || address.country);
+  return !hasState && !hasPin && !hasCountry;
+}
+
 async function resolveZone(address) {
     if (!address) return null;
 

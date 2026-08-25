@@ -207,6 +207,18 @@ export interface OrderLine {
   unitPrice: number;
 }
 
+export interface AdminOrderPricing {
+  subtotal: number;
+  subtotalLabel: string;
+  couponCode: string | null;
+  couponDiscount: number;
+  bulkDiscount: number;
+  discountAmount: number;
+  shippingCharge: number;
+  taxAmount: number;
+  total: number;
+}
+
 export interface AdminOrder {
   id: string;
   number: string;
@@ -225,6 +237,8 @@ export interface AdminOrder {
     phone: string;
   };
   lines: OrderLine[];
+  /** Server-persisted financial snapshot fields for display only. */
+  pricing?: AdminOrderPricing | null;
   /** Backend fulfilment status used for writes. Not shown as a Seller field. */
   backendStatus?: string;
   paymentStatus?: string;

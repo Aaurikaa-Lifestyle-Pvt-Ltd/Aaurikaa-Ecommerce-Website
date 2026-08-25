@@ -142,6 +142,29 @@ describe("invoicePdfService layout", () => {
     expect(y).toBeGreaterThan(100);
   });
 
+  test("renderFinancialSummary labels discount with coupon code", () => {
+    const doc = new PDFDocument({ margin: 50 });
+    const labels = [];
+    const originalText = doc.text.bind(doc);
+    doc.text = (text, ...rest) => {
+      labels.push(String(text));
+      return originalText(text, ...rest);
+    };
+
+    const order = {
+      totalAmount: 900,
+      shippingCharge: 0,
+      coupon: { code: "SAVE100", discountAmount: 100 },
+      items: [{ quantity: 1, price: 1000, originalPrice: 1000, product: { name: "Item" } }],
+      tax: { totalTaxAmount: 0, totalTaxAdded: 0 },
+    };
+    const taxVisibility = buildOrderTaxVisibility(order);
+    expect(taxVisibility.showDiscountLine).toBe(true);
+    expect(taxVisibility.couponCode).toBe("SAVE100");
+    renderFinancialSummary(doc, order, taxVisibility, 100);
+    expect(labels.some((label) => label.includes("Discount (SAVE100)"))).toBe(true);
+  });
+
   test("writeOrderInvoicePdf completes for minimal order", async () => {
     const { buffer, pageCount } = await renderPdfToBuffer({
       _id: "507f1f77bcf86cd799439011",

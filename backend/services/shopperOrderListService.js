@@ -4,6 +4,7 @@ const {
   getReturnEligibility,
   toShopperReturnEligibility,
 } = require("./returnEligibilityService");
+const { buildOrderFinancialSnapshot } = require("../utils/orderFinancialSnapshot");
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 10;
@@ -110,6 +111,11 @@ function shopperOrderListDTO(order, options = {}) {
     eligible: false,
     status: null,
   };
+  const financial = buildOrderFinancialSnapshot(plain);
+  const couponCode =
+    plain.coupon?.code != null && String(plain.coupon.code).trim()
+      ? String(plain.coupon.code).trim()
+      : null;
 
   return {
     _id: id,
@@ -120,6 +126,8 @@ function shopperOrderListDTO(order, options = {}) {
         : plain.createdAt
       : null,
     total: plain.totalAmount,
+    discountAmount: financial.discountAmount > 0 ? financial.discountAmount : 0,
+    couponCode,
     orderStatus: plain.status,
     paymentVisibility: toPaymentVisibilityDTO(plain),
     trackingSummary: buildTrackingSummary(plain),

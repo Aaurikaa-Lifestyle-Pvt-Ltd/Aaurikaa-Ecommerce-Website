@@ -89,6 +89,9 @@ describe("shopperOrderDetailService", () => {
         shippingCharge: 49,
         taxAmount: 0,
         discountAmount: 150,
+        couponCode: null,
+        couponDiscount: 50,
+        bulkDiscount: 100,
         total: 1299,
         gst: {
           cgst: 0,
@@ -104,6 +107,7 @@ describe("shopperOrderDetailService", () => {
           shippingCharge: 49,
           shippingGst: 0,
           discountAmount: 0,
+          couponCode: null,
           total: 1299,
         },
       });
@@ -326,9 +330,30 @@ describe("shopperOrderDetailService", () => {
         shippingCharge: 50,
         shippingGst: 6,
         discountAmount: 0,
+        couponCode: null,
         total: 534,
       });
       expect(summary.taxInformation).toBeUndefined();
+    });
+
+    it("exposes coupon code and keeps discount line amount when not embedded in items", () => {
+      const summary = buildPricingSummary({
+        totalAmount: 900,
+        shippingCharge: 0,
+        coupon: { code: "SAVE100", discountAmount: 100 },
+        items: [{ quantity: 1, price: 1000, originalPrice: 1000 }],
+        tax: { totalTaxAmount: 0, totalTaxAdded: 0 },
+      });
+
+      expect(summary).toMatchObject({
+        couponCode: "SAVE100",
+        couponDiscount: 100,
+        discountAmount: 100,
+        orderSummary: {
+          couponCode: "SAVE100",
+          discountAmount: 100,
+        },
+      });
     });
   });
 

@@ -509,6 +509,26 @@ const Coupon = require('../../models/coupon');
         expect(result.shippingZone.name).toBe('East India');
     });
 
+    it('defers shipping when destination address is not provided yet', async () => {
+        const result = await calculateShipping({
+            cartItems: [{
+                product: {
+                    weight: 500,
+                    weightClass: lightClass._id,
+                    salePrice: 1000,
+                    regularPrice: 1000,
+                },
+                quantity: 1,
+            }],
+            shippingAddress: null,
+        });
+
+        expect(result.shippingMethod).toBe('pending');
+        expect(result.pendingAddress).toBe(true);
+        expect(result.shippingCharge).toBe(0);
+        expect(result.applicable).toBe(true);
+    });
+
     it('resolveZone matches by state name fallback', async () => {
         const zone = await resolveZone({ stateId: testState._id });
         expect(zone).not.toBeNull();
