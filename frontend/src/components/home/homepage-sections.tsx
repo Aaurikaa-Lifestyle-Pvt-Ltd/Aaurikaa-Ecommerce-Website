@@ -10,7 +10,7 @@ import { OccasionShowcase } from "./occasion-showcase";
 import { UGCGallery } from "./ugc-gallery";
 import { BrandStory } from "./brand-story";
 import { TrustStrip } from "./trust-strip";
-import { NewsletterSection } from "./newsletter-section";
+import { WearYourStory } from "./wear-your-story";
 
 /**
  * Renders the homepage from the locked, config-driven section order.
@@ -115,10 +115,8 @@ async function HomepageSectionRenderer({
     case "trust-strip":
       return <TrustStrip />;
 
-    case "newsletter": {
-      const content = await getNewsletter();
-      if (!content) return null;
-      return <NewsletterSection content={content} />;
+    case "wear-your-story": {
+      return <WearYourStory />;
     }
 
     default:

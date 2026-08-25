@@ -24,7 +24,7 @@ export type HomepageSectionType =
   | "ugc-gallery"
   | "brand-story"
   | "trust-strip"
-  | "newsletter";
+  | "wear-your-story";
 
 export interface HomepageSection {
   type: HomepageSectionType;

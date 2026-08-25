@@ -21,5 +21,5 @@ export const homepageSections: HomepageSection[] = [
   { type: "product-showcase", collection: "best-sellers" },
   { type: "brand-story" },
   { type: "trust-strip" },
-  { type: "newsletter" },
+  { type: "wear-your-story" },
 ];

@@ -7,5 +7,5 @@ export { OccasionShowcase } from "./occasion-showcase";
 export { UGCGallery } from "./ugc-gallery";
 export { BrandStory } from "./brand-story";
 export { TrustStrip } from "./trust-strip";
-export { NewsletterSection } from "./newsletter-section";
+export { WearYourStory } from "./wear-your-story";
 export { HomepageSections } from "./homepage-sections";
