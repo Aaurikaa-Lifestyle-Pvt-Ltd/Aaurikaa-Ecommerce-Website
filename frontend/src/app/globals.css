@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/*
+ * IMAGINEAIRY visual system — design foundation (Task 02).
+ *
+ * Values here are an initial, sensible system and are intentionally easy to
+ * refine — they are NOT permanently locked (see task brief). Client re-branding
+ * happens primarily by editing the CSS variables in :root below.
+ *
+ * Direction: premium, editorial, image-led, spacious, restrained (brief §29).
+ */
+
+:root {
+  /* Neutrals — warm ivory page field; surfaces stay pure white */
+  --background: #faf8f4;
+  --surface: #ffffff;
+  --foreground: #171512;
+  --muted: #f1eee9;
+  --muted-foreground: #6e6a63;
+  --border: #e7e3dc;
+  --input: #e7e3dc;
+
+  /* Brand actions — restrained near-black primary */
+  --primary: #1a1714;
+  --primary-foreground: #fbfaf8;
+
+  /* Accent — muted champagne, used sparingly (avoid heavy gold, brief §29) */
+  --accent: #a6875c;
+  --accent-foreground: #ffffff;
+
+  /* Support */
+  --sale: #b23a48;
+  --ring: #a6875c;
+}
+
+@theme inline {
+  /* Colours → semantic utilities (bg-*, text-*, border-*, ring-*) */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-sale: var(--sale);
+  --color-ring: var(--ring);
+
+  /* Fonts → font-sans (default) and font-serif (editorial, selective) */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair), ui-serif, Georgia, "Times New Roman",
+    serif;
+
+  /* Radius — rounded cards, refined near-square controls (brief §14) */
+  --radius-control: 3px;
+  --radius-card: 14px;
+
+  /* Shadows — subtle only; imagery carries the weight, not chrome */
+  --shadow-soft: 0 1px 3px rgba(23, 21, 18, 0.06);
+  --shadow-card: 0 1px 2px rgba(23, 21, 18, 0.04),
+    0 12px 32px -16px rgba(23, 21, 18, 0.12);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+/*
+ * Editorial helpers. Kept small — components should prefer Tailwind utilities.
+ * `.eyebrow` is the small uppercase kicker used above editorial headings.
+ */
+.eyebrow {
+  font-size: 0.75rem;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted-foreground);
+}
+
+/* Hide scrollbars on horizontal carousels (scroll still works). */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes announcement-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

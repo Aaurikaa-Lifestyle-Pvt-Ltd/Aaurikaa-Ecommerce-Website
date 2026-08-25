@@ -1,0 +1,36 @@
+---
+description: AAURIKAA architecture — reuse-first, service ownership, inspect before build
+alwaysApply: true
+---
+
+# Architecture
+
+## Stack
+
+- `backend/` — Express + Mongoose (ANBAZAR-derived commerce engine)
+- `admin/` — Next.js Admin
+- `frontend/` — Next.js storefront
+- Docs under `docs/`; SRS is functional SoT, **code is implementation SoT**
+
+## Reuse first
+
+REUSE > ADAPT > BUILD > CONFIGURE. Classify before coding. Do not invent a second catalogue, pricing, inventory, checkout, tax, shipping, or payment engine.
+
+## Ownership
+
+- Business logic lives in `backend/services/` (and related utils)
+- Routes/controllers are HTTP adapters — keep them thin
+- Models own persistence shape; do not bypass services for commerce writes when a service already exists
+
+## Inspect before implement
+
+1. Search routes, controllers, services, models, Admin/storefront modules, and tests
+2. Read capability matrix / stage reports only as aids — verify against code
+3. Prefer extending existing APIs and UI over parallel systems
+
+## Avoid
+
+- Unnecessary refactors unrelated to the task
+- Duplicate business logic across frontend and backend
+- Schema churn that breaks import/export or variants without explicit need
+- Weakening nested `admin/AGENTS.md` / `frontend/AGENTS.md` Next.js notices

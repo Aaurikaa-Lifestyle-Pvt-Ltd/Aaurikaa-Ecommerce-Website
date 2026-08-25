@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Next.js / build
+.next/
+out/
+build/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Secrets
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+!.env.example
+!**/.env.example
+
+# Uploads
+backend/uploads/**
+!backend/uploads/.gitkeep
+
+# Logs / caches / OS / IDE
+logs/
+*.log
+.cache/
+.tmp/
+tmp/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Cursor: ignore local IDE state; keep shared project agents/rules/skills
+.cursor/*
+!.cursor/agents/
+!.cursor/agents/**
+!.cursor/rules/
+!.cursor/rules/**
+!.cursor/skills/
+!.cursor/skills/**

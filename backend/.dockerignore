@@ -1,0 +1,12 @@
+# Exclude contents of uploads directory but keep the directory structure
+uploads/*
+!uploads/.gitkeep
+
+# Other common exclusions
+node_modules
+npm-debug.log
+.git
+.gitignore
+.DS_Store
+*.log
+

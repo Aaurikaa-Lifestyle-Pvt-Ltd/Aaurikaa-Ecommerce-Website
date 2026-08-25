@@ -1,0 +1,484 @@
+@import "tailwindcss";
+
+/*
+ * IMAGINEAIRY Admin — operational console template.
+ * Cool neutrals, compact density. Distinct from the editorial storefront.
+ */
+
+:root {
+  --background: #f4f5f7;
+  --surface: #ffffff;
+  --surface-raised: #fafbfc;
+  --foreground: #111827;
+  --muted: #eef0f3;
+  --muted-foreground: #6b7280;
+  --border: #e5e7eb;
+  --input: #d1d5db;
+  --primary: #0f172a;
+  --primary-foreground: #f8fafc;
+  --accent: #0d9488;
+  --accent-foreground: #ffffff;
+  --danger: #dc2626;
+  --warning: #d97706;
+  --success: #059669;
+  --info: #2563eb;
+  --ring: #0d9488;
+  --sidebar: #0f172a;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-muted: #94a3b8;
+  --sidebar-active: #1e293b;
+  --header-height: 56px;
+  --drawer-width: 280px;
+  --sidebar-width: 240px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-info: var(--info);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-active: var(--sidebar-active);
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04),
+    0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 28%, transparent);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 180ms ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 220ms ease-out;
+}
+
+.animate-rise-in {
+  animation: rise-in 280ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-in-left,
+  .animate-rise-in {
+    animation: none;
+  }
+}
+
+/*
+ * TipTap ProductStructuredEditor (ported from ANBAZAR; scoped).
+ * ANBAZAR relies on @tailwindcss/typography for .prose headings/lists;
+ * AAURIKAA Admin is Tailwind v4 without that plugin, so restore prose-like
+ * typography here. Tailwind preflight otherwise resets ul/ol list-style.
+ */
+.prose.editor-content,
+.structured-editor-body .ProseMirror {
+  line-height: 1.625;
+  color: var(--foreground);
+}
+
+.prose.editor-content p,
+.structured-editor-body .ProseMirror p {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+
+.prose.editor-content > :first-child,
+.structured-editor-body .ProseMirror > :first-child {
+  margin-top: 0;
+}
+
+.prose.editor-content > :last-child,
+.structured-editor-body .ProseMirror > :last-child {
+  margin-bottom: 0;
+}
+
+.prose.editor-content h1,
+.prose.editor-content h2,
+.prose.editor-content h3,
+.prose.editor-content h4,
+.prose.editor-content h5,
+.prose.editor-content h6,
+.structured-editor-body .ProseMirror h1,
+.structured-editor-body .ProseMirror h2,
+.structured-editor-body .ProseMirror h3,
+.structured-editor-body .ProseMirror h4,
+.structured-editor-body .ProseMirror h5,
+.structured-editor-body .ProseMirror h6 {
+  color: var(--foreground);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.prose.editor-content h1,
+.structured-editor-body .ProseMirror h1 {
+  font-size: 1.875em;
+  margin-top: 0;
+  margin-bottom: 0.8em;
+}
+
+.prose.editor-content h2,
+.structured-editor-body .ProseMirror h2 {
+  font-size: 1.5em;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.prose.editor-content h3,
+.structured-editor-body .ProseMirror h3 {
+  font-size: 1.25em;
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+}
+
+.prose.editor-content h4,
+.structured-editor-body .ProseMirror h4 {
+  font-size: 1.125em;
+  margin-top: 1.1em;
+  margin-bottom: 0.5em;
+}
+
+.prose.editor-content h5,
+.structured-editor-body .ProseMirror h5 {
+  font-size: 1em;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.prose.editor-content h6,
+.structured-editor-body .ProseMirror h6 {
+  font-size: 0.875em;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+}
+
+.prose.editor-content h2 + *,
+.prose.editor-content h3 + *,
+.prose.editor-content h4 + *,
+.structured-editor-body .ProseMirror h2 + *,
+.structured-editor-body .ProseMirror h3 + *,
+.structured-editor-body .ProseMirror h4 + * {
+  margin-top: 0;
+}
+
+.prose.editor-content ul,
+.structured-editor-body .ProseMirror ul {
+  list-style-type: disc;
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+  padding-inline-start: 1.625em;
+}
+
+.prose.editor-content ol,
+.structured-editor-body .ProseMirror ol {
+  list-style-type: decimal;
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+  padding-inline-start: 1.625em;
+}
+
+.prose.editor-content li,
+.structured-editor-body .ProseMirror li {
+  margin-top: 0.35em;
+  margin-bottom: 0.35em;
+  padding-inline-start: 0.25em;
+}
+
+.prose.editor-content ul ul,
+.prose.editor-content ul ol,
+.prose.editor-content ol ul,
+.prose.editor-content ol ol,
+.structured-editor-body .ProseMirror ul ul,
+.structured-editor-body .ProseMirror ul ol,
+.structured-editor-body .ProseMirror ol ul,
+.structured-editor-body .ProseMirror ol ol {
+  margin-top: 0.35em;
+  margin-bottom: 0.35em;
+}
+
+.prose.editor-content ul ul,
+.structured-editor-body .ProseMirror ul ul {
+  list-style-type: circle;
+}
+
+.prose.editor-content ul ul ul,
+.structured-editor-body .ProseMirror ul ul ul {
+  list-style-type: square;
+}
+
+.prose.editor-content blockquote,
+.structured-editor-body .ProseMirror blockquote {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding-inline-start: 1em;
+  border-inline-start: 3px solid var(--border);
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.prose.editor-content a[data-variant="hidden"] {
+  color: inherit;
+  text-decoration: none;
+}
+
+.prose.editor-content table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  margin: 1rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.prose.editor-content th,
+.prose.editor-content td {
+  position: relative;
+  vertical-align: top;
+  padding: 0.65rem 0.75rem;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.prose.editor-content th:last-child,
+.prose.editor-content td:last-child {
+  border-right: 0;
+}
+
+.prose.editor-content tr:last-child > th,
+.prose.editor-content tr:last-child > td {
+  border-bottom: 0;
+}
+
+.prose.editor-content th {
+  background: var(--surface-raised);
+  color: var(--foreground);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.prose.editor-content td:hover,
+.prose.editor-content th:hover {
+  background: var(--muted);
+}
+
+.prose.editor-content td:focus-within,
+.prose.editor-content th:focus-within {
+  background: color-mix(in oklab, var(--info) 12%, white);
+  box-shadow:
+    inset 0 0 0 2px var(--info),
+    0 0 0 2px color-mix(in oklab, var(--info) 20%, transparent);
+  z-index: 1;
+}
+
+.prose.editor-content .selectedCell {
+  background: color-mix(in oklab, var(--info) 12%, transparent);
+}
+
+.prose.editor-content .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--info) 45%, transparent);
+  border-radius: 0.25rem;
+}
+
+.prose.editor-content .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: -1px;
+  width: 4px;
+  background: color-mix(in oklab, var(--info) 25%, transparent);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.prose.editor-content td:hover .column-resize-handle,
+.prose.editor-content th:hover .column-resize-handle,
+.prose.editor-content td:focus-within .column-resize-handle,
+.prose.editor-content th:focus-within .column-resize-handle {
+  opacity: 1;
+}
+
+.prose.editor-content .resize-cursor {
+  cursor: col-resize;
+}
+
+.prose [data-media-group="true"] {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 1rem;
+  align-items: flex-start;
+  margin: 2rem 0;
+}
+
+.prose [data-media-group="true"] > * {
+  flex: 1 1 50%;
+  min-width: 0;
+  max-width: 50%;
+}
+
+.prose [data-media-text="true"] {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 1rem;
+  align-items: flex-start;
+  margin: 2rem 0;
+}
+
+.prose [data-media-text="true"][data-layout="imageRight"] {
+  flex-direction: row-reverse;
+}
+
+.prose [data-media-text="true"] > *:first-child {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.prose [data-media-text="true"] > *:last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.prose [data-media-text="true"] > *:first-child img,
+.prose [data-media-text="true"] > *:first-child figure {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+@media (max-width: 767px) {
+  .prose [data-media-text="true"] > *:first-child {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-basis: 100% !important;
+  }
+
+  .prose [data-media-text="true"] > *:first-child figure,
+  .prose [data-media-text="true"] > *:first-child img {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .prose [data-media-group="true"] > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-basis: 100% !important;
+  }
+
+  .prose [data-media-group="true"] figure,
+  .prose [data-media-group="true"] img {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+.structured-editor-root {
+  position: relative;
+}
+
+.structured-editor-chrome {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.structured-editor-body .ProseMirror {
+  min-height: inherit;
+}
+
+.structured-editor-body .ProseMirror-focused {
+  outline: none;
+}
+
+.structured-editor-body .ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--muted-foreground);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.structured-editor-body .ProseMirror img.ProseMirror-selectednode,
+.structured-editor-body .ProseMirror img:active {
+  outline: 2px solid var(--info);
+  outline-offset: 2px;
+}

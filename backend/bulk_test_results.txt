@@ -1,0 +1,25 @@
+
+> multi-vendor-backend@1.0.0 test
+> jest tests/integration/bulk-upload-transaction.test.js
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+(node:10048) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS tests/integration/bulk-upload-transaction.test.js (13.955 s)
+  Bulk Upload Transaction Tests
+    Transaction success
+      √ should commit transaction on successful insert (1740 ms)
+    Transaction rollback
+      √ should rollback on duplicate SKU error (924 ms)
+      √ should rollback on database error (951 ms)
+    Data consistency
+      √ should maintain data consistency with all-or-nothing behavior (1237 ms)
+      √ should not create partial data on failure (1057 ms)
+    Transaction error handling
+      √ should provide clear error message on transaction failure (863 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        14.21 s, estimated 16 s
+Ran all test suites matching tests/integration/bulk-upload-transaction.test.js.

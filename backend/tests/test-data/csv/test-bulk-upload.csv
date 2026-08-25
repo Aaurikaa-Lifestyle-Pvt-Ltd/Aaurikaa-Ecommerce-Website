@@ -1,0 +1,6 @@
+name,sku,regularPrice,salePrice,stock,category,shortDesc,longDesc,status
+Wireless Bluetooth Headphones,SKU-BT-001,99.99,79.99,50,Electronics,Premium wireless headphones with noise cancellation,"Experience crystal-clear audio with our premium wireless Bluetooth headphones. Features active noise cancellation, 30-hour battery life, and comfortable over-ear design.",draft
+Smartphone Case,SKU-CASE-001,24.99,19.99,100,Electronics,Protective case for smartphones,Durable and stylish smartphone case with shock absorption. Available in multiple colors. Protects your device from drops and scratches.,draft
+Running Shoes,SKU-SHOE-001,129.99,99.99,30,Electronics,Comfortable running shoes,High-performance running shoes designed for comfort and durability. Features breathable mesh upper and cushioned sole.,draft
+Laptop Stand,SKU-STAND-001,49.99,,75,Electronics,Ergonomic laptop stand,Adjustable aluminum laptop stand that improves posture and reduces neck strain. Compatible with all laptop sizes.,draft
+Coffee Maker,SKU-COFFEE-001,89.99,69.99,20,Clothing,Programmable coffee maker,"12-cup programmable coffee maker with auto-shutoff feature. Brews rich, flavorful coffee every time.",draft

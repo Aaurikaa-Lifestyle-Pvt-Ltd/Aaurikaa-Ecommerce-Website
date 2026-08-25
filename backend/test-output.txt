@@ -1,0 +1,36 @@
+
+> multi-vendor-backend@1.0.0 test
+> jest tests/integration/payoutWorkflow.test.js
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+(node:12652) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+🔗 MongoDB Test URI: mongodb://127.0.0.1:49436/?replicaSet=rs0
+🚨 Request payout error: MongoServerError - Unable to acquire IX lock on '{8432009337903997811: Collection, 1514480310262915955, test.commissions}' within 5ms. opId: 426, op: conn28, connId: 28.
+FAIL tests/integration/payoutWorkflow.test.js (13.783 s)
+  Payout Workflow Integration Tests
+    × Should complete full payout lifecycle: Request -> Approve -> Pay (1253 ms)
+    √ Should handle Payout Rejection and refund funds (922 ms)
+
+  ● Payout Workflow Integration Tests › Should complete full payout lifecycle: Request -> Approve -> Pay
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 500
+
+    [0m [90m 125 |[39m             console[33m.[39merror([32m'Request Payout Failed:'[39m[33m,[39m [33mJSON[39m[33m.[39mstringify(res[33m.[39mbody[33m,[39m [36mnull[39m[33m,[39m [35m2[39m))[33m;[39m
+     [90m 126 |[39m         }
+    [31m[1m>[22m[39m[90m 127 |[39m         expect(res[33m.[39mstatus)[33m.[39mtoBe([35m201[39m)[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 128 |[39m         [36mconst[39m payoutId [33m=[39m res[33m.[39mbody[33m.[39mdata[33m.[39mpayout[33m.[39m_id[33m;[39m
+     [90m 129 |[39m
+     [90m 130 |[39m         [90m// Verify Ledger (Deduction)[39m[0m
+
+      at Object.toBe (tests/integration/payoutWorkflow.test.js:127:28)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 passed, 2 total
+Snapshots:   0 total
+Time:        14.021 s, estimated 16 s
+Ran all test suites matching tests/integration/payoutWorkflow.test.js.

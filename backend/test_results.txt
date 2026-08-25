@@ -1,0 +1,52 @@
+
+> multi-vendor-backend@1.0.0 test
+> jest tests/integration/payoutWorkflow.test.js
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+(node:7012) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+🔗 MongoDB Test URI: mongodb://127.0.0.1:54702/?replicaSet=rs0
+FAIL tests/integration/payoutWorkflow.test.js (12.132 s)
+  Payout Workflow Integration Tests
+    × Should complete full payout lifecycle: Request -> Approve -> Pay (849 ms)
+    × Should handle Payout Rejection and refund funds (648 ms)
+
+  ● Payout Workflow Integration Tests › Should complete full payout lifecycle: Request -> Approve -> Pay
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+    [0m [90m 122 |[39m             [33m.[39msend({ amount[33m:[39m [35m3000[39m[33m,[39m notes[33m:[39m [32m'Need money'[39m })[33m;[39m
+     [90m 123 |[39m
+    [31m[1m>[22m[39m[90m 124 |[39m         expect(res[33m.[39mstatus)[33m.[39mtoBe([35m201[39m)[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 125 |[39m         [36mconst[39m payoutId [33m=[39m res[33m.[39mbody[33m.[39mdata[33m.[39mpayout[33m.[39m_id[33m;[39m
+     [90m 126 |[39m
+     [90m 127 |[39m         [90m// Verify Ledger (Deduction)[39m[0m
+
+      at Object.toBe (tests/integration/payoutWorkflow.test.js:124:28)
+
+  ● Payout Workflow Integration Tests › Should handle Payout Rejection and refund funds
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+    [0m [90m 168 |[39m             [33m.[39msend({ amount[33m:[39m [35m2000[39m })[33m;[39m
+     [90m 169 |[39m
+    [31m[1m>[22m[39m[90m 170 |[39m         expect(res[33m.[39mstatus)[33m.[39mtoBe([35m201[39m)[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 171 |[39m         [36mconst[39m payoutId [33m=[39m res[33m.[39mbody[33m.[39mdata[33m.[39mpayout[33m.[39m_id[33m;[39m
+     [90m 172 |[39m
+     [90m 173 |[39m         [90m// 2. Admin Reject[39m[0m
+
+      at Object.toBe (tests/integration/payoutWorkflow.test.js:170:28)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 2 total
+Snapshots:   0 total
+Time:        12.347 s, estimated 13 s
+Ran all test suites matching tests/integration/payoutWorkflow.test.js.

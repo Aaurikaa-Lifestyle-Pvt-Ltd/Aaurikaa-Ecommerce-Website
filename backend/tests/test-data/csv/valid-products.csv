@@ -1,0 +1,4 @@
+name,sku,regularPrice,salePrice,stock,category,shortDesc,longDesc,status
+Test Product 1,SKU-001,100.5,90,50,68c020ccb99dcee980913119,Short description 1,Long description for product 1,draft
+Test Product 2,SKU-002,200,180,30,68c020ccb99dcee980913119,Short description 2,Long description for product 2,draft
+Test Product 3,SKU-003,150.75,,25,68c020ccb99dcee980913119,Short description 3,Long description for product 3,draft

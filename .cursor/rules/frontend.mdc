@@ -1,0 +1,29 @@
+---
+description: Admin and storefront UI — API-driven, reuse components, respect contracts
+globs: admin/**/*.ts,admin/**/*.tsx,frontend/**/*.ts,frontend/**/*.tsx
+alwaysApply: false
+---
+
+# Frontend (Admin + Storefront)
+
+## API-driven UI
+
+- Production flows must call the Express backend — no mock data as the source of truth
+- Respect existing request/response contracts; map in dedicated API/mapper modules
+- Never compute authoritative price/tax/shipping/coupon/inventory client-side for checkout or order write paths
+
+## Reuse
+
+- Inspect existing components, layouts, forms, and lib/api clients before adding new ones
+- Follow established Admin/storefront patterns (nav, status badges, forms, loading UX)
+
+## UX requirements
+
+- Responsive Admin and storefront (desktop/tablet/mobile)
+- Explicit loading, error, and empty states
+- Form validation with clear field errors
+- Accessible labels, focus, and keyboard-usable controls
+
+## Next.js
+
+This repo uses Next.js 16 with breaking changes. Before new App Router APIs, check `node_modules/next/dist/docs/` under the app you are editing. Keep `admin/AGENTS.md` and `frontend/AGENTS.md`.

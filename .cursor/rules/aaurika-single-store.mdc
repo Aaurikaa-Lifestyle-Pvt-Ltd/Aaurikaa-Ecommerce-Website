@@ -1,0 +1,28 @@
+---
+description: AAURIKAA single-store boundary — no marketplace UX or seller picker
+alwaysApply: true
+---
+
+# Single-store boundary
+
+AAURIKAA is a **single-business** jewellery store, not a marketplace.
+
+## Seller compatibility
+
+- Backend may still require a `Seller` document for ownership, GST origin, Shiprocket, returns spine, etc.
+- Treat Seller as an **internal** compatibility entity (foundation already pins Admin writes to the internal Seller).
+- Do not make Admin or customers choose a seller.
+
+## Do not expose (unless explicitly requested)
+
+- Seller marketplace browsing, public seller storefronts, seller onboarding
+- Seller selection / picker in Admin workflows
+- Commissions, payouts, seller ledgers, marketplace finance UI
+- “Become a seller” / seller FAQ / seller portal surfaces in AAURIKAA UX
+
+## Allowed
+
+- Keeping seller routes/models in the codebase while disabled or unused by AAURIKAA UI
+- Admin operating as the store operator (not as multi-vendor marketplace admin)
+
+When adding navigation, APIs, or copy: default to **hide marketplace concepts**.

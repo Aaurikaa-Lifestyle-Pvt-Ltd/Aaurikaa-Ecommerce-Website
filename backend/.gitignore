@@ -1,0 +1,52 @@
+# ============================
+# Dependencies
+# ============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============================
+# Environment variables and secrets
+# ============================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+*.env
+!.env.example
+
+# ============================
+# Uploads and user-generated content
+# ============================
+uploads/**
+!uploads/.gitkeep
+
+# ============================
+# Logs, coverage, caches
+# ============================
+logs/
+*.log
+coverage/
+.nyc_output/
+.jest/
+.cache/
+.tmp/
+tmp/
+temp/
+*.tmp
+*.temp
+
+# ============================
+# Runtime / OS / IDE
+# ============================
+pids/
+*.pid
+*.pid.lock
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.cursor/

@@ -1,0 +1,122 @@
+{
+  "generatedAt": "2026-07-25T15:23:19.777Z",
+  "mode": "apply",
+  "noShippingChargeSlab": {
+    "id": "6a64d4e71e0b3e69dc9a931c",
+    "name": "No Shipping Charge (₹0/-)",
+    "active": true,
+    "createdThisRun": true
+  },
+  "zeroRules": [
+    {
+      "action": "create",
+      "zoneId": "6a5915e8e886f0cb27271576",
+      "zoneName": "Andaman and Nicobar, Dadra and Nagar Haveli, Daman and Diu, Ladakh, Lakshadweep",
+      "rateINR": 0
+    },
+    {
+      "action": "create",
+      "zoneId": "697b5c6367af454a8fad0cee",
+      "zoneName": "Andhra Pradesh, Arunachal Pradesh, Assam, Bihar, Chhattisgarh, Goa, Gujarat, Haryana, Himachal Pradesh, Jharkhand, Karnataka, Kerala, Madhya Pradesh, Maharashtra, Manipur, Meghalaya, Mizoram, Nagaland, Odisha, Punjab, Rajasthan, Sikkim, Tamil Nadu, Telangana, Tripura, Uttar Pradesh, Uttarakhand",
+      "rateINR": 0
+    },
+    {
+      "action": "create",
+      "zoneId": "68d01c29dd6f2c055905d77a",
+      "zoneName": "West Bengal",
+      "rateINR": 0
+    }
+  ],
+  "duplicateNameGroups": [],
+  "renames": [],
+  "defaultWeightClass": {
+    "id": "691d9edc08a08569c3e434dd",
+    "name": "Zero grams to Five hundred grams"
+  },
+  "matrix": {
+    "activeZoneCount": 3,
+    "activeSlabCount": 14,
+    "expected": 42,
+    "covered": 32,
+    "omissionCount": 10,
+    "omissions": [
+      {
+        "zoneId": "6a5915e8e886f0cb27271576",
+        "zoneName": "Andaman and Nicobar, Dadra and Nagar Haveli, Daman and Diu, Ladakh, Lakshadweep",
+        "weightClassId": "691d9f5708a08569c3e434ec",
+        "weightClassName": "Two thousand & one gram to Three thousand grams",
+        "covered": false
+      },
+      {
+        "zoneId": "6a5915e8e886f0cb27271576",
+        "zoneName": "Andaman and Nicobar, Dadra and Nagar Haveli, Daman and Diu, Ladakh, Lakshadweep",
+        "weightClassId": "691d9f6708a08569c3e434f1",
+        "weightClassName": "Three thousand & one gram to Four thousand grams",
+        "covered": false
+      },
+      {
+        "zoneId": "6a5915e8e886f0cb27271576",
+        "zoneName": "Andaman and Nicobar, Dadra and Nagar Haveli, Daman and Diu, Ladakh, Lakshadweep",
+        "weightClassId": "691da06408a08569c3e434f6",
+        "weightClassName": "Four thousand & one gram to Five thousand grams",
+        "covered": false
+      },
+      {
+        "zoneId": "6a5915e8e886f0cb27271576",
+        "zoneName": "Andaman and Nicobar, Dadra and Nagar Haveli, Daman and Diu, Ladakh, Lakshadweep",
+        "weightClassId": "691da07608a08569c3e434fb",
+        "weightClassName": "Five thousand & one gram to Seven thousand grams",
+        "covered": false
+      },
+      {
+        "zoneId": "6a5915e8e886f0cb27271576",
+        "zoneName": "Andaman and Nicobar, Dadra and Nagar Haveli, Daman and Diu, Ladakh, Lakshadweep",
+        "weightClassId": "691da08d08a08569c3e43500",
+        "weightClassName": "Seven thousand & one gram to Ten thousand grams",
+        "covered": false
+      },
+      {
+        "zoneId": "6a5915e8e886f0cb27271576",
+        "zoneName": "Andaman and Nicobar, Dadra and Nagar Haveli, Daman and Diu, Ladakh, Lakshadweep",
+        "weightClassId": "691da12208a08569c3e43505",
+        "weightClassName": "Ten thousand & one gram to Twenty thousand grams",
+        "covered": false
+      },
+      {
+        "zoneId": "6a5915e8e886f0cb27271576",
+        "zoneName": "Andaman and Nicobar, Dadra and Nagar Haveli, Daman and Diu, Ladakh, Lakshadweep",
+        "weightClassId": "691da13a08a08569c3e4350a",
+        "weightClassName": "Twenty thousand & one gram to Fifty thousand grams",
+        "covered": false
+      },
+      {
+        "zoneId": "6a5915e8e886f0cb27271576",
+        "zoneName": "Andaman and Nicobar, Dadra and Nagar Haveli, Daman and Diu, Ladakh, Lakshadweep",
+        "weightClassId": "691da15f08a08569c3e4350f",
+        "weightClassName": "Fifty thousand & one gram to One Lakh grams",
+        "covered": false
+      },
+      {
+        "zoneId": "6a5915e8e886f0cb27271576",
+        "zoneName": "Andaman and Nicobar, Dadra and Nagar Haveli, Daman and Diu, Ladakh, Lakshadweep",
+        "weightClassId": "697f4a03b8a2bae51cb424c4",
+        "weightClassName": "One Lakh & one gram to Three Lakh grams",
+        "covered": false
+      },
+      {
+        "zoneId": "6a5915e8e886f0cb27271576",
+        "zoneName": "Andaman and Nicobar, Dadra and Nagar Haveli, Daman and Diu, Ladakh, Lakshadweep",
+        "weightClassId": "6a5c67478149a55fb490bed7",
+        "weightClassName": "Three Lakh & one gram to Five Lakh grams & Up",
+        "covered": false
+      }
+    ]
+  },
+  "gates": {
+    "noShippingChargeExists": true,
+    "noShippingChargeZeroRulesComplete": true,
+    "matrixComplete": false,
+    "zeroDuplicateNames": true,
+    "defaultWeightClassRecorded": true
+  }
+}

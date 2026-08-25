@@ -1,0 +1,219 @@
+{
+  "mode": "dry-run",
+  "generatedAt": "2026-05-07T15:37:43.187Z",
+  "limit": 5000,
+  "preview": 15,
+  "summary": {
+    "scannedMissingSlugCapped": 29,
+    "wouldUpdate": 29,
+    "skippedMissingName": 0,
+    "skippedExhaustedAttempts": 0,
+    "skippedUnexpected": 0
+  },
+  "updates": [
+    {
+      "_id": "6973979d2cd8d0322d658cb9",
+      "name": "Best Ballpoint Pen TEZ PENCILO 20pcs Blue 0.5mm",
+      "before": null,
+      "after": "best-ballpoint-pen-tez-pencilo-20pcs-blue-05mm-acfgq",
+      "attempts": 1
+    },
+    {
+      "_id": "6973979e2cd8d0322d658cbd",
+      "name": "Ball Pen Blue Star 25cm 20pcs Pack - Smooth Writing & Multi Colors",
+      "before": null,
+      "after": "ball-pen-blue-star-25cm-20pcs-pack-smooth-writing-and-multi-colors-h1x8n",
+      "attempts": 1
+    },
+    {
+      "_id": "697397a12cd8d0322d658cd0",
+      "name": "Maths Exercise Books JAYA 6pcs 144 Pages 35x24cm-Unruled",
+      "before": null,
+      "after": "maths-exercise-books-jaya-6pcs-144-pages-35x24cm-unruled-u3rvy",
+      "attempts": 1
+    },
+    {
+      "_id": "698d95d32938936796ac23d4",
+      "name": "Workout Book JAYA DC Notebook Pack of 6 (120 Pages)",
+      "before": null,
+      "after": "workout-book-jaya-dc-notebook-pack-of-6-120-pages-13z6y",
+      "attempts": 1
+    },
+    {
+      "_id": "698dcf15e633b86e5ee92b4a",
+      "name": "Exercise Book JAYA DC A4 Notebook Pack of 6 – 144 Pages",
+      "before": null,
+      "after": "exercise-book-jaya-dc-a4-notebook-pack-of-6-144-pages-m6rtg",
+      "attempts": 1
+    },
+    {
+      "_id": "698ef72c79d05c550c4a7126",
+      "name": "Exercise Notebook 35x24cm 112 ITC Pages Pack of 6",
+      "before": null,
+      "after": "exercise-notebook-35x24cm-112-itc-pages-pack-of-6-eghl0",
+      "attempts": 1
+    },
+    {
+      "_id": "699052dfbca68a0415dc2705",
+      "name": "Drawing Pencils 10pcs Long 34cm Graphite 2mm",
+      "before": null,
+      "after": "drawing-pencils-10pcs-long-34cm-graphite-2mm-w54mt",
+      "attempts": 1
+    },
+    {
+      "_id": "69956b95c49e9ed7dc167389",
+      "name": "Poetry and Drama Books Bengali Dale Carnegie Classic",
+      "before": null,
+      "after": "poetry-and-drama-books-bengali-dale-carnegie-classic-t7l0e",
+      "attempts": 1
+    },
+    {
+      "_id": "699bd173594932a1a2ad1f08",
+      "name": "Party Wear Saree Cotton Silk Jacquard Border",
+      "before": null,
+      "after": "party-wear-saree-cotton-silk-jacquard-border-ltmpp",
+      "attempts": 1
+    },
+    {
+      "_id": "699c241049918c9be2b886c2",
+      "name": "Kanjivaram Saree Banarasi Art Silk Party Wear",
+      "before": null,
+      "after": "kanjivaram-saree-banarasi-art-silk-party-wear-0frsb",
+      "attempts": 1
+    },
+    {
+      "_id": "69a180c633b22bbe39d0aca3",
+      "name": "Single Bed Sheet Cotton with 2 Pillow Covers 300TC",
+      "before": null,
+      "after": "single-bed-sheet-cotton-with-2-pillow-covers-300tc-s54gz",
+      "attempts": 1
+    },
+    {
+      "_id": "69a1868a33b22bbe39d0aefa",
+      "name": "Best Workout Books Alternative – JAYA 4-Line Notebook 6pcs",
+      "before": null,
+      "after": "best-workout-books-alternative-jaya-4-line-notebook-6pcs-plooc",
+      "attempts": 1
+    },
+    {
+      "_id": "69a569d02c2900d3b3f4f19f",
+      "name": "Induction Accessories Lifelong 4 Pc Stainless Steel Cookware Set",
+      "before": null,
+      "after": "induction-accessories-lifelong-4-pc-stainless-steel-cookware-set-272b2",
+      "attempts": 1
+    },
+    {
+      "_id": "69a65f5f48294178ef803b42",
+      "name": "Round Neck Blouse SCUBE DESIGNS Embroidered Cotton Silk Free Size",
+      "before": null,
+      "after": "round-neck-blouse-scube-designs-embroidered-cotton-silk-free-size-bcq8m",
+      "attempts": 1
+    },
+    {
+      "_id": "69a6a7958b5336ef65074f02",
+      "name": "Mixer Grinder 750 Watts Prestige Astra 5 Jars Juicer Blue",
+      "before": null,
+      "after": "mixer-grinder-750-watts-prestige-astra-5-jars-juicer-blue-6uwrl",
+      "attempts": 1
+    },
+    {
+      "_id": "69a6c1ccdd0be939fd72d49c",
+      "name": "Water Colour Tubes Doms 24 Shades Water Colour Cakes with Brush",
+      "before": null,
+      "after": "water-colour-tubes-doms-24-shades-water-colour-cakes-with-brush-9azhh",
+      "attempts": 1
+    },
+    {
+      "_id": "69aa52e7a238d589f7701f7a",
+      "name": "Chair for Home Atlas Brown Plastic Armless Chair Modern 1 Pc",
+      "before": null,
+      "after": "chair-for-home-atlas-brown-plastic-armless-chair-modern-1-pc-znjvi",
+      "attempts": 1
+    },
+    {
+      "_id": "69aa605ea238d589f7702378",
+      "name": "Portable Table Fan for Office Portronics Aero Breeze USB Rechargeable Fan",
+      "before": null,
+      "after": "portable-table-fan-for-office-portronics-aero-breeze-usb-rechargeable-fan-1wsba",
+      "attempts": 1
+    },
+    {
+      "_id": "69ac37410b8f6493cafb6260",
+      "name": "Moisturizer for Dry Skin Himalaya Aloe Vera Face Gel Pack of 2 100ML",
+      "before": null,
+      "after": "moisturizer-for-dry-skin-himalaya-aloe-vera-face-gel-pack-of-2-100ml-kyqjp",
+      "attempts": 1
+    },
+    {
+      "_id": "69ac453c0b8f6493cafb6a76",
+      "name": "Pressure Cookers Electric Lifelong Fornello 5L Black with Warranty",
+      "before": null,
+      "after": "pressure-cookers-electric-lifelong-fornello-5l-black-with-warranty-c09fe",
+      "attempts": 1
+    },
+    {
+      "_id": "69afa3e44952fc33bf4f8219",
+      "name": "Mosquito Repellent Liquid All Out Ultra Refill 45ml Mosquito Killer",
+      "before": null,
+      "after": "mosquito-repellent-liquid-all-out-ultra-refill-45ml-mosquito-killer-un0wq",
+      "attempts": 1
+    },
+    {
+      "_id": "69afe58be53ba6079e865ced",
+      "name": "Mosquito Repellent at Home Good Knight Power Activ+ Refill 45ml",
+      "before": null,
+      "after": "mosquito-repellent-at-home-good-knight-power-activ-refill-45ml-snw3l",
+      "attempts": 1
+    },
+    {
+      "_id": "69b3a00c63076a8d27565485",
+      "name": "Wide Ruled Notebook JAYA 120 Pages Single Line 25x18cm Pack of 6",
+      "before": null,
+      "after": "wide-ruled-notebook-jaya-120-pages-single-line-25x18cm-pack-of-6-w1eey",
+      "attempts": 1
+    },
+    {
+      "_id": "69bb6eb3ca2e84a5b9c1e631",
+      "name": "Blender Mixer Generic Portable USB Rechargeable 380ml Bottle",
+      "before": null,
+      "after": "blender-mixer-generic-portable-usb-rechargeable-380ml-bottle-53tp4",
+      "attempts": 1
+    },
+    {
+      "_id": "69bba0d10554d670b846cfdb",
+      "name": "Shaving Kit for Men Philips OneBlade Turbo2X Trimmer 1Pc",
+      "before": null,
+      "after": "shaving-kit-for-men-philips-oneblade-turbo2x-trimmer-1pc-vp6c4",
+      "attempts": 1
+    },
+    {
+      "_id": "69c934d278d0a34015355a15",
+      "name": "Sandal for Men SPARX Double Strap Floater Hook Loop 1 Pair",
+      "before": null,
+      "after": "sandal-for-men-sparx-double-strap-floater-hook-loop-1-pair-u902f",
+      "attempts": 1
+    },
+    {
+      "_id": "69ca2ac5a1504694a3a356b7",
+      "name": "Precision Mechanical Pencil Pentel GraphGear 1000 0.5mm Pack",
+      "before": null,
+      "after": "precision-mechanical-pencil-pentel-graphgear-1000-05mm-pack-maryk",
+      "attempts": 1
+    },
+    {
+      "_id": "69cb7af55c3f299fe9ede960",
+      "name": "Erasable Ink Pens Girirajji Correction Whitener Set of 2",
+      "before": null,
+      "after": "erasable-ink-pens-girirajji-correction-whitener-set-of-2-vtb7v",
+      "attempts": 1
+    },
+    {
+      "_id": "69cb80b05c3f299fe9edebee",
+      "name": "Untitled Draft",
+      "before": null,
+      "after": "untitled-draft-1k2gg",
+      "attempts": 1
+    }
+  ],
+  "skipped": []
+}

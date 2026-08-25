@@ -1,0 +1,6 @@
+name,sku,regularPrice,salePrice,stock,category,shortDesc,longDesc,status
+"Product 1","SKU-001",invalid_price,90.00,50,"507f1f77bcf86cd799439011","Short description 1","Long description for product 1","draft"
+,"SKU-002",200.00,180.00,30,"507f1f77bcf86cd799439011","Short description 2","Long description for product 2","draft"
+"Product 3",,150.75,,25,"507f1f77bcf86cd799439011","Short description 3","Long description for product 3","draft"
+"Product 4","SKU-004",,180.00,30,"507f1f77bcf86cd799439011","Short description 4","Long description for product 4","draft"
+

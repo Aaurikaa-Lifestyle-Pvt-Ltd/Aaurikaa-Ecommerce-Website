@@ -1,0 +1,6 @@
+name,sku,regularPrice,salePrice,stock,category,shortDesc,longDesc,status
+"Valid Product 1","SKU-MIX-001",100.50,90.00,50,"507f1f77bcf86cd799439011","Short description 1","Long description for product 1","draft"
+"Valid Product 2","SKU-MIX-002",200.00,180.00,30,"507f1f77bcf86cd799439011","Short description 2","Long description for product 2","draft"
+,"SKU-MIX-003",150.75,,25,"507f1f77bcf86cd799439011","Short description 3","Long description for product 3","draft"
+"Valid Product 4","SKU-MIX-004",175.00,160.00,40,"507f1f77bcf86cd799439011","Short description 4","Long description for product 4","draft"
+

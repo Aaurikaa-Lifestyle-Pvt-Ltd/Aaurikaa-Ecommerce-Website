@@ -1,0 +1,34 @@
+---
+description: Financial and commerce safety — server authority, HOLD policy, no invented money rules
+alwaysApply: true
+---
+
+# Financial safety
+
+## Server authority
+
+Never trust the client for: price, variant price, tax, shipping, coupon, inventory, payment status, order state, refund state. Recompute/validate on the backend using existing engines.
+
+## High-risk surfaces
+
+Inspect services + tests before changing:
+
+- Payment (PhonePe/COD), order create/status, refunds, wallet
+- Coupons / pricing engine, GST / tax, shipping charges
+- Inventory decrement/restore, commission / payout
+
+Preserve invariants from `docs/AAURIKAA_SECURITY_BASELINE_AUDIT.md` (e.g. no client variant price trust, no unpaid coupon burn, stock lifecycle).
+
+## HOLD — do not invent
+
+- Refund destination, method, timelines, jewellery return windows
+- Client Refund Policy content
+- Business credentials, GSTIN, addresses, catalogue seed data
+
+If the SRS/audit marks **HOLD**, leave it HOLD. Mark work **BLOCKED/HOLD** — do not ship a fake policy.
+
+## Discipline
+
+- Prefer minimal, tested changes over redesigns
+- Run affected backend tests for any financial/commerce touch
+- Do not “fix” security by weakening checks
