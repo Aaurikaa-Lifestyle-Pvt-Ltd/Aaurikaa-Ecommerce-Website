@@ -1,6 +1,6 @@
 import type { HomepageSection } from "@/types/homepage";
 import { homepageSections } from "@/config/homepage";
-import { getCollectionBySlug, getNewsletter } from "@/lib/data";
+import { getCollectionBySlug, getNewsletter, getBrandStory, getTrustItems } from "@/lib/data";
 import { ProductShowcase } from "@/components/product";
 import { HomepageBannerSection } from "./homepage-banner-section";
 import { CategoryShowcase } from "./category-showcase";
@@ -11,6 +11,8 @@ import { UGCGallery } from "./ugc-gallery";
 import { BrandStory } from "./brand-story";
 import { TrustStrip } from "./trust-strip";
 import { WearYourStory } from "./wear-your-story";
+import { brandStory } from "@/data/brand";
+import { trustItems } from "@/data/trust";
 
 /**
  * Renders the homepage from the locked, config-driven section order.
@@ -109,11 +111,16 @@ async function HomepageSectionRenderer({
     case "ugc-gallery":
       return <UGCGallery />;
 
-    case "brand-story":
-      return <BrandStory />;
+    case "brand-story": {
+      const content = await getBrandStory() ?? brandStory;
+      return <BrandStory content={content} />;
+    }
 
-    case "trust-strip":
-      return <TrustStrip />;
+    case "trust-strip": {
+      const items = await getTrustItems();
+      const finalItems = items && items.length > 0 ? items : trustItems;
+      return <TrustStrip items={finalItems} />;
+    }
 
     case "wear-your-story": {
       return <WearYourStory />;
