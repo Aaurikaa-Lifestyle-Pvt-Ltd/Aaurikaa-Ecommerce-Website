@@ -103,3 +103,104 @@ body {
     opacity: 1;
   }
 }
+
+/* AAURIKAA Spin-to-Win premium visual styles */
+
+@keyframes spin-gentle {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-gentle {
+  animation: spin-gentle 16s linear infinite;
+}
+
+@keyframes golden-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.bg-shimmer-gold {
+  background: linear-gradient(
+    90deg,
+    rgba(166, 135, 92, 0.02) 0%,
+    rgba(166, 135, 92, 0.12) 50%,
+    rgba(166, 135, 92, 0.02) 100%
+  );
+  background-size: 200% 100%;
+  animation: golden-shimmer 5s infinite linear;
+}
+
+.bg-shimmer-button {
+  background: linear-gradient(
+    90deg,
+    var(--primary) 0%,
+    #2a2520 40%,
+    var(--accent) 50%,
+    #2a2520 60%,
+    var(--primary) 100%
+  );
+  background-size: 200% 100%;
+  animation: golden-shimmer 6s infinite linear;
+}
+
+@keyframes float-sparkle {
+  0% {
+    transform: translateY(15px) scale(0.7) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-90px) scale(1.1) rotate(120deg);
+    opacity: 0;
+  }
+}
+
+.animate-sparkle-1 {
+  animation: float-sparkle 3.5s infinite ease-out;
+}
+.animate-sparkle-2 {
+  animation: float-sparkle 2.8s infinite ease-out 0.8s;
+}
+.animate-sparkle-3 {
+  animation: float-sparkle 4s infinite ease-out 1.5s;
+}
+.animate-sparkle-4 {
+  animation: float-sparkle 4.5s infinite ease-out 0.3s;
+}
+
+.spin-wheel-transition {
+  transition: transform 4000ms cubic-bezier(0.15, 0.85, 0.3, 1);
+}
+
+/* Accessibility: prefers-reduced-motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-gentle,
+  .bg-shimmer-gold,
+  .bg-shimmer-button,
+  .animate-sparkle-1,
+  .animate-sparkle-2,
+  .animate-sparkle-3,
+  .animate-sparkle-4,
+  .animate-spin,
+  .spin-wheel-transition {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  
+  .spin-wheel-transition {
+    transition: none !important;
+  }
+}
+

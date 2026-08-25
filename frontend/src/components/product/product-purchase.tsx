@@ -20,6 +20,7 @@ import { useCart } from "@/components/cart";
 import { useShopperAuth } from "@/lib/auth/shopper-provider";
 import { writeBuyNowIntent } from "@/lib/buy-now";
 import { createStockNotification } from "@/lib/api/stock-notifications";
+import { fetchProductReviews } from "@/lib/api/reviews";
 import { ApiError } from "@/lib/api/errors";
 import { normalizeVariantKey } from "@/lib/mappers/helpers";
 import { StructuredContent } from "@/components/product/structured-content";
@@ -117,6 +118,28 @@ export function ProductPurchase({ product }: ProductPurchaseProps) {
     "idle" | "loading" | "success" | "exists" | "error"
   >("idle");
   const [notifyMessage, setNotifyMessage] = useState<string | null>(null);
+  const [reviewAvgRating, setReviewAvgRating] = useState<number | null>(
+    product.avgRating ?? null,
+  );
+  const [reviewCount, setReviewCount] = useState<number | null>(
+    product.reviewCount ?? null,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchProductReviews(product.id)
+      .then((payload) => {
+        if (cancelled) return;
+        setReviewAvgRating(payload.summary.avgRating);
+        setReviewCount(payload.summary.reviewCount);
+      })
+      .catch(() => {
+        /* Keep catalogue seed on fetch failure */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [product.id]);
 
   const selectedVariant = hasVariants
     ? findVariant(variants!, selectedOptions)
@@ -265,12 +288,12 @@ export function ProductPurchase({ product }: ProductPurchaseProps) {
         {product.name}
       </h1>
 
-      {product.reviewCount && product.reviewCount > 0 && product.avgRating != null ? (
+      {reviewCount != null && reviewCount > 0 && reviewAvgRating != null ? (
         <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs tracking-wide text-muted-foreground">
-          <StarDisplay rating={product.avgRating} size="sm" showValue />
+          <StarDisplay rating={reviewAvgRating} size="sm" showValue />
           <span>
-            {product.reviewCount}{" "}
-            {product.reviewCount === 1 ? "review" : "reviews"}
+            {reviewCount}{" "}
+            {reviewCount === 1 ? "review" : "reviews"}
           </span>
         </div>
       ) : null}

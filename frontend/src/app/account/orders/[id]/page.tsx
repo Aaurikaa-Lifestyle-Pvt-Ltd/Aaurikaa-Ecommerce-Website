@@ -18,12 +18,18 @@ import {
   uploadReturnEvidence,
   type ShopperOrderDetail,
   type ShopperOrderLineItem,
+  type ReviewEligibility,
 } from "@/lib/api/orders";
 import { createProductReview, fetchProductReviews } from "@/lib/api/reviews";
 import { initiatePhonePePayment } from "@/lib/api/payments";
 import { formatCommerceApiError } from "@/lib/commerce-errors";
 import { formatMoney } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/mappers/media";
+import {
+  canWriteReview,
+  getReviewEligibilityMessage,
+  isAlreadyReviewed,
+} from "@/lib/review-eligibility";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { StarRatingInput } from "@/components/ui/star-rating";
@@ -78,9 +84,6 @@ export default function OrderDetailPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [paymentRetryError, setPaymentRetryError] = useState<string | null>(null);
   const [payingAgain, setPayingAgain] = useState(false);
-  const [reviewSuccessByProduct, setReviewSuccessByProduct] = useState<
-    Record<string, string>
-  >({});
 
   async function reload() {
     if (!params.id) return;
@@ -126,12 +129,7 @@ export default function OrderDetailPage() {
   const invoiceAvailable =
     order.invoiceSummary?.invoiceAvailable ?? order.invoiceAvailable ?? true;
   const lineItems = order.items ?? order.itemsPreview ?? [];
-  const reviewableItems = (order.items ?? []).filter(
-    (item): item is ShopperOrderLineItem & { productId: string } =>
-      Boolean(item.productId) &&
-      item.reviewEligibility?.eligible === true &&
-      !reviewSuccessByProduct[item.productId!],
-  );
+  const detailItems = order.items ?? [];
 
   async function downloadInvoice() {
     setInvoiceError(null);
@@ -259,47 +257,69 @@ export default function OrderDetailPage() {
         </p>
       ) : null}
 
-      <ul className="mt-8 space-y-4">
+      <ul
+        className="mt-8 space-y-4"
+        {...(detailItems.some((item) => item.reviewEligibility) ||
+        order.reviewEligibility
+          ? { id: "reviews" }
+          : {})}
+      >
         {lineItems.map((item, index) => {
           const src = resolveMediaUrl("image" in item ? item.image : null);
           const unit = Number(
             "itemPrice" in item ? (item as ShopperOrderLineItem).itemPrice : NaN,
           );
           const lineTotal = lineDisplayTotal(item as ShopperOrderLineItem);
+          const detailItem = detailItems[index];
+          const lineItem = (detailItem ?? item) as ShopperOrderLineItem;
+          const reviewEligibility = lineItem.reviewEligibility;
+          const productId = lineItem.productId ? String(lineItem.productId) : undefined;
           return (
             <li
               key={`${item.productSlug ?? "item"}-${index}`}
-              className="flex gap-3 text-sm"
+              className="rounded-card border border-border bg-surface p-4 text-sm"
             >
-              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-control bg-muted">
-                {src ? (
-                  <Image
-                    src={src}
-                    alt={item.productName || "Product"}
-                    fill
-                    sizes="64px"
-                    className="object-cover"
-                  />
-                ) : null}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-medium">{item.productName}</p>
-                {"variantSummary" in item && item.variantSummary ? (
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {item.variantSummary}
+              <div className="flex gap-3">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-control bg-muted">
+                  {src ? (
+                    <Image
+                      src={src}
+                      alt={item.productName || "Product"}
+                      fill
+                      sizes="64px"
+                      className="object-cover"
+                    />
+                  ) : null}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium">{item.productName}</p>
+                  {"variantSummary" in item && item.variantSummary ? (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {item.variantSummary}
+                    </p>
+                  ) : null}
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Qty {item.quantity ?? 1}
+                    {Number.isFinite(unit)
+                      ? ` · ${formatMoney({ amount: unit, currency: "INR" })} each`
+                      : ""}
                   </p>
+                </div>
+                {lineTotal != null ? (
+                  <span className="shrink-0 font-medium">
+                    {formatMoney({ amount: lineTotal, currency: "INR" })}
+                  </span>
                 ) : null}
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Qty {item.quantity ?? 1}
-                  {Number.isFinite(unit)
-                    ? ` · ${formatMoney({ amount: unit, currency: "INR" })} each`
-                    : ""}
-                </p>
               </div>
-              {lineTotal != null ? (
-                <span className="shrink-0 font-medium">
-                  {formatMoney({ amount: lineTotal, currency: "INR" })}
-                </span>
+              {productId && reviewEligibility ? (
+                <OrderLineItemReview
+                  productId={productId}
+                  productName={item.productName || "Product"}
+                  reviewEligibility={reviewEligibility}
+                  orderId={orderId}
+                  onReload={reload}
+                  onError={setActionError}
+                />
               ) : null}
             </li>
           );
@@ -427,36 +447,6 @@ export default function OrderDetailPage() {
       ) : order.cancelEligibility?.message ? (
         <p className="mt-8 text-sm text-muted-foreground">
           {order.cancelEligibility.message}
-        </p>
-      ) : null}
-
-      {reviewableItems.length > 0 || Object.keys(reviewSuccessByProduct).length > 0 ? (
-        <div className="mt-8 space-y-6 border-t border-border pt-5">
-          <h3 className="text-sm font-medium">Write a review</h3>
-          {Object.entries(reviewSuccessByProduct).map(([productId, message]) => (
-            <p key={productId} className="text-sm text-muted-foreground" role="status">
-              {message}
-            </p>
-          ))}
-          {reviewableItems.map((item) => (
-            <ReviewForm
-              key={item.productId}
-              productId={item.productId}
-              productName={item.productName || "Product"}
-              onError={setActionError}
-              onSubmitted={(message) => {
-                setActionError(null);
-                setReviewSuccessByProduct((prev) => ({
-                  ...prev,
-                  [item.productId]: message,
-                }));
-              }}
-            />
-          ))}
-        </div>
-      ) : order.reviewEligibility?.alreadyReviewed ? (
-        <p className="mt-8 text-sm text-muted-foreground">
-          You have already reviewed the items in this order.
         </p>
       ) : null}
 
@@ -697,15 +687,78 @@ function ReturnForm({
   );
 }
 
-function ReviewForm({
+function OrderLineItemReview({
   productId,
   productName,
-  onSubmitted,
+  reviewEligibility,
+  orderId,
+  onReload,
   onError,
 }: {
   productId: string;
   productName: string;
-  onSubmitted: (message: string) => void;
+  reviewEligibility: ReviewEligibility;
+  orderId: string;
+  onReload: () => Promise<void>;
+  onError: (message: string) => void;
+}) {
+  const message = getReviewEligibilityMessage(reviewEligibility);
+
+  if (canWriteReview(reviewEligibility)) {
+    return (
+      <div className="mt-4 border-t border-border pt-4">
+        <p className="text-xs text-muted-foreground">{message}</p>
+        <ReviewForm
+          productId={productId}
+          productName={productName}
+          orderId={orderId}
+          onError={onError}
+          onReload={onReload}
+        />
+      </div>
+    );
+  }
+
+  if (isAlreadyReviewed(reviewEligibility)) {
+    return (
+      <div className="mt-4 border-t border-border pt-4">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Already reviewed
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">{message}</p>
+      </div>
+    );
+  }
+
+  if (reviewEligibility.reason === "ORDER_NOT_DELIVERED") {
+    return (
+      <div className="mt-4 border-t border-border pt-4">
+        <Button type="button" variant="secondary" disabled className="opacity-60">
+          Write review
+        </Button>
+        <p className="mt-2 text-xs text-muted-foreground">{message}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 border-t border-border pt-4">
+      <p className="text-xs text-muted-foreground">{message}</p>
+    </div>
+  );
+}
+
+function ReviewForm({
+  productId,
+  productName,
+  orderId,
+  onReload,
+  onError,
+}: {
+  productId: string;
+  productName: string;
+  orderId: string;
+  onReload: () => Promise<void>;
   onError: (message: string) => void;
 }) {
   const toast = useToast();
@@ -723,10 +776,10 @@ function ReviewForm({
     try {
       const created = await createProductReview({
         productId,
+        orderId,
         rating,
         comment: comment || undefined,
       });
-      // Refetch authoritative product summary (no WebSockets / no client-side average).
       try {
         await fetchProductReviews(productId);
       } catch {
@@ -735,14 +788,12 @@ function ReviewForm({
       const published =
         created.review?.status === "approved" ||
         created.review?.verifiedPurchase === true;
-      const message = published
-        ? "Your review was published."
-        : "Your review was submitted.";
       toast.success(
         "Review submitted",
         published ? "It is now visible on the product page." : undefined,
       );
-      onSubmitted(message);
+      onError("");
+      await onReload();
     } catch (err: unknown) {
       const message =
         err instanceof ApiError ? err.message : "Unable to submit this review.";
@@ -754,8 +805,8 @@ function ReviewForm({
   }
 
   return (
-    <div className="space-y-3">
-      <p className="text-sm">{productName}</p>
+    <div className="mt-3 space-y-3">
+      <p className="text-sm font-medium">{productName}</p>
       <div className="text-sm">
         <span className="text-muted-foreground">Rating</span>
         <div className="mt-1">

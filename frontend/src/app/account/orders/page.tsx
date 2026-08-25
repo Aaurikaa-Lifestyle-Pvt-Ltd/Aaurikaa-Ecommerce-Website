@@ -10,6 +10,7 @@ import { resolveMediaUrl } from "@/lib/mappers/media";
 import { BuyAgainButton } from "@/components/orders/buy-again-button";
 import { ButtonLink } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { canWriteReview } from "@/lib/review-eligibility";
 
 function formatOrderDate(iso: string | null): string {
   if (!iso) return "—";
@@ -160,6 +161,15 @@ function OrderListCard({ order }: { order: ShopperOrderListItem }) {
       </div>
 
       <div className="flex flex-col gap-2 border-t border-border bg-muted/30 px-4 py-3 sm:flex-row sm:flex-wrap sm:px-5">
+        {canWriteReview(order.reviewEligibility) ? (
+          <ButtonLink
+            href={`/account/orders/${order._id}#reviews`}
+            variant="primary"
+            className="flex-1 justify-center"
+          >
+            Write a review
+          </ButtonLink>
+        ) : null}
         <ButtonLink
           href={`/account/orders/${order._id}`}
           variant="secondary"

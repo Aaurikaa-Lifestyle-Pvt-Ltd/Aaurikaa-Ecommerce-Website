@@ -67,6 +67,7 @@ export type ShopperOrderListItem = {
     reason?: string;
     message?: string;
   };
+  reviewEligibility?: ReviewEligibility;
 };
 
 export type ShopperOrderLineItem = {

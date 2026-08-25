@@ -69,3 +69,17 @@ test("spin entry point wires to active campaign and mounts in root layout", () =
   assert.match(layout, /SpinEntryPoint/);
 });
 
+test("spin promotional modal handles session delays and dismissal", () => {
+  const entryPoint = readFileSync(
+    join(ROOT, "src/components/spin/spin-entry-point.tsx"),
+    "utf8",
+  );
+  assert.match(entryPoint, /sessionStorage/);
+  assert.match(entryPoint, /setTimeout/);
+  assert.match(entryPoint, /aaurikaa_spin_modal_dismissed/);
+  assert.match(entryPoint, /Maybe later/i);
+  assert.match(entryPoint, /Spin & Win/i);
+  assert.match(entryPoint, /Escape/i);
+});
+
+

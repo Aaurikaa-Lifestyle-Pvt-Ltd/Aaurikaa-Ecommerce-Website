@@ -41,12 +41,22 @@ function buildCustomerReviewPayload(input: {
   productId: string;
   rating: number;
   comment?: string;
+  orderId?: string;
 }) {
-  return {
+  const payload: {
+    productId: string;
+    rating: number;
+    comment: string;
+    orderId?: string;
+  } = {
     productId: input.productId,
     rating: input.rating,
     comment: input.comment?.trim() ? input.comment.trim() : "",
   };
+  if (input.orderId?.trim()) {
+    payload.orderId = input.orderId.trim();
+  }
+  return payload;
 }
 
 function buildReturnAppealPayload(input: {
@@ -143,6 +153,20 @@ test("canRetryPhonePePayment allows pending unpaid PhonePe and cancelled+failed 
   );
 });
 
+test("customer review payload includes optional orderId from order context", () => {
+  const payload = buildCustomerReviewPayload({
+    productId: "prod-1",
+    rating: 5,
+    orderId: "order-abc",
+  });
+  assert.deepEqual(payload, {
+    productId: "prod-1",
+    rating: 5,
+    comment: "",
+    orderId: "order-abc",
+  });
+});
+
 test("customer review payload is productId + rating + comment only", () => {
   const payload = buildCustomerReviewPayload({
     productId: "prod-1",
@@ -173,13 +197,29 @@ test("orders.ts exports PhonePe retry + return appeal helpers without refund des
   assert.equal(/refundMethod/i.test(text), false);
 });
 
-test("reviews.ts includes createCustomerReview / createProductReview POST /api/reviews/", () => {
+test("reviews.ts includes createCustomerReview POST /api/reviews without trailing slash", () => {
   const text = fs.readFileSync(path.join(import.meta.dirname, "reviews.ts"), "utf8");
   assert.match(text, /export async function createCustomerReview/);
   assert.match(text, /export const createProductReview/);
   assert.match(text, /export function buildCustomerReviewPayload/);
-  assert.match(text, /\/api\/reviews\//);
+  assert.match(text, /\/api\/reviews[^/]/);
+  assert.match(text, /orderId/);
+  assert.equal(text.includes('"/api/reviews/"'), false);
   assert.equal(/refundDestination/i.test(text), false);
+});
+
+test("order list shows Write a review CTA when reviewEligibility is eligible", () => {
+  const pagePath = path.join(import.meta.dirname, "../../app/account/orders/page.tsx");
+  const text = fs.readFileSync(pagePath, "utf8");
+  assert.match(text, /canWriteReview/);
+  assert.match(text, /Write a review/);
+  assert.match(text, /reviewEligibility/);
+  assert.match(text, /#reviews/);
+});
+
+test("orders list item type includes reviewEligibility", () => {
+  const text = fs.readFileSync(path.join(import.meta.dirname, "orders.ts"), "utf8");
+  assert.match(text, /ShopperOrderListItem[\s\S]*reviewEligibility\?: ReviewEligibility/);
 });
 
 test("order detail page wires Pay again, review submit, and return appeal", () => {
@@ -192,9 +232,12 @@ test("order detail page wires Pay again, review submit, and return appeal", () =
   assert.match(text, /initiatePhonePePayment/);
   assert.match(text, /Pay again/);
   assert.match(text, /createProductReview/);
+  assert.match(text, /orderId/);
   assert.match(text, /StarRatingInput/);
   assert.match(text, /fetchProductReviews/);
-  assert.match(text, /Your review was published/);
+  assert.match(text, /onReload/);
+  assert.match(text, /OrderLineItemReview/);
+  assert.match(text, /getReviewEligibilityMessage/);
   assert.match(text, /reviewEligibility/);
   assert.match(text, /submitReturnAppeal/);
   assert.match(text, /returnRequest\.appeal\?\.canAppeal/);

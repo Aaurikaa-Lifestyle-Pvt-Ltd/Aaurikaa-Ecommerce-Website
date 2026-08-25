@@ -55,7 +55,9 @@ test("reviews client uses public product reviews contract", () => {
   assert.match(text, /createCustomerReview/);
   assert.match(text, /createProductReview/);
   assert.match(text, /buildCustomerReviewPayload/);
-  assert.match(text, /\/api\/reviews\//);
+  assert.match(text, /\/api\/reviews[^/]/);
+  assert.match(text, /orderId/);
+  assert.equal(text.includes('"/api/reviews/"'), false);
 });
 
 test("star rating UI provides display and interactive input without select", () => {
@@ -76,6 +78,10 @@ test("star rating UI provides display and interactive input without select", () 
     path.join(root, "components/product/product-reviews.tsx"),
     "utf8",
   );
+  const purchase = fs.readFileSync(
+    path.join(root, "components/product/product-purchase.tsx"),
+    "utf8",
+  );
 
   assert.match(stars, /export function StarDisplay/);
   assert.match(stars, /export function StarRatingInput/);
@@ -85,6 +91,9 @@ test("star rating UI provides display and interactive input without select", () 
   assert.match(orderPage, /StarRatingInput/);
   assert.match(orderPage, /fetchProductReviews/);
   assert.match(orderPage, /reviewEligibility/);
+  assert.match(orderPage, /orderId/);
+  assert.match(orderPage, /OrderLineItemReview/);
+  assert.match(orderPage, /getReviewEligibilityMessage/);
   assert.equal(
     /<select[\s\S]*\{\[5,\s*4,\s*3,\s*2,\s*1\]/.test(orderPage),
     false,
@@ -99,4 +108,8 @@ test("star rating UI provides display and interactive input without select", () 
   assert.match(reviewsUi, /verifiedPurchase/);
   assert.match(reviewsUi, /fetchProductReviews/);
   assert.equal(/seller review|SellerReview|\/api\/reviews\/seller/i.test(reviewsUi), false);
+
+  assert.match(purchase, /fetchProductReviews/);
+  assert.match(purchase, /reviewAvgRating/);
+  assert.match(purchase, /reviewCount/);
 });

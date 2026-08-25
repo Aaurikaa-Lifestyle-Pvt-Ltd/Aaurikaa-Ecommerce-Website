@@ -124,6 +124,8 @@ export type CreateCustomerReviewInput = {
   productId: string;
   rating: number;
   comment?: string;
+  /** Optional order context — backend uses it to verify delivered purchase. */
+  orderId?: string;
 };
 
 export type CreateCustomerReviewResult = {
@@ -141,12 +143,22 @@ export function buildCustomerReviewPayload(input: CreateCustomerReviewInput): {
   productId: string;
   rating: number;
   comment: string;
+  orderId?: string;
 } {
-  return {
+  const payload: {
+    productId: string;
+    rating: number;
+    comment: string;
+    orderId?: string;
+  } = {
     productId: input.productId,
     rating: input.rating,
     comment: input.comment?.trim() ? input.comment.trim() : "",
   };
+  if (input.orderId?.trim()) {
+    payload.orderId = input.orderId.trim();
+  }
+  return payload;
 }
 
 function mapCreateResult(raw: unknown): CreateCustomerReviewResult {
@@ -198,7 +210,7 @@ export async function createCustomerReview(
   input: CreateCustomerReviewInput,
 ): Promise<CreateCustomerReviewResult> {
   const response = await apiRequest<{ data?: CreateCustomerReviewResult } & CreateCustomerReviewResult>(
-    "/api/reviews/",
+    "/api/reviews",
     {
       method: "POST",
       auth: true,
@@ -208,5 +220,5 @@ export async function createCustomerReview(
   return mapCreateResult(unwrapData(response));
 }
 
-/** Alias used by order-detail review submit (same POST /api/reviews/). */
+/** Alias used by order-detail review submit (same POST /api/reviews). */
 export const createProductReview = createCustomerReview;
