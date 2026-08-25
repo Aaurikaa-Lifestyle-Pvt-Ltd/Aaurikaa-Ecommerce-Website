@@ -104,5 +104,59 @@ describe("shopperOrderListService", () => {
       expect(dto.discountAmount).toBe(100);
       expect(dto.couponCode).toBe("SAVE100");
     });
+
+    it("includes reviewEligibility for delivered unreviewed orders", () => {
+      const dto = shopperOrderListDTO(
+        {
+          _id: "507f1f77bcf86cd799439011",
+          invoiceNumber: "INV-DEL-1",
+          status: "delivered",
+          totalAmount: 999,
+          items: [
+            {
+              quantity: 1,
+              product: { _id: "507f1f77bcf86cd799439012", name: "Ring" },
+            },
+          ],
+        },
+        {
+          shopperId: "507f1f77bcf86cd799439099",
+          reviewedProductIds: new Set(),
+        }
+      );
+
+      expect(dto.reviewEligibility).toEqual({
+        eligible: true,
+        alreadyReviewed: false,
+        delivered: true,
+        reason: "ELIGIBLE",
+      });
+    });
+
+    it("includes reviewEligibility with alreadyReviewed when all products reviewed", () => {
+      const dto = shopperOrderListDTO(
+        {
+          _id: "507f1f77bcf86cd799439011",
+          status: "delivered",
+          items: [
+            {
+              quantity: 1,
+              product: { _id: "507f1f77bcf86cd799439012", name: "Ring" },
+            },
+          ],
+        },
+        {
+          shopperId: "507f1f77bcf86cd799439099",
+          reviewedProductIds: new Set(["507f1f77bcf86cd799439012"]),
+        }
+      );
+
+      expect(dto.reviewEligibility).toEqual({
+        eligible: false,
+        alreadyReviewed: true,
+        delivered: true,
+        reason: "ALREADY_REVIEWED",
+      });
+    });
   });
 });

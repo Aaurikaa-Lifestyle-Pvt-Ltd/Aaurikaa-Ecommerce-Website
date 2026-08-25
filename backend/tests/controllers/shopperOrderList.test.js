@@ -3,9 +3,11 @@ const express = require("express");
 
 jest.mock("../../models/Order");
 jest.mock("../../models/SiteSettings");
+jest.mock("../../models/Review");
 jest.mock("../../services/manualConfirmationService");
 
 const Order = require("../../models/Order");
+const Review = require("../../models/Review");
 const SiteSettings = require("../../models/SiteSettings");
 const { buildManualConfirmationMap } = require("../../services/manualConfirmationService");
 const { listShopperOrders } = require("../../controllers/shopperOrderController");
@@ -43,6 +45,10 @@ describe("Shopper order listing (DTO)", () => {
       sort: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
       lean: jest.fn().mockResolvedValue({ returnWindowDays: 7 }),
+    });
+    Review.find.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
     });
   });
 
@@ -120,6 +126,60 @@ describe("Shopper order listing (DTO)", () => {
     });
     expect(response.body.orders[0].paymentVisibility).toHaveProperty("paymentStatus");
     expect(response.body.orders[0].trackingSummary).toHaveProperty("awbAvailable", false);
+  });
+
+  it("includes reviewEligibility for delivered unreviewed orders", async () => {
+    const mockOrders = [
+      {
+        _id: "507f1f77bcf86cd799439011",
+        invoiceNumber: "INV-DEL-1",
+        buyer: "507f1f77bcf86cd799439099",
+        status: "delivered",
+        totalAmount: 999,
+        paymentMethod: "phonepe",
+        paymentStatus: "paid",
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+        items: [
+          {
+            quantity: 1,
+            product: {
+              _id: "507f1f77bcf86cd799439012",
+              name: "Delivered Product",
+              slug: "delivered-product",
+            },
+          },
+        ],
+        shiprocketShipments: [],
+      },
+    ];
+
+    Order.countDocuments.mockResolvedValue(1);
+    Order.find.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      populate: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue(mockOrders),
+    });
+    Review.find.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
+
+    const response = await request(app).get("/api/shopper/orders").expect(200);
+
+    expect(Review.find).toHaveBeenCalledWith({
+      product: { $in: ["507f1f77bcf86cd799439012"] },
+      "reviewer.userId": "507f1f77bcf86cd799439099",
+      "reviewer.role": "shopper",
+    });
+    expect(response.body.orders[0].reviewEligibility).toEqual({
+      eligible: true,
+      alreadyReviewed: false,
+      delivered: true,
+      reason: "ELIGIBLE",
+    });
   });
 
   it("handles database errors", async () => {

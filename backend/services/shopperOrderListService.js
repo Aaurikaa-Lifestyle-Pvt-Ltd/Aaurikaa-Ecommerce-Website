@@ -5,6 +5,7 @@ const {
   toShopperReturnEligibility,
 } = require("./returnEligibilityService");
 const { buildOrderFinancialSnapshot } = require("../utils/orderFinancialSnapshot");
+const { getReviewEligibilityForOrder } = require("./reviewEligibilityService");
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 10;
@@ -153,6 +154,11 @@ function shopperOrderListDTO(order, options = {}) {
     invoiceAvailable: resolveInvoiceAvailable(plain),
     itemsPreview: buildItemsPreview(plain.items),
     manualConfirmation,
+    reviewEligibility: getReviewEligibilityForOrder({
+      order: plain,
+      shopperId: options.shopperId || null,
+      reviewedProductIds: options.reviewedProductIds || new Set(),
+    }),
   };
 }
 

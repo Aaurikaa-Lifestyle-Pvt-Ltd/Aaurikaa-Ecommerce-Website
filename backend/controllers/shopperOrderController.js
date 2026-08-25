@@ -91,11 +91,23 @@ exports.listShopperOrders = async (req, res) => {
       }
     }
 
+    const productIds = orders.flatMap((order) =>
+      (order.items || [])
+        .map((item) => item.product?._id || item.product)
+        .filter(Boolean)
+    );
+    const reviewedProductIds = await loadReviewedProductIds({
+      shopperId: buyerId,
+      productIds,
+    });
+
     res.json({
       orders: orders.map((order) => {
         const existingReturnRequest = returnRequestMap.get(String(order._id)) || null;
         const eligibilityOptions = resolveOrderEligibilityOptions(order);
         return shopperOrderListDTO(order, {
+          shopperId: buyerId,
+          reviewedProductIds,
           manualConfirmation: manualConfirmationMap.get(String(order._id)),
           existingReturnRequest,
           returnRequest: toShopperReturnRequestDTO(existingReturnRequest),
