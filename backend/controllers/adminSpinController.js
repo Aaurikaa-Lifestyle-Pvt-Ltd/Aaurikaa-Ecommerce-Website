@@ -13,6 +13,8 @@ const {
   validateCampaignPayload,
   sanitizeCampaignForShopper,
   getCampaignWindowState,
+  parseCampaignCalendarDate,
+  resolveCampaign,
   ELIGIBILITY,
 } = require("../services/spinCampaignService");
 
@@ -21,8 +23,8 @@ function buildCampaignPayload(body, adminId) {
     name: body.name,
     slug: normalizeSlug(body.slug || body.name),
     status: body.status || "draft",
-    startDate: body.startDate ? new Date(body.startDate) : null,
-    endDate: body.endDate ? new Date(body.endDate) : null,
+    startDate: parseCampaignCalendarDate(body.startDate, "start"),
+    endDate: parseCampaignCalendarDate(body.endDate, "end"),
     headline: body.headline || "",
     description: body.description || "",
     couponCodePrefix: body.couponCodePrefix || "",
@@ -101,15 +103,11 @@ exports.updateCampaign = asyncHandler(async (req, res) => {
     status: req.body.status ?? campaign.status,
     startDate:
       req.body.startDate !== undefined
-        ? req.body.startDate
-          ? new Date(req.body.startDate)
-          : null
+        ? parseCampaignCalendarDate(req.body.startDate, "start")
         : campaign.startDate,
     endDate:
       req.body.endDate !== undefined
-        ? req.body.endDate
-          ? new Date(req.body.endDate)
-          : null
+        ? parseCampaignCalendarDate(req.body.endDate, "end")
         : campaign.endDate,
     headline: req.body.headline ?? campaign.headline,
     description: req.body.description ?? campaign.description,
@@ -265,18 +263,10 @@ exports.listAttempts = asyncHandler(async (req, res) => {
 /** Public-safe active campaign preview (no weights, auth not required). */
 exports.getActiveCampaignPreview = asyncHandler(async (req, res) => {
   const { slug } = req.query;
-  const now = new Date();
-  const windowFilter = {
-    $and: [
-      { $or: [{ startDate: null }, { startDate: { $lte: now } }] },
-      { $or: [{ endDate: null }, { endDate: { $gte: now } }] },
-    ],
-  };
-  const query = slug
-    ? { slug: normalizeSlug(slug), status: "active", ...windowFilter }
-    : { status: "active", ...windowFilter };
+  const campaign = await resolveCampaign({
+    slug: slug ? String(slug) : undefined,
+  });
 
-  const campaign = await SpinCampaign.findOne(query).sort({ updatedAt: -1 });
   if (!campaign || getCampaignWindowState(campaign) !== ELIGIBILITY.ELIGIBLE) {
     return sendSuccessResponse(res, HTTP_STATUS.OK, "No active spin campaign", {
       campaign: null,

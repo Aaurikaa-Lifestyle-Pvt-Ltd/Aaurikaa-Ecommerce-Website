@@ -13,6 +13,10 @@ const ELIGIBILITY = {
   NO_ACTIVE_CAMPAIGN: "no_active_campaign",
 };
 
+/** AAURIKAA business calendar (India). Matches return-window IST day semantics. */
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+const DATE_ONLY_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
 function isDuplicateKeyError(error) {
   return error && (error.code === 11000 || error.code === 11001);
 }
@@ -25,14 +29,74 @@ function normalizeSlug(slug) {
     .replace(/^-+|-+$/g, "");
 }
 
+function toIstCalendarParts(date) {
+  const ist = new Date(new Date(date).getTime() + IST_OFFSET_MS);
+  return {
+    year: ist.getUTCFullYear(),
+    month: ist.getUTCMonth(),
+    day: ist.getUTCDate(),
+  };
+}
+
+function istStartOfCalendarDay(year, monthIndex, day) {
+  return new Date(Date.UTC(year, monthIndex, day, 0, 0, 0, 0) - IST_OFFSET_MS);
+}
+
+function istEndOfCalendarDay(year, monthIndex, day) {
+  return new Date(Date.UTC(year, monthIndex, day, 23, 59, 59, 999) - IST_OFFSET_MS);
+}
+
+/**
+ * Admin date inputs are calendar days (YYYY-MM-DD). Persist inclusive IST bounds
+ * so "26 Aug → 27 Aug" is live for those full India calendar days.
+ */
+function parseCampaignCalendarDate(value, bound) {
+  if (value === null || value === undefined || value === "") return null;
+  const raw = String(value).trim();
+  const dateOnly = DATE_ONLY_RE.exec(raw);
+  if (dateOnly) {
+    const year = Number(dateOnly[1]);
+    const monthIndex = Number(dateOnly[2]) - 1;
+    const day = Number(dateOnly[3]);
+    return bound === "end"
+      ? istEndOfCalendarDay(year, monthIndex, day)
+      : istStartOfCalendarDay(year, monthIndex, day);
+  }
+
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return null;
+  const parts = toIstCalendarParts(parsed);
+  return bound === "end"
+    ? istEndOfCalendarDay(parts.year, parts.month, parts.day)
+    : istStartOfCalendarDay(parts.year, parts.month, parts.day);
+}
+
+function getCampaignWindowBounds(campaign) {
+  let startBound = null;
+  let endBound = null;
+
+  if (campaign?.startDate) {
+    const parts = toIstCalendarParts(campaign.startDate);
+    startBound = istStartOfCalendarDay(parts.year, parts.month, parts.day);
+  }
+  if (campaign?.endDate) {
+    const parts = toIstCalendarParts(campaign.endDate);
+    endBound = istEndOfCalendarDay(parts.year, parts.month, parts.day);
+  }
+
+  return { startBound, endBound };
+}
+
 function getCampaignWindowState(campaign, now = new Date()) {
   if (!campaign || campaign.status !== "active") {
     return ELIGIBILITY.CAMPAIGN_INACTIVE;
   }
-  if (campaign.startDate && now < new Date(campaign.startDate)) {
+
+  const { startBound, endBound } = getCampaignWindowBounds(campaign);
+  if (startBound && now < startBound) {
     return ELIGIBILITY.CAMPAIGN_NOT_STARTED;
   }
-  if (campaign.endDate && now > new Date(campaign.endDate)) {
+  if (endBound && now > endBound) {
     return ELIGIBILITY.CAMPAIGN_EXPIRED;
   }
   return ELIGIBILITY.ELIGIBLE;
@@ -230,14 +294,10 @@ async function resolveCampaign({ campaignId, slug } = {}) {
     return SpinCampaign.findOne({ slug: normalizeSlug(slug) });
   }
 
-  const now = new Date();
-  return SpinCampaign.findOne({
-    status: "active",
-    $and: [
-      { $or: [{ startDate: null }, { startDate: { $lte: now } }] },
-      { $or: [{ endDate: null }, { endDate: { $gte: now } }] },
-    ],
-  }).sort({ updatedAt: -1 });
+  // Status-only query: IST calendar-day window is applied in getCampaignWindowState.
+  // Raw UTC midnight comparisons incorrectly hide "today" campaigns before ~05:30 IST.
+  const candidates = await SpinCampaign.find({ status: "active" }).sort({ updatedAt: -1 });
+  return candidates.find((campaign) => getCampaignWindowState(campaign) === ELIGIBILITY.ELIGIBLE) || null;
 }
 
 async function getSpinStatus(shopperId, { campaignId, slug } = {}) {
@@ -375,9 +435,11 @@ async function executeSpin(shopperId, { campaignId, slug, ipAddress, userAgent, 
 module.exports = {
   ELIGIBILITY,
   normalizeSlug,
+  parseCampaignCalendarDate,
   validateCampaignPayload,
   validateSegmentCouponTemplate,
   getCampaignWindowState,
+  getCampaignWindowBounds,
   pickWeightedSegment,
   mapSegmentOutcome,
   resolveCampaign,

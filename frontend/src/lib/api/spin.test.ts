@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import path from "node:path";
+import { readFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
-const ROOT = path.resolve(import.meta.dirname, "../../..");
+const here = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(here, "../../..");
 
 test("storefront spin API uses public and shopper contracts", () => {
-  const text = fs.readFileSync(path.join(import.meta.dirname, "spin.ts"), "utf8");
+  const text = readFileSync(join(here, "spin.ts"), "utf8");
   assert.match(text, /\/api\/spin\/active/);
   assert.match(text, /\/api\/shopper\/spin\/status/);
   assert.match(text, /\/api\/shopper\/spin\/spin/);
@@ -20,12 +22,12 @@ test("storefront spin API uses public and shopper contracts", () => {
 });
 
 test("spin-to-win page gates guests and follows server outcome", () => {
-  const page = fs.readFileSync(
-    path.join(ROOT, "src/app/spin-to-win/page.tsx"),
+  const page = readFileSync(
+    join(ROOT, "src/app/spin-to-win/page.tsx"),
     "utf8",
   );
-  const wheel = fs.readFileSync(
-    path.join(ROOT, "src/components/spin/spin-wheel.tsx"),
+  const wheel = readFileSync(
+    join(ROOT, "src/components/spin/spin-wheel.tsx"),
     "utf8",
   );
   assert.match(page, /ShopperAuthPanel/);
@@ -40,8 +42,8 @@ test("spin-to-win page gates guests and follows server outcome", () => {
 });
 
 test("spin page covers inactive eligible and already spun states", () => {
-  const page = fs.readFileSync(
-    path.join(ROOT, "src/app/spin-to-win/page.tsx"),
+  const page = readFileSync(
+    join(ROOT, "src/app/spin-to-win/page.tsx"),
     "utf8",
   );
   assert.match(page, /"inactive"/);
@@ -51,3 +53,19 @@ test("spin page covers inactive eligible and already spun states", () => {
   assert.match(page, /couponCode/);
   assert.match(page, /no_active_campaign/);
 });
+
+test("spin entry point wires to active campaign and mounts in root layout", () => {
+  const entryPoint = readFileSync(
+    join(ROOT, "src/components/spin/spin-entry-point.tsx"),
+    "utf8",
+  );
+  const layout = readFileSync(
+    join(ROOT, "src/app/layout.tsx"),
+    "utf8",
+  );
+  assert.match(entryPoint, /fetchActiveSpinCampaign/);
+  assert.match(entryPoint, /href="\/spin-to-win"/);
+  assert.match(entryPoint, /pathname === "\/spin-to-win"/);
+  assert.match(layout, /SpinEntryPoint/);
+});
+

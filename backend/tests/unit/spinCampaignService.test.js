@@ -6,6 +6,7 @@ const {
   ELIGIBILITY,
   pickWeightedSegment,
   getCampaignWindowState,
+  parseCampaignCalendarDate,
   validateCampaignPayload,
 } = require("../../services/spinCampaignService");
 
@@ -44,6 +45,44 @@ describe("spinCampaignService", () => {
           endDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
         })
       ).toBe(ELIGIBILITY.CAMPAIGN_EXPIRED);
+    });
+
+    it("treats Admin UTC-midnight date-only windows as inclusive IST calendar days", () => {
+      // Admin saved start=2026-08-26 / end=2026-08-27 via <input type="date">.
+      const campaign = {
+        status: "active",
+        startDate: new Date("2026-08-26T00:00:00.000Z"),
+        endDate: new Date("2026-08-27T00:00:00.000Z"),
+      };
+
+      // 26 Aug 2026 01:00 IST == 25 Aug 2026 19:30 UTC (before UTC midnight start).
+      expect(
+        getCampaignWindowState(campaign, new Date("2026-08-25T19:30:00.000Z"))
+      ).toBe(ELIGIBILITY.ELIGIBLE);
+
+      // Still before IST start of 26 Aug (25 Aug 18:29 UTC).
+      expect(
+        getCampaignWindowState(campaign, new Date("2026-08-25T18:29:59.000Z"))
+      ).toBe(ELIGIBILITY.CAMPAIGN_NOT_STARTED);
+
+      // Inclusive through end of 27 Aug IST.
+      expect(
+        getCampaignWindowState(campaign, new Date("2026-08-27T18:29:59.999Z"))
+      ).toBe(ELIGIBILITY.ELIGIBLE);
+      expect(
+        getCampaignWindowState(campaign, new Date("2026-08-27T18:30:00.000Z"))
+      ).toBe(ELIGIBILITY.CAMPAIGN_EXPIRED);
+    });
+  });
+
+  describe("parseCampaignCalendarDate", () => {
+    it("maps YYYY-MM-DD to IST start and end of day", () => {
+      expect(parseCampaignCalendarDate("2026-08-26", "start").toISOString()).toBe(
+        "2026-08-25T18:30:00.000Z"
+      );
+      expect(parseCampaignCalendarDate("2026-08-27", "end").toISOString()).toBe(
+        "2026-08-27T18:29:59.999Z"
+      );
     });
   });
 

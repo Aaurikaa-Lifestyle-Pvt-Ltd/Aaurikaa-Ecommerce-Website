@@ -3,6 +3,7 @@ import { Geist, Playfair_Display } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import { Announcement, Footer, Header } from "@/components/layout";
 import { CartProvider, MiniCart } from "@/components/cart";
+import { SpinEntryPoint } from "@/components/spin";
 import { ShopperAuthProvider } from "@/lib/auth/shopper-provider";
 import { WishlistProvider } from "@/lib/wishlist/wishlist-provider";
 import { ToastProvider } from "@/components/ui/toast";
@@ -88,6 +89,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <main className="flex-1">{children}</main>
                 <Footer />
                 <MiniCart />
+                <SpinEntryPoint />
               </CartProvider>
             </WishlistProvider>
           </ToastProvider>
