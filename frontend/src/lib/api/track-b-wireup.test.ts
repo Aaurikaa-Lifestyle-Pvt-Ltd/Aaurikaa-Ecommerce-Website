@@ -45,4 +45,7 @@ test("enquiry form posts contact enquiries without seller category", () => {
   assert.match(form, /submitContactEnquiry/);
   assert.equal(/category:\s*"seller"|value:\s*"seller"/i.test(form), false);
   assert.match(form, /enquiryNumber/);
+  assert.match(form, /CONTACT_FIELD_LABELS/);
+  assert.match(form, /orderInvoiceNumber/);
+  assert.equal(form.includes("order_invoice"), false);
 });

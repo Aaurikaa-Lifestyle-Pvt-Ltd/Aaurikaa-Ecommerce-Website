@@ -18,6 +18,9 @@ export type {
 export {
   buildContactEnquiryPayload,
   buildWellWisherEnquiryPayload,
+  CONTACT_ENQUIRY_CATEGORIES,
+  CONTACT_FIELD_LABELS,
+  contactCategoryLabel,
   validateContactEnquiryInput,
   validateWellWisherEnquiryInput,
   WELL_WISHER_CATEGORIES,

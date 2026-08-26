@@ -1,6 +1,15 @@
 /** Pure contact / well-wisher enquiry payload + validation (no HTTP client). */
 
-export type EnquiryCategory = "product" | "support" | "other";
+/** Backend CATEGORIES allowlist (CustomerEnquiry) — never invent values. */
+export type EnquiryCategory =
+  | "product"
+  | "support"
+  | "payment"
+  | "delivery"
+  | "policy"
+  | "website"
+  | "experience"
+  | "other";
 
 export type WellWisherCategory =
   | "feature"
@@ -23,6 +32,8 @@ export type ContactEnquiryInput = {
     phone?: string;
   };
   category?: EnquiryCategory;
+  /** Maps to backend `orderInvoiceNumber` (optional). */
+  orderInvoiceNumber?: string;
 };
 
 export type WellWisherEnquiryInput = {
@@ -38,11 +49,23 @@ export type WellWisherEnquiryInput = {
   subject?: string;
 };
 
-const ALLOWED_CATEGORIES: readonly EnquiryCategory[] = [
-  "product",
-  "support",
-  "other",
+/** Customer-facing Contact Us category options (values = backend enums). */
+export const CONTACT_ENQUIRY_CATEGORIES: readonly {
+  value: EnquiryCategory;
+  label: string;
+}[] = [
+  { value: "support", label: "Customer Care" },
+  { value: "product", label: "Product Question" },
+  { value: "payment", label: "Payment Help" },
+  { value: "delivery", label: "Shipping & Delivery" },
+  { value: "policy", label: "Policies & Returns" },
+  { value: "website", label: "Website Help" },
+  { value: "experience", label: "Shopping Experience" },
+  { value: "other", label: "Something Else" },
 ];
+
+const ALLOWED_CATEGORIES: readonly EnquiryCategory[] =
+  CONTACT_ENQUIRY_CATEGORIES.map((item) => item.value);
 
 export const WELL_WISHER_CATEGORIES: readonly {
   value: WellWisherCategory;
@@ -63,6 +86,22 @@ export const WELL_WISHER_CATEGORIES: readonly {
 const ALLOWED_WELL_WISHER: readonly WellWisherCategory[] =
   WELL_WISHER_CATEGORIES.map((item) => item.value);
 
+/** Display labels for Contact Us fields — never expose raw API keys. */
+export const CONTACT_FIELD_LABELS = {
+  name: "Full Name",
+  phone: "Phone Number",
+  email: "Email Address",
+  subject: "Subject",
+  category: "How can we help?",
+  orderInvoiceNumber: "Order / Invoice Number",
+  message: "Your Message",
+} as const;
+
+export function contactCategoryLabel(value: string): string {
+  const match = CONTACT_ENQUIRY_CATEGORIES.find((item) => item.value === value);
+  return match?.label ?? "Something Else";
+}
+
 export function buildContactEnquiryPayload(
   input: ContactEnquiryInput,
 ): Record<string, unknown> {
@@ -71,6 +110,7 @@ export function buildContactEnquiryPayload(
   const message = String(input.message ?? "").trim();
   const name = String(input.submitter.name ?? "").trim();
   const phone = String(input.submitter.phone ?? "").trim();
+  const orderInvoiceNumber = String(input.orderInvoiceNumber ?? "").trim();
 
   const payload: Record<string, unknown> = {
     source: "contact",
@@ -85,6 +125,10 @@ export function buildContactEnquiryPayload(
 
   if (input.category && ALLOWED_CATEGORIES.includes(input.category)) {
     payload.category = input.category;
+  }
+
+  if (orderInvoiceNumber) {
+    payload.orderInvoiceNumber = orderInvoiceNumber;
   }
 
   return payload;
@@ -121,6 +165,7 @@ export function validateContactEnquiryInput(input: ContactEnquiryInput): string 
   const subject = String(input.subject ?? "").trim();
   const message = String(input.message ?? "").trim();
   const email = String(input.submitter.email ?? "").trim();
+  const orderInvoiceNumber = String(input.orderInvoiceNumber ?? "").trim();
 
   if (!subject) return "Subject is required.";
   if (subject.length > 200) return "Subject must be 200 characters or fewer.";
@@ -130,7 +175,10 @@ export function validateContactEnquiryInput(input: ContactEnquiryInput): string 
     return "A valid email address is required.";
   }
   if (input.category && !ALLOWED_CATEGORIES.includes(input.category)) {
-    return "Please choose a valid category.";
+    return "Please choose a valid option for how we can help.";
+  }
+  if (orderInvoiceNumber.length > 64) {
+    return "Order / invoice number looks too long. Please check and try again.";
   }
   return null;
 }
