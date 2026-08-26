@@ -26,6 +26,35 @@ test("header shows wishlist count badge like bag", () => {
   assert.match(header, /showWishlistBadge/);
 });
 
+test("hamburger drawer is site navigation only", () => {
+  const header = read("components/layout/header.tsx");
+  const drawerStart = header.indexOf("const mobileDrawer");
+  const drawerEnd = header.indexOf("return (", drawerStart);
+  assert.ok(drawerStart >= 0 && drawerEnd > drawerStart);
+  const drawer = header.slice(drawerStart, drawerEnd);
+
+  assert.doesNotMatch(drawer, /SearchAutocomplete/);
+  assert.doesNotMatch(drawer, /href="\/account"/);
+  assert.doesNotMatch(drawer, /href="\/wishlist"/);
+  assert.doesNotMatch(drawer, /IconBag/);
+  assert.doesNotMatch(drawer, />\s*Bag\s*</);
+  assert.match(drawer, /aria-label="Site"/);
+  assert.match(drawer, /primaryNav\.map/);
+});
+
+test("mobile bottom nav mounts Home Shop Wishlist Cart", () => {
+  const layout = read("app/layout.tsx");
+  const nav = read("components/layout/mobile-bottom-nav.tsx");
+  assert.match(layout, /MobileBottomNav/);
+  assert.match(nav, /href: "\/"/);
+  assert.match(nav, /href: "\/categories"/);
+  assert.match(nav, /href: "\/wishlist"/);
+  assert.match(nav, /href: "\/cart"/);
+  assert.doesNotMatch(nav, /\/shop"/);
+  assert.doesNotMatch(nav, /\/account"/);
+  assert.doesNotMatch(nav, /\/search"/);
+});
+
 test("wishlist provider is auth-only and does not invent guest wishlist", () => {
   const provider = read("lib/wishlist/wishlist-provider.tsx");
   assert.match(provider, /fetchWishlistProductIds/);

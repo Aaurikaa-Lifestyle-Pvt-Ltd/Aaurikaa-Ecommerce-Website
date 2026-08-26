@@ -129,7 +129,7 @@ export function Header({ brandName, navLinks }: HeaderProps = {}) {
               aria-label="Menu"
               className="fixed inset-y-0 left-0 z-50 flex w-[86%] max-w-sm flex-col bg-surface shadow-card"
             >
-              <div className="flex h-16 items-center justify-between border-b border-border px-5">
+              <div className="flex h-14 items-center justify-between gap-3 border-b border-border px-4">
                 <HeaderLogo name={name} />
                 <button
                   type="button"
@@ -141,29 +141,16 @@ export function Header({ brandName, navLinks }: HeaderProps = {}) {
                 </button>
               </div>
 
-              <div className="border-b border-border px-5 py-4">
-                <Suspense
-                  fallback={
-                    <p className="text-sm text-muted-foreground">Search…</p>
-                  }
-                >
-                  <SearchAutocomplete
-                    compact
-                    onClose={() => setMenuOpen(false)}
-                  />
-                </Suspense>
-              </div>
-
               <nav
-                aria-label="Mobile"
-                className="flex-1 overflow-y-auto px-5 py-6"
+                aria-label="Site"
+                className="overflow-y-auto px-4 py-5"
               >
-                <ul className="flex flex-col gap-1">
+                <ul className="flex flex-col gap-0.5">
                   {primaryNav.map((link) => (
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="block rounded-control px-2 py-3 text-base text-foreground transition-colors hover:bg-muted"
+                        className="block rounded-control px-3 py-3 text-base text-foreground transition-colors hover:bg-muted"
                         onClick={() => setMenuOpen(false)}
                       >
                         {link.label}
@@ -172,42 +159,6 @@ export function Header({ brandName, navLinks }: HeaderProps = {}) {
                   ))}
                 </ul>
               </nav>
-
-              <div className="border-t border-border px-5 py-5">
-                <div className="flex flex-col gap-1">
-                  <Link
-                    href="/account"
-                    className="flex items-center gap-3 rounded-control px-2 py-3 text-sm text-foreground hover:bg-muted"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    <IconUser className="h-5 w-5" /> Account
-                  </Link>
-                  <Link
-                    href="/wishlist"
-                    className="flex items-center gap-3 rounded-control px-2 py-3 text-sm text-foreground hover:bg-muted"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    <IconHeart className="h-5 w-5" /> Wishlist
-                    {showWishlistBadge ? (
-                      <span className="text-muted-foreground">
-                        ({wishlistCount > 99 ? "99+" : wishlistCount})
-                      </span>
-                    ) : null}
-                  </Link>
-                  <button
-                    type="button"
-                    className="flex items-center gap-3 rounded-control px-2 py-3 text-left text-sm text-foreground hover:bg-muted"
-                    onClick={handleOpenCart}
-                  >
-                    <IconBag className="h-5 w-5" /> Bag
-                    {showBadge ? (
-                      <span className="text-muted-foreground">
-                        ({itemCount})
-                      </span>
-                    ) : null}
-                  </button>
-                </div>
-              </div>
             </div>
           </div>,
           document.body,
@@ -265,16 +216,13 @@ export function Header({ brandName, navLinks }: HeaderProps = {}) {
                 <IconSearch className="h-5 w-5" />
               )}
             </button>
-            <Link
-              href="/account"
-              className={`${iconButton} hidden md:inline-grid`}
-              aria-label="Account"
-            >
+            <Link href="/account" className={iconButton} aria-label="Account">
               <IconUser className="h-5 w-5" />
             </Link>
+            {/* Wishlist + bag: desktop only — iconButton’s inline-grid must not win over hide */}
             <Link
               href="/wishlist"
-              className={`relative ${iconButton}`}
+              className={`relative ${iconButton} max-lg:hidden`}
               aria-label={
                 showWishlistBadge
                   ? `Wishlist, ${wishlistCount} saved`
@@ -290,7 +238,7 @@ export function Header({ brandName, navLinks }: HeaderProps = {}) {
             </Link>
             <button
               type="button"
-              className={`relative ${iconButton}`}
+              className={`relative ${iconButton} max-lg:hidden`}
               aria-label={
                 showBadge ? `Open bag, ${itemCount} items` : "Open bag"
               }

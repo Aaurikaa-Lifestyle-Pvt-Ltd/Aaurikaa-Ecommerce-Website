@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Playfair_Display } from "next/font/google";
 import { siteConfig } from "@/config/site";
-import { Announcement, Footer, Header } from "@/components/layout";
+import {
+  Announcement,
+  Footer,
+  Header,
+  MobileBottomNav,
+} from "@/components/layout";
 import { CartProvider, MiniCart } from "@/components/cart";
 import { SpinEntryPoint } from "@/components/spin";
 import { ShopperAuthProvider } from "@/lib/auth/shopper-provider";
@@ -97,7 +102,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${sans.variable} ${serif.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col bg-background text-foreground pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
         <ShopperAuthProvider>
           <ToastProvider>
             <WishlistProvider>
@@ -106,6 +111,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <Header brandName={headerTitle} navLinks={navLinks} />
                 <main className="flex-1">{children}</main>
                 <Footer />
+                <MobileBottomNav />
                 <MiniCart />
                 <SpinEntryPoint />
               </CartProvider>
