@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { CmsMediaField, type CmsMediaRef } from "@/components/cms-media-field";
+import { ProductStructuredEditor } from "@/components/product-structured-editor";
 import {
   Button,
   Card,
@@ -16,7 +17,10 @@ import {
   type FaqItem,
   type OrderedSection,
 } from "@/lib/cms-ordered-sections";
-import { editableTextToTiptapJson, tiptapValueToEditableText } from "@/lib/tiptap-plain";
+import {
+  editableTextToTiptapJson,
+  richTextValueToEditorString,
+} from "@/lib/tiptap-plain";
 
 export type { CardGridItem, FaqItem, OrderedSection } from "@/lib/cms-ordered-sections";
 export { pruneOrderedSections } from "@/lib/cms-ordered-sections";
@@ -201,16 +205,12 @@ export function ImageTextEditor({
           </Select>
         </Field>
         <Field label="Body">
-          <Textarea
-            rows={6}
-            value={tiptapValueToEditableText(block.bodyRichText)}
-            onChange={(e) =>
-              onChange({
-                ...block,
-                bodyRichText: editableTextToTiptapJson(e.target.value),
-              })
-            }
-            placeholder="Write paragraphs as plain text"
+          <ProductStructuredEditor
+            value={richTextValueToEditorString(block.bodyRichText)}
+            onChange={(bodyRichText) => onChange({ ...block, bodyRichText })}
+            context="CMS"
+            placeholder="Write body copy…"
+            minHeight={180}
           />
         </Field>
       </div>
@@ -467,15 +467,17 @@ function OrderedSectionItemEditor({
               />
             </Field>
             <Field label="Body">
-              <Textarea
-                rows={5}
-                value={tiptapValueToEditableText(section.bodyRichText)}
-                onChange={(e) =>
+              <ProductStructuredEditor
+                value={richTextValueToEditorString(section.bodyRichText)}
+                onChange={(bodyRichText) =>
                   onChange({
                     ...section,
-                    bodyRichText: editableTextToTiptapJson(e.target.value),
+                    bodyRichText,
                   })
                 }
+                context="CMS"
+                placeholder="Write section body…"
+                minHeight={160}
               />
             </Field>
           </div>
@@ -511,15 +513,17 @@ function OrderedSectionItemEditor({
               </Select>
             </Field>
             <Field label="Body">
-              <Textarea
-                rows={5}
-                value={tiptapValueToEditableText(section.bodyRichText)}
-                onChange={(e) =>
+              <ProductStructuredEditor
+                value={richTextValueToEditorString(section.bodyRichText)}
+                onChange={(bodyRichText) =>
                   onChange({
                     ...section,
-                    bodyRichText: editableTextToTiptapJson(e.target.value),
+                    bodyRichText,
                   })
                 }
+                context="CMS"
+                placeholder="Write body copy…"
+                minHeight={160}
               />
             </Field>
           </div>

@@ -72,6 +72,23 @@ export function tiptapValueToEditableText(value: unknown): string {
 }
 
 /**
+ * Coerce zone/body values (JSON string or TipTap object) into the string
+ * ProductStructuredEditor expects — without flattening rich formatting.
+ */
+export function richTextValueToEditorString(value: unknown): string {
+  if (value == null || value === "") return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "object") {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return "";
+    }
+  }
+  return String(value);
+}
+
+/**
  * Accept TipTap JSON (string or object) or plain text.
  * Plain / invalid JSON is wrapped into a TipTap paragraph doc for backend validation.
  */

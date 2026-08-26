@@ -144,3 +144,28 @@ test("static page UI does not invent refund policy substance", () => {
     assert.match(text, /Content coming soon|StaticPageView|StaticPageZones/);
   }
 });
+
+test("CMS TipTapRenderer reuses StructuredContent and respects textAlign attrs", () => {
+  const root = path.resolve(import.meta.dirname, "../..");
+  const tiptap = fs.readFileSync(path.join(root, "lib/static-pages/tiptap.tsx"), "utf8");
+  const structured = fs.readFileSync(
+    path.join(root, "components/product/structured-content.tsx"),
+    "utf8",
+  );
+  assert.match(tiptap, /StructuredContent/);
+  assert.match(tiptap, /cms-rich-text/);
+  assert.equal(/text-align:\s*center/.test(tiptap), false);
+  assert.match(structured, /alignStyleFromNode/);
+  assert.match(structured, /textAlign/);
+  assert.match(structured, /TEXT_ALIGNS/);
+});
+
+test("static page content uses full container width (no narrow max-w-3xl gutter)", () => {
+  const view = fs.readFileSync(
+    path.resolve(import.meta.dirname, "../../components/static-pages/static-page-view.tsx"),
+    "utf8",
+  );
+  assert.equal(view.includes("max-w-3xl"), false);
+  assert.match(view, /StaticPageZones/);
+  assert.match(view, /className="w-full"/);
+});

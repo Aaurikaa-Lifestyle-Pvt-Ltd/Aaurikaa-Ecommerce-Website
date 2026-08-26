@@ -6,6 +6,7 @@ import { isMarketplaceCmsPageKey } from "./cms-pages.ts";
 import {
   editableTextToTiptapJson,
   plainTextToTiptapJson,
+  richTextValueToEditorString,
   tiptapValueToEditableText,
 } from "./tiptap-plain.ts";
 
@@ -35,6 +36,8 @@ test("marketplace CMS keys are identified and excluded from Admin CMS source", (
   assert.equal(structured.includes("heroBanner"), true);
   assert.equal(structured.includes("orderedSections"), true);
   assert.equal(structured.includes("CmsMediaField") || structured.includes("cms-zone-editors"), true);
+  assert.equal(structured.includes("ProductStructuredEditor"), true);
+  assert.equal(structured.includes('context="CMS"'), true);
   assert.equal(/TipTap JSON|JSON from the existing manifest|raw JSON/i.test(structured), false);
   assert.equal(structured.includes("Advanced content"), true);
 
@@ -45,6 +48,8 @@ test("marketplace CMS keys are identified and excluded from Admin CMS source", (
   assert.equal(zoneEditors.includes("MediaPicker") || zoneEditors.includes("CmsMediaField"), true);
   assert.equal(zoneEditors.includes("OrderedSectionsEditor"), true);
   assert.equal(zoneEditors.includes("pruneOrderedSections"), true);
+  assert.equal(zoneEditors.includes("ProductStructuredEditor"), true);
+  assert.equal(zoneEditors.includes("tiptapValueToEditableText"), false);
 
   const orderedLib = fs.readFileSync(
     path.join(import.meta.dirname, "cms-ordered-sections.ts"),
@@ -103,4 +108,7 @@ test("tiptap plain helpers wrap and round-trip simple paragraphs", () => {
   assert.equal(tiptapValueToEditableText(wrapped), "Hello\n\nWorld");
   assert.equal(JSON.parse(editableTextToTiptapJson("Plain")).type, "doc");
   assert.equal(JSON.parse(editableTextToTiptapJson(wrapped)).content.length, 2);
+  assert.equal(richTextValueToEditorString(parsed), wrapped);
+  assert.equal(richTextValueToEditorString(wrapped), wrapped);
+  assert.equal(richTextValueToEditorString(null), "");
 });

@@ -18,7 +18,10 @@ import {
 } from "@/components/cms-zone-editors";
 import { ProductStructuredEditor } from "@/components/product-structured-editor";
 import type { CmsManifestZone } from "@/lib/api/cms";
-import { editableTextToTiptapJson, tiptapValueToEditableText } from "@/lib/tiptap-plain";
+import {
+  editableTextToTiptapJson,
+  richTextValueToEditorString,
+} from "@/lib/tiptap-plain";
 import type {
   AdminManufacturerConditions,
   AdminProductFeature,
@@ -192,18 +195,16 @@ export function StructuredEditor({ zone, value, onChange }: StructuredZoneProps)
                 />
               </Field>
               <Field label="Body">
-                <Textarea
-                  rows={5}
-                  value={tiptapValueToEditableText(item.bodyRichText)}
-                  onChange={(e) => {
+                <ProductStructuredEditor
+                  value={richTextValueToEditorString(item.bodyRichText)}
+                  onChange={(bodyRichText) => {
                     const next = [...items];
-                    next[index] = {
-                      ...next[index],
-                      bodyRichText: editableTextToTiptapJson(e.target.value),
-                    };
+                    next[index] = { ...next[index], bodyRichText };
                     onChange(next);
                   }}
-                  placeholder="Write paragraphs as plain text"
+                  context="CMS"
+                  placeholder="Write section body…"
+                  minHeight={160}
                 />
               </Field>
               <Button
@@ -399,14 +400,15 @@ export function StructuredEditor({ zone, value, onChange }: StructuredZoneProps)
       <Card>
         <CardHeader
           title={zone.label || zone.id}
-          description="Write body copy as plain paragraphs. Do not invent policy or legal text."
+          description="Write and format body copy. Do not invent policy or legal text."
         />
         <div className="p-4 sm:p-5">
-          <Textarea
-            rows={10}
-            value={tiptapValueToEditableText(value)}
-            onChange={(e) => onChange(editableTextToTiptapJson(e.target.value))}
-            placeholder="Plain text paragraphs"
+          <ProductStructuredEditor
+            value={richTextValueToEditorString(value)}
+            onChange={onChange}
+            context="CMS"
+            placeholder="Write page body copy…"
+            minHeight={220}
           />
         </div>
       </Card>

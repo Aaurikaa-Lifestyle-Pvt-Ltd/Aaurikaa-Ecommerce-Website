@@ -87,7 +87,7 @@ function MediaFigure({
           alt={media.alt || ""}
           fill
           className="object-cover"
-          sizes="(max-width: 768px) 100vw, 960px"
+          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 100vw, 1280px"
           priority={priority}
           unoptimized={/^https?:\/\//i.test(media.url)}
         />

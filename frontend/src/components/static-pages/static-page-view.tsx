@@ -48,7 +48,7 @@ export function StaticPageView({ title, page, pageKey }: StaticPageViewProps) {
 
   return (
     <Container className="py-14 sm:py-20">
-      <header className="mb-12 max-w-3xl">
+      <header className="mb-12">
         <p className="eyebrow mb-3">AAURIKAA</p>
         <h1 className="font-serif text-4xl leading-tight tracking-tight sm:text-5xl">
           {title}
@@ -84,7 +84,7 @@ export function StaticPageView({ title, page, pageKey }: StaticPageViewProps) {
       ) : null}
 
       {ready ? (
-        <div className="max-w-3xl">
+        <div className="w-full">
           <StaticPageZones zones={zones} />
         </div>
       ) : null}
