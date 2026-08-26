@@ -46,7 +46,7 @@ export const siteConfig: SiteConfig = {
   tagline: "Premium Imitation Jewellery",
   description:
     "Discover premium imitation jewellery — modern, editorial pieces for everyday moments and special occasions.",
-  logo: null,
+  logo: "/images/logo/Aaurikaa logo .png",
   announcement: "Complimentary shipping on all orders over ₹1,499",
   primaryNav: [
     { label: "New Arrivals", href: "/collections/new-arrivals" },

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Suspense, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
@@ -18,9 +19,9 @@ import {
 } from "@/components/ui/icons";
 
 const iconButton =
-  "inline-grid h-10 w-10 place-items-center rounded-control text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+  "inline-grid h-9 w-9 sm:h-9 sm:w-9 lg:h-10 lg:w-10 place-items-center rounded-control text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
-function Wordmark({
+function HeaderLogo({
   className,
   name,
 }: {
@@ -28,13 +29,31 @@ function Wordmark({
   name: string;
 }) {
   return (
-    <Link href="/" className={className} aria-label={`${name} home`}>
-      <span className="font-serif text-xl tracking-tight sm:text-2xl">
-        {name}
-      </span>
+    <Link
+      href="/"
+      className={`group flex items-center gap-2 sm:gap-2.5 lg:gap-3 transition-opacity hover:opacity-90 shrink-0 ${className ?? ""}`}
+      aria-label={`${name} home`}
+    >
+      <Image
+        src="/images/logo/aaurikaa-emblem.png"
+        alt={`${name} emblem`}
+        width={56}
+        height={56}
+        priority
+        className="h-10 w-10 sm:h-11 sm:w-11 lg:h-13 lg:w-13 object-contain shrink-0 drop-shadow-xs"
+      />
+      <div className="flex flex-col justify-center text-left">
+        <span className="font-serif text-[22px] sm:text-2xl lg:text-[27px] font-semibold tracking-[0.03em] leading-tight bg-gradient-to-r from-[#8c6014] via-[#b38018] to-[#7d520e] bg-clip-text text-transparent">
+          Aaurikaa
+        </span>
+        <span className="mt-0.5 text-[7.5px] sm:text-[8.5px] lg:text-[9.5px] font-semibold uppercase tracking-[0.2em] text-[#6b4e18] leading-none">
+          FOR THE QUEEN WITHIN…
+        </span>
+      </div>
     </Link>
   );
 }
+
 
 type HeaderProps = {
   /** Soft-wired from SiteSettings header.title when present. */
@@ -111,7 +130,7 @@ export function Header({ brandName, navLinks }: HeaderProps = {}) {
               className="fixed inset-y-0 left-0 z-50 flex w-[86%] max-w-sm flex-col bg-surface shadow-card"
             >
               <div className="flex h-16 items-center justify-between border-b border-border px-5">
-                <Wordmark name={name} />
+                <HeaderLogo name={name} />
                 <button
                   type="button"
                   className={iconButton}
@@ -209,7 +228,7 @@ export function Header({ brandName, navLinks }: HeaderProps = {}) {
             >
               <IconMenu className="h-5 w-5" />
             </button>
-            <Wordmark name={name} />
+            <HeaderLogo name={name} />
           </div>
 
           <nav aria-label="Primary" className="hidden lg:block">
@@ -248,7 +267,7 @@ export function Header({ brandName, navLinks }: HeaderProps = {}) {
             </button>
             <Link
               href="/account"
-              className={`${iconButton} hidden sm:inline-grid`}
+              className={`${iconButton} hidden md:inline-grid`}
               aria-label="Account"
             >
               <IconUser className="h-5 w-5" />

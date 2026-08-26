@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { siteConfig, type FooterGroup, type SocialLink } from "@/config/site";
 import { Container } from "@/components/ui/container";
@@ -8,6 +9,32 @@ import {
   type PublicFooterSettings,
 } from "@/lib/api/site";
 import { scrubFooterHref as scrubMarketplaceFooterHref } from "@/lib/static-pages/sanitize-href";
+import {
+  IconFacebook,
+  IconGlobe,
+  IconInstagram,
+  IconPinterest,
+  IconTwitter,
+  IconWhatsApp,
+  IconYouTube,
+} from "@/components/ui/icons";
+
+function SocialIcon({
+  platform,
+  className = "h-5 w-5",
+}: {
+  platform: string;
+  className?: string;
+}) {
+  const p = platform.toLowerCase();
+  if (p.includes("instagram")) return <IconInstagram className={className} />;
+  if (p.includes("facebook")) return <IconFacebook className={className} />;
+  if (p.includes("whatsapp") || p.includes("wa.me")) return <IconWhatsApp className={className} />;
+  if (p.includes("youtube")) return <IconYouTube className={className} />;
+  if (p.includes("twitter") || p.includes("x")) return <IconTwitter className={className} />;
+  if (p.includes("pinterest")) return <IconPinterest className={className} />;
+  return <IconGlobe className={className} />;
+}
 
 /** Map known broken care paths onto registry slugs. */
 function remapCareHref(href: string): string {
@@ -81,12 +108,9 @@ export async function Footer() {
 
   const companyName =
     footer?.companyName?.trim() || siteConfig.name;
-  const brandBlurb =
-    footer?.text?.trim() || siteConfig.description;
   const copyrightLine =
     footer?.copyright?.trim() ||
     `© ${year} ${companyName}. All rights reserved.`;
-  const tagline = siteConfig.tagline;
 
   const detailLines = [
     footer?.address?.trim(),
@@ -97,50 +121,49 @@ export async function Footer() {
     footer?.workingHours2?.trim(),
   ].filter(Boolean) as string[];
 
+  const shopGroup = groups.find((g) => /^shop/i.test(g.title)) || groups[0];
+  const careGroup =
+    groups.find((g) => /care|support|service/i.test(g.title)) ||
+    (groups.length > 1 && groups[1] !== shopGroup ? groups[1] : null);
+  const otherGroups = groups.filter(
+    (g) => g !== shopGroup && g !== careGroup
+  );
+
   return (
     <footer className="mt-8 border-t border-primary-foreground/10 bg-primary text-primary-foreground [&_.eyebrow]:text-primary-foreground/55">
       <Container>
-        <div className="grid grid-cols-2 gap-10 py-16 md:grid-cols-6 lg:gap-8">
-          <div className="col-span-2">
-            <p className="font-serif text-2xl tracking-tight">{companyName}</p>
-            {brandBlurb ? (
-              <p className="mt-4 max-w-xs text-sm leading-relaxed text-primary-foreground/60">
-                {brandBlurb}
-              </p>
-            ) : null}
+        <div className="grid grid-cols-1 gap-10 py-16 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+          {/* Column 1: BRAND */}
+          <div className="flex flex-col">
+            <Link
+              href="/"
+              className="inline-block transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label={`${companyName} Home`}
+            >
+              <Image
+                src="/images/logo/Aaurikaa logo .png"
+                alt={companyName}
+                width={380}
+                height={220}
+                className="h-40 w-auto object-contain object-left sm:h-48 lg:h-52"
+                priority={false}
+              />
+            </Link>
             {detailLines.length > 0 ? (
-              <ul className="mt-4 max-w-xs space-y-1 text-sm text-primary-foreground/55">
+              <ul className="mt-6 max-w-xs space-y-1.5 text-sm text-primary-foreground/55">
                 {detailLines.map((line) => (
                   <li key={line}>{line}</li>
                 ))}
               </ul>
             ) : null}
-            {social.length > 0 ? (
-              <div className="mt-6">
-                <p className="eyebrow mb-3">Connect</p>
-                <ul className="flex flex-wrap gap-x-5 gap-y-2">
-                  {social.map((s) => (
-                    <li key={`${s.label}-${s.href}`}>
-                      <a
-                        href={s.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-primary-foreground/60 underline-offset-4 transition-colors hover:text-primary-foreground hover:underline"
-                      >
-                        {s.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
           </div>
 
-          {groups.map((group) => (
-            <nav key={group.title} aria-label={group.title}>
-              <p className="eyebrow mb-4">{group.title}</p>
+          {/* Column 2: SHOP */}
+          {shopGroup ? (
+            <nav aria-label={shopGroup.title}>
+              <p className="eyebrow mb-4">{shopGroup.title}</p>
               <ul className="flex flex-col gap-3">
-                {group.links.map((link) => (
+                {shopGroup.links.map((link) => (
                   <li key={`${link.label}-${link.href}`}>
                     <Link
                       href={link.href}
@@ -152,14 +175,74 @@ export async function Footer() {
                 ))}
               </ul>
             </nav>
-          ))}
+          ) : null}
+
+          {/* Column 3: CUSTOMER CARE */}
+          {careGroup ? (
+            <nav aria-label={careGroup.title}>
+              <p className="eyebrow mb-4">{careGroup.title}</p>
+              <ul className="flex flex-col gap-3">
+                {careGroup.links.map((link) => (
+                  <li key={`${link.label}-${link.href}`}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-primary-foreground/60 underline-offset-4 transition-colors hover:text-primary-foreground hover:underline"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ) : null}
+
+          {/* Column 4: ABOUT / LEGAL */}
+          {otherGroups.length > 0 ? (
+            <div className="flex flex-col gap-6">
+              {otherGroups.map((group) => (
+                <nav key={group.title} aria-label={group.title}>
+                  <p className="eyebrow mb-4">{group.title}</p>
+                  <ul className="flex flex-col gap-3">
+                    {group.links.map((link) => (
+                      <li key={`${link.label}-${link.href}`}>
+                        <Link
+                          href={link.href}
+                          className="text-sm text-primary-foreground/60 underline-offset-4 transition-colors hover:text-primary-foreground hover:underline"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              ))}
+            </div>
+          ) : null}
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-primary-foreground/10 py-6 text-xs text-primary-foreground/55 sm:flex-row sm:items-center sm:justify-between">
+        {/* Footer bottom bar */}
+        <div className="flex flex-col gap-4 border-t border-primary-foreground/10 py-6 text-xs text-primary-foreground/55 sm:flex-row sm:items-center sm:justify-between">
           <p>{copyrightLine}</p>
-          <p>{tagline}</p>
+          {social.length > 0 ? (
+            <div className="flex items-center gap-4">
+              {social.map((s) => (
+                <a
+                  key={`${s.label}-${s.href}`}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                  className="text-primary-foreground/60 transition-transform transition-colors hover:scale-110 hover:text-primary-foreground"
+                >
+                  <SocialIcon platform={s.label} className="h-5 w-5" />
+                </a>
+              ))}
+            </div>
+          ) : null}
         </div>
       </Container>
     </footer>
   );
 }
+
+

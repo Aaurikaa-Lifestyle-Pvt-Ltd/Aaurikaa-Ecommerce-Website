@@ -59,6 +59,24 @@ export async function generateMetadata(): Promise<Metadata> {
     ...(keywords
       ? { keywords: keywords.split(",").map((k) => k.trim()).filter(Boolean) }
       : {}),
+    icons: {
+      icon: [
+        {
+          url: "/images/logo/aaurikaa-emblem.png",
+          type: "image/png",
+        },
+        {
+          url: "/images/logo/WhatsApp Image 2026-08-21 at 16.28.15.jpeg",
+          type: "image/jpeg",
+        },
+      ],
+      shortcut: ["/images/logo/aaurikaa-emblem.png"],
+      apple: [
+        {
+          url: "/images/logo/aaurikaa-emblem.png",
+        },
+      ],
+    },
   };
 }
 
