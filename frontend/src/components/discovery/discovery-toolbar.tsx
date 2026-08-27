@@ -226,7 +226,7 @@ export function DiscoveryToolbar({
                 onClick={() => setActivePopover(activePopover === "category" ? null : "category")}
                 className={cn(
                   "inline-flex h-9 items-center gap-1.5 rounded-control border px-3.5 text-xs font-medium text-muted-foreground transition-all hover:text-foreground",
-                  query.category ? "border-accent bg-accent/5 text-accent hover:text-accent" : "border-border bg-surface"
+                  query.category ? "border-[#C5A880] bg-[#FAF5EB] text-[#8C6014] font-medium" : "border-border bg-surface"
                 )}
               >
                 Category
@@ -399,7 +399,7 @@ export function DiscoveryToolbar({
               onClick={() => setActivePopover(activePopover === "offers" ? null : "offers")}
               className={cn(
                 "inline-flex h-9 items-center gap-1.5 rounded-control border px-3.5 text-xs font-medium text-muted-foreground transition-all hover:text-foreground",
-                query.onSaleOnly ? "border-accent bg-accent/5 text-accent hover:text-accent" : "border-border bg-surface"
+                query.onSaleOnly ? "border-[#C5A880] bg-[#FAF5EB] text-[#8C6014] font-medium" : "border-border bg-surface"
               )}
             >
               Offers
@@ -488,16 +488,16 @@ export function DiscoveryToolbar({
           {activeChips.map((chip, idx) => (
             <span
               key={idx}
-              className="inline-flex items-center gap-1 rounded-full border border-accent/20 bg-accent/5 px-2.5 py-0.5 text-xs text-accent-foreground font-medium text-accent"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#d6c7b2] bg-[#fbf9f5] px-3 py-1 text-xs font-medium text-[#2d2924] shadow-2xs transition-colors hover:border-[#bda88d]"
             >
-              {chip.label}
+              <span>{chip.label}</span>
               <button
                 type="button"
                 onClick={chip.onRemove}
-                className="ml-1 rounded-full p-0.5 hover:bg-accent/20 transition-colors"
+                className="ml-0.5 rounded-full p-0.5 text-muted-foreground hover:bg-[#ebdcc8] hover:text-foreground transition-colors"
                 aria-label="Remove filter"
               >
-                <IconClose className="h-2.5 w-2.5" strokeWidth={2} />
+                <IconClose className="h-3 w-3" strokeWidth={2} />
               </button>
             </span>
           ))}

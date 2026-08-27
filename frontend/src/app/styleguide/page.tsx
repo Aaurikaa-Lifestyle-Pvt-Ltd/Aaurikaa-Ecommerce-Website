@@ -139,11 +139,34 @@ export default function StyleGuidePage() {
         </div>
       </Block>
 
-      <Block title="Badges">
-        <div className="flex flex-wrap items-center gap-3">
-          {badges.map((b) => (
-            <Badge key={b} badge={b} />
-          ))}
+      <Block title="Badges & Filter Pills">
+        <div className="space-y-4">
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Product Badges</p>
+            <div className="flex flex-wrap items-center gap-3">
+              {badges.map((b) => (
+                <Badge key={b} badge={b} />
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Active Filter Badges</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mr-1">Active:</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d6c7b2] bg-[#fbf9f5] px-3 py-1 text-xs font-medium text-[#2d2924] shadow-2xs">
+                In Stock <span className="ml-0.5 text-muted-foreground">✕</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d6c7b2] bg-[#fbf9f5] px-3 py-1 text-xs font-medium text-[#2d2924] shadow-2xs">
+                Category: Earrings <span className="ml-0.5 text-muted-foreground">✕</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d6c7b2] bg-[#fbf9f5] px-3 py-1 text-xs font-medium text-[#2d2924] shadow-2xs">
+                Price: ₹1,000 - ₹5,000 <span className="ml-0.5 text-muted-foreground">✕</span>
+              </span>
+              <button type="button" className="text-[10px] font-semibold text-muted-foreground hover:text-foreground underline underline-offset-2 ml-1">
+                Clear all
+              </button>
+            </div>
+          </div>
         </div>
       </Block>
 
