@@ -37,6 +37,7 @@ import { useToast } from "@/components/ui/toast";
 import { BuyAgainButton } from "@/components/orders/buy-again-button";
 import { OrderPricingBreakdown } from "@/components/orders/order-pricing-breakdown";
 import { OrderDeliveryAddress } from "@/components/orders/order-delivery-address";
+import { IconArrowRight } from "@/components/ui/icons";
 
 function formatTimestamp(iso: string | null | undefined): string | null {
   if (!iso) return null;
@@ -180,85 +181,120 @@ export default function OrderDetailPage() {
     }
   }
 
+function getStatusBadgeStyle(status?: string | null): string {
+  const s = (status || "").toLowerCase();
+  if (s.includes("delivered") || s.includes("completed")) {
+    return "bg-[#edf7ed] text-[#2e7d32] border-[#c8e6c9]";
+  }
+  if (s.includes("cancel") || s.includes("failed")) {
+    return "bg-[#fdeded] text-[#d32f2f] border-[#ffcdd2]";
+  }
+  if (s.includes("ship") || s.includes("transit") || s.includes("out")) {
+    return "bg-[#e8f4fd] text-[#0288d1] border-[#b3e5fc]";
+  }
+  return "bg-[#fff8e1] text-[#b78103] border-[#ffe082]";
+}
+
   return (
-    <div className="max-w-2xl">
-      <p className="text-sm">
-        <Link href="/account/orders" className="underline-offset-4 hover:underline">
-          All orders
-        </Link>
-      </p>
-      <h2 className="mt-4 font-serif text-2xl tracking-tight">{order.orderId}</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Placed {formatOrderDate(order.createdAt)}
-      </p>
-      <p className="mt-1 text-sm uppercase tracking-wide text-muted-foreground">
-        {order.orderStatus}
-        {visibility?.paymentStatus ? ` · ${visibility.paymentStatus}` : ""}
-      </p>
-      {order.fulfilmentKind === "replacement" ? (
-        <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">
-          Replacement shipment
-        </p>
-      ) : null}
+    <div className="max-w-3xl space-y-6">
+      <Link
+        href="/account/orders"
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <span>← Back to all orders</span>
+      </Link>
 
-      {visibility ? (
-        <div className="mt-6 space-y-1 border-t border-border pt-5 text-sm">
-          <h3 className="font-medium">Payment</h3>
-          <p className="text-muted-foreground">
-            {[visibility.paymentType || visibility.paymentMethod, visibility.gateway]
-              .filter(Boolean)
-              .join(" · ") || "—"}
-          </p>
-          {visibility.paymentStatus ? (
-            <p className="text-muted-foreground">Status: {visibility.paymentStatus}</p>
-          ) : null}
-          {visibility.channel ? (
-            <p className="text-muted-foreground">Channel: {visibility.channel}</p>
-          ) : null}
-          {visibility.transactionId ? (
-            <p className="text-muted-foreground">Txn: {visibility.transactionId}</p>
-          ) : null}
-          {visibility.paidAt ? (
-            <p className="text-muted-foreground">
-              Paid at {formatTimestamp(visibility.paidAt)}
+      <div className="rounded-2xl border border-border bg-surface p-6 shadow-xs sm:p-7">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between border-b border-border/70 pb-5">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
+                Order Details
+              </span>
+              <span
+                className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${getStatusBadgeStyle(
+                  order.orderStatus,
+                )}`}
+              >
+                {order.orderStatus}
+              </span>
+            </div>
+            <h2 className="mt-1 font-serif text-2xl font-normal tracking-tight text-foreground sm:text-3xl">
+              #{order.orderId}
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+              Placed on {formatOrderDate(order.createdAt)}
             </p>
-          ) : null}
-        </div>
-      ) : null}
+          </div>
 
-      <div className="mt-6 flex flex-wrap gap-2">
-        {showPayAgain ? (
-          <Button type="button" onClick={() => void payAgain()} disabled={payingAgain}>
-            {payingAgain ? (
-              <>
-                <Spinner /> Redirecting…
-              </>
-            ) : (
-              "Pay again"
-            )}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2 pt-2 sm:pt-0">
+            {showPayAgain ? (
+              <Button type="button" onClick={() => void payAgain()} disabled={payingAgain} className="text-xs sm:text-sm">
+                {payingAgain ? (
+                  <>
+                    <Spinner /> Redirecting…
+                  </>
+                ) : (
+                  "Pay again"
+                )}
+              </Button>
+            ) : null}
+            <BuyAgainButton orderId={orderId} redirectToCart className="text-xs sm:text-sm" variant="secondary" />
+            {shipment?.trackingAvailable && shipment.trackingUrl ? (
+              <Button
+                type="button"
+                variant="secondary"
+                className="text-xs sm:text-sm"
+                onClick={() =>
+                  window.open(shipment.trackingUrl!, "_blank", "noreferrer")
+                }
+              >
+                Track shipment
+              </Button>
+            ) : null}
+          </div>
+        </div>
+
+        {order.fulfilmentKind === "replacement" ? (
+          <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-accent">
+            Replacement shipment
+          </p>
         ) : null}
-        <BuyAgainButton orderId={orderId} redirectToCart />
-        {shipment?.trackingAvailable && shipment.trackingUrl ? (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() =>
-              window.open(shipment.trackingUrl!, "_blank", "noreferrer")
-            }
-          >
-            Track shipment
-          </Button>
+
+        {visibility ? (
+          <div className="mt-5 rounded-xl border border-border/70 bg-[#faf8f4]/60 p-4 text-xs sm:text-sm">
+            <h3 className="font-semibold text-foreground">Payment Information</h3>
+            <p className="mt-1 text-muted-foreground">
+              {[visibility.paymentType || visibility.paymentMethod, visibility.gateway]
+                .filter(Boolean)
+                .join(" · ") || "—"}
+            </p>
+            {visibility.paymentStatus ? (
+              <p className="mt-0.5 text-muted-foreground">Status: <span className="font-medium text-foreground">{visibility.paymentStatus}</span></p>
+            ) : null}
+            {visibility.channel ? (
+              <p className="mt-0.5 text-muted-foreground">Channel: {visibility.channel}</p>
+            ) : null}
+            {visibility.transactionId ? (
+              <p className="mt-0.5 text-muted-foreground">Txn: <span className="font-mono text-xs">{visibility.transactionId}</span></p>
+            ) : null}
+            {visibility.paidAt ? (
+              <p className="mt-0.5 text-muted-foreground">
+                Paid at {formatTimestamp(visibility.paidAt)}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {paymentRetryError ? (
+          <div className="mt-4 rounded-xl border border-[#ffcdd2] bg-[#fdeded] p-3 text-xs text-[#d32f2f]" role="alert">
+            {paymentRetryError}
+          </div>
         ) : null}
       </div>
-      {paymentRetryError ? (
-        <p className="mt-2 text-sm text-sale" role="alert">
-          {paymentRetryError}
-        </p>
-      ) : null}
 
       <ul
-        className="mt-8 space-y-4"
+        className="space-y-4"
         {...(detailItems.some((item) => item.reviewEligibility) ||
         order.reviewEligibility
           ? { id: "reviews" }
@@ -277,22 +313,22 @@ export default function OrderDetailPage() {
           return (
             <li
               key={`${item.productSlug ?? "item"}-${index}`}
-              className="rounded-card border border-border bg-surface p-4 text-sm"
+              className="rounded-2xl border border-border bg-surface p-5 shadow-xs text-sm"
             >
-              <div className="flex gap-3">
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-control bg-muted">
+              <div className="flex gap-4">
+                <div className="relative h-18 w-18 shrink-0 overflow-hidden rounded-xl border border-border/60 bg-[#f4efe6]">
                   {src ? (
                     <Image
                       src={src}
                       alt={item.productName || "Product"}
                       fill
-                      sizes="64px"
+                      sizes="72px"
                       className="object-cover"
                     />
                   ) : null}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium">{item.productName}</p>
+                  <p className="font-medium text-foreground text-base">{item.productName}</p>
                   {"variantSummary" in item && item.variantSummary ? (
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {item.variantSummary}
@@ -306,7 +342,7 @@ export default function OrderDetailPage() {
                   </p>
                 </div>
                 {lineTotal != null ? (
-                  <span className="shrink-0 font-medium">
+                  <span className="shrink-0 font-serif font-semibold text-foreground text-base">
                     {formatMoney({ amount: lineTotal, currency: "INR" })}
                   </span>
                 ) : null}
@@ -326,138 +362,152 @@ export default function OrderDetailPage() {
         })}
       </ul>
 
-      {pricing ? (
-        <div className="mt-8 border-t border-border pt-5">
-          <h3 className="mb-3 text-sm font-medium">Order total</h3>
-          <OrderPricingBreakdown
-            pricingSummary={pricing}
-            fallbackTotal={order.total}
+      <div className="space-y-6">
+        {pricing ? (
+          <div className="rounded-2xl border border-border bg-surface p-6 shadow-xs">
+            <h3 className="mb-3 font-serif text-lg font-normal tracking-tight text-foreground">Order Total</h3>
+            <OrderPricingBreakdown
+              pricingSummary={pricing}
+              fallbackTotal={order.total}
+            />
+          </div>
+        ) : null}
+
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-xs">
+          <OrderDeliveryAddress
+            order={order}
           />
         </div>
-      ) : null}
 
-      <OrderDeliveryAddress
-        order={order}
-        className="mt-8 border-t border-border pt-5"
-      />
-
-      {shipment ? (
-        <div className="mt-8 space-y-2 border-t border-border pt-5 text-sm">
-          <h3 className="font-medium">Shipment</h3>
-          <p className="text-muted-foreground">
-            {shipment.shipmentStatus || "Not shipped yet"}
-          </p>
-          {shipment.courierName ? <p>{shipment.courierName}</p> : null}
-          {shipment.awbNumber ? <p>AWB {shipment.awbNumber}</p> : null}
-          {shipment.trackingAvailable && shipment.trackingUrl ? (
-            <a
-              href={shipment.trackingUrl}
-              className="underline-offset-4 hover:underline"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Track shipment
-            </a>
-          ) : null}
-        </div>
-      ) : null}
-
-      {invoiceAvailable ? (
-        <div className="mt-8 flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => void downloadInvoice()}
-            disabled={downloading}
-          >
-            {downloading ? (
-              <>
-                <Spinner /> Preparing…
-              </>
-            ) : (
-              "Download invoice"
-            )}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => void printInvoice()}
-            disabled={printing}
-          >
-            {printing ? (
-              <>
-                <Spinner /> Opening…
-              </>
-            ) : (
-              "Print invoice"
-            )}
-          </Button>
-          {invoiceError ? (
-            <p className="w-full text-sm text-sale" role="alert">
-              {invoiceError}
+        {shipment ? (
+          <div className="rounded-2xl border border-border bg-surface p-6 shadow-xs space-y-2 text-sm">
+            <h3 className="font-serif text-lg font-normal tracking-tight text-foreground">Shipment Details</h3>
+            <p className="text-muted-foreground">
+              Status: <span className="font-medium text-foreground">{shipment.shipmentStatus || "Not shipped yet"}</span>
             </p>
-          ) : null}
-        </div>
-      ) : null}
+            {shipment.courierName ? <p className="text-muted-foreground">Courier: <span className="font-medium text-foreground">{shipment.courierName}</span></p> : null}
+            {shipment.awbNumber ? <p className="text-muted-foreground">AWB: <span className="font-mono">{shipment.awbNumber}</span></p> : null}
+            {shipment.trackingAvailable && shipment.trackingUrl ? (
+              <div className="pt-2">
+                <a
+                  href={shipment.trackingUrl}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent underline-offset-4 hover:underline"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <span>Track shipment live</span>
+                  <IconArrowRight className="h-3 w-3" />
+                </a>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {invoiceAvailable ? (
+          <div className="rounded-2xl border border-border bg-surface p-6 shadow-xs">
+            <h3 className="mb-3 font-serif text-lg font-normal tracking-tight text-foreground">Invoice</h3>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => void downloadInvoice()}
+                disabled={downloading}
+                className="text-xs sm:text-sm"
+              >
+                {downloading ? (
+                  <>
+                    <Spinner /> Preparing…
+                  </>
+                ) : (
+                  "Download invoice"
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void printInvoice()}
+                disabled={printing}
+                className="text-xs sm:text-sm"
+              >
+                {printing ? (
+                  <>
+                    <Spinner /> Opening…
+                  </>
+                ) : (
+                  "Print invoice"
+                )}
+              </Button>
+            </div>
+            {invoiceError ? (
+              <div className="mt-3 rounded-xl border border-[#ffcdd2] bg-[#fdeded] p-3 text-xs text-[#d32f2f]" role="alert">
+                {invoiceError}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
 
       {order.statusTimeline && order.statusTimeline.length > 0 ? (
-        <ol className="mt-8 space-y-3 border-t border-border pt-5 text-sm">
-          <li className="list-none">
-            <h3 className="font-medium">Order timeline</h3>
-          </li>
-          {order.statusTimeline.map((step, idx) => {
-            const when = formatTimestamp(step.timestamp);
-            return (
-              <li
-                key={`${step.status}-${step.timestamp ?? idx}`}
-                className="flex flex-col gap-0.5"
-              >
-                <span>{step.label || step.status}</span>
-                {when ? (
-                  <span className="text-xs text-muted-foreground">{when}</span>
-                ) : null}
-              </li>
-            );
-          })}
-        </ol>
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-xs">
+          <h3 className="font-serif text-lg font-normal tracking-tight text-foreground mb-4">Order Timeline</h3>
+          <ol className="relative border-l border-border/80 ml-3 space-y-4">
+            {order.statusTimeline.map((step, idx) => {
+              const when = formatTimestamp(step.timestamp);
+              return (
+                <li
+                  key={`${step.status}-${step.timestamp ?? idx}`}
+                  className="ml-4"
+                >
+                  <div className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border border-border bg-accent" />
+                  <span className="text-sm font-medium text-foreground">{step.label || step.status}</span>
+                  {when ? (
+                    <p className="text-xs text-muted-foreground mt-0.5">{when}</p>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
       ) : null}
 
       {actionError ? (
-        <p className="mt-6 text-sm text-sale" role="alert">
+        <div className="rounded-xl border border-[#ffcdd2] bg-[#fdeded] p-4 text-sm text-[#d32f2f]" role="alert">
           {actionError}
-        </p>
+        </div>
       ) : null}
 
       {order.cancelEligibility?.eligible ? (
-        <CancelForm
-          orderId={orderId}
-          onDone={async () => {
-            setActionError(null);
-            try {
-              await reload();
-              toast.success("Order cancelled");
-            } catch (err: unknown) {
-              setActionError(
-                err instanceof ApiError ? err.message : "Unable to refresh this order.",
-              );
-            }
-          }}
-          onError={setActionError}
-        />
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-xs">
+          <CancelForm
+            orderId={orderId}
+            onDone={async () => {
+              setActionError(null);
+              try {
+                await reload();
+                toast.success("Order cancelled");
+              } catch (err: unknown) {
+                setActionError(
+                  err instanceof ApiError ? err.message : "Unable to refresh this order.",
+                );
+              }
+            }}
+            onError={setActionError}
+          />
+        </div>
       ) : order.cancelEligibility?.message ? (
-        <p className="mt-8 text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground px-1">
           {order.cancelEligibility.message}
         </p>
       ) : null}
 
       {returnRequest ? (
-        <div className="mt-8 space-y-2 border-t border-border pt-5 text-sm">
-          <h3 className="font-medium">Need Help — return or replacement</h3>
-          <p className="uppercase tracking-wide text-muted-foreground">
-            {returnRequest.status}
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-xs space-y-3 text-sm">
+          <h3 className="font-serif text-lg font-normal tracking-tight text-foreground">Need Help — Return or Replacement</h3>
+          <p className="text-xs uppercase tracking-wider font-semibold text-accent">
+            Status: {returnRequest.status}
           </p>
           {returnRequest.resolution ? (
-            <p>Resolution: {returnRequest.resolution}</p>
+            <p className="text-muted-foreground">Resolution: <span className="font-medium text-foreground">{returnRequest.resolution}</span></p>
           ) : null}
           {returnRequest.manualFollowUpRequired ? (
             <p className="text-muted-foreground">
@@ -469,28 +519,29 @@ export default function OrderDetailPage() {
               Replacement order{" "}
               <Link
                 href={`/account/orders/${returnRequest.replacementOrderId}`}
-                className="underline-offset-4 hover:underline"
+                className="font-medium text-accent underline-offset-4 hover:underline"
               >
                 is in fulfilment
               </Link>
             </p>
           ) : null}
           {returnRequest.reverseLogistics?.awbCode ? (
-            <p>Return pickup AWB {returnRequest.reverseLogistics.awbCode}</p>
+            <p className="text-muted-foreground">Return pickup AWB <span className="font-mono">{returnRequest.reverseLogistics.awbCode}</span></p>
           ) : null}
           {returnRequest.reverseLogistics?.trackingUrl ? (
             <a
               href={returnRequest.reverseLogistics.trackingUrl}
-              className="underline-offset-4 hover:underline"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent underline-offset-4 hover:underline"
               target="_blank"
               rel="noreferrer"
             >
-              Track return pickup
+              <span>Track return pickup</span>
+              <IconArrowRight className="h-3 w-3" />
             </a>
           ) : null}
           {returnRequest.refundCompletedAt ||
           returnRequest.walletCreditProcessedAt ? (
-            <p className="text-muted-foreground">A refund record exists on this case.</p>
+            <p className="text-xs text-muted-foreground">A refund record exists on this case.</p>
           ) : null}
           {returnRequest.appeal?.canAppeal ? (
             <AppealForm
@@ -521,22 +572,24 @@ export default function OrderDetailPage() {
           ) : null}
         </div>
       ) : order.returnEligibility?.eligible ? (
-        <ReturnForm
-          orderId={orderId}
-          onDone={async () => {
-            setActionError(null);
-            try {
-              await reload();
-            } catch (err: unknown) {
-              setActionError(
-                err instanceof ApiError ? err.message : "Unable to refresh this order.",
-              );
-            }
-          }}
-          onError={setActionError}
-        />
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-xs">
+          <ReturnForm
+            orderId={orderId}
+            onDone={async () => {
+              setActionError(null);
+              try {
+                await reload();
+              } catch (err: unknown) {
+                setActionError(
+                  err instanceof ApiError ? err.message : "Unable to refresh this order.",
+                );
+              }
+            }}
+            onError={setActionError}
+          />
+        </div>
       ) : order.returnEligibility?.message ? (
-        <p className="mt-8 text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground px-1">
           {order.returnEligibility.message}
         </p>
       ) : null}

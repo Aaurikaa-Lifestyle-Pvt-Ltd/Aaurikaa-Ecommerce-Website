@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
+import { IconMapPin } from "@/components/ui/icons";
 import { Field, SelectInput, TextInput } from "@/components/checkout/checkout-field";
 import { ApiError } from "@/lib/api/errors";
 import {
@@ -178,258 +179,288 @@ export default function AddressesPage() {
 
   if (loading) {
     return (
-      <p className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground py-8">
         <Spinner /> Loading addresses…
-      </p>
+      </div>
     );
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(280px,400px)]">
-      <div>
-        <h2 className="font-serif text-2xl tracking-tight">Saved addresses</h2>
-        {error ? (
-          <p className="mt-3 text-sm text-sale" role="alert">
-            {error}
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 border-b border-border/70 pb-5">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border/80 bg-[#faf8f4] text-foreground">
+          <IconMapPin className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
+            Delivery & Shipping
           </p>
-        ) : null}
-        {addresses.length === 0 ? (
-          <p className="mt-4 text-sm text-muted-foreground">No addresses yet.</p>
-        ) : (
-          <ul className="mt-5 space-y-3">
-            {addresses.map((address) => (
-              <li
-                key={address.id}
-                className="rounded-card border border-border bg-surface p-4"
-              >
-                <p className="text-sm font-medium">
-                  {address.contactName}
-                  {address.isDefault ? (
-                    <span className="ml-2 text-xs uppercase tracking-wide text-muted-foreground">
-                      Default
-                    </span>
-                  ) : null}
-                </p>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  {addressPreviewLines(address).map((line, index) => (
-                    <p key={`${address.id}-line-${index}`}>{line}</p>
-                  ))}
-                  <p>
-                    {address.city}
-                    {address.districtName ? `, ${address.districtName}` : ""}
-                    {address.stateName ? `, ${address.stateName}` : ""} {address.pincode}
-                  </p>
-                  <p>{address.contactPhone}</p>
-                </div>
-                <div className="mt-3 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    className="text-sm underline-offset-4 hover:underline"
-                    onClick={() => startEdit(address)}
-                  >
-                    Edit
-                  </button>
-                  {!address.isDefault ? (
+          <h2 className="font-serif text-xl font-normal tracking-tight text-foreground sm:text-2xl">
+            Saved Addresses
+          </h2>
+        </div>
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
+        <div>
+          {error ? (
+            <div className="mb-4 rounded-xl border border-[#ffcdd2] bg-[#fdeded] p-4 text-sm text-[#d32f2f]" role="alert">
+              {error}
+            </div>
+          ) : null}
+
+          {addresses.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-surface p-8 text-center shadow-xs">
+              <p className="text-sm text-muted-foreground">You do not have any saved addresses yet.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Add your delivery address using the form to ensure quick checkout.</p>
+            </div>
+          ) : (
+            <ul className="space-y-4">
+              {addresses.map((address) => (
+                <li
+                  key={address.id}
+                  className="rounded-2xl border border-border bg-surface p-5 shadow-xs transition-shadow hover:shadow-card sm:p-6"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-base font-medium text-foreground">
+                      {address.contactName}
+                    </p>
+                    {address.isDefault ? (
+                      <span className="inline-flex items-center rounded-full border border-accent/20 bg-[#f4efe6] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-accent">
+                        Default
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-2 space-y-0.5 text-sm text-muted-foreground">
+                    {addressPreviewLines(address).map((line, index) => (
+                      <p key={`${address.id}-line-${index}`}>{line}</p>
+                    ))}
+                    <p>
+                      {address.city}
+                      {address.districtName ? `, ${address.districtName}` : ""}
+                      {address.stateName ? `, ${address.stateName}` : ""} {address.pincode}
+                    </p>
+                    <p className="pt-1 text-xs font-medium text-foreground/80">{address.contactPhone}</p>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border/60 pt-3 text-xs sm:text-sm">
                     <button
                       type="button"
-                      className="text-sm underline-offset-4 hover:underline"
+                      className="font-medium text-foreground underline-offset-4 hover:underline hover:text-accent"
+                      onClick={() => startEdit(address)}
+                    >
+                      Edit
+                    </button>
+                    {!address.isDefault ? (
+                      <>
+                        <span className="text-border">·</span>
+                        <button
+                          type="button"
+                          className="font-medium text-foreground underline-offset-4 hover:underline hover:text-accent"
+                          onClick={() =>
+                            setDefaultShopperAddress(address.id)
+                              .then(reload)
+                              .catch((err: unknown) =>
+                                setError(
+                                  err instanceof ApiError
+                                    ? err.message
+                                    : "Unable to set the default address.",
+                                ),
+                              )
+                          }
+                        >
+                          Set as default
+                        </button>
+                      </>
+                    ) : null}
+                    <span className="text-border">·</span>
+                    <button
+                      type="button"
+                      className="font-medium text-sale underline-offset-4 hover:underline"
                       onClick={() =>
-                        setDefaultShopperAddress(address.id)
-                          .then(reload)
+                        deleteShopperAddress(address.id)
+                          .then(() => {
+                            if (editingId === address.id) cancelEdit();
+                            return reload();
+                          })
                           .catch((err: unknown) =>
                             setError(
                               err instanceof ApiError
                                 ? err.message
-                                : "Unable to set the default address.",
+                                : "Unable to remove this address.",
                             ),
                           )
                       }
                     >
-                      Set as default
+                      Remove
                     </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    className="text-sm text-sale underline-offset-4 hover:underline"
-                    onClick={() =>
-                      deleteShopperAddress(address.id)
-                        .then(() => {
-                          if (editingId === address.id) cancelEdit();
-                          return reload();
-                        })
-                        .catch((err: unknown) =>
-                          setError(
-                            err instanceof ApiError
-                              ? err.message
-                              : "Unable to remove this address.",
-                          ),
-                        )
-                    }
-                  >
-                    Remove
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <form
-        onSubmit={onSubmit}
-        className="h-fit space-y-4 rounded-card border border-border bg-surface p-5"
-      >
-        <h3 className="font-serif text-xl tracking-tight">
-          {editingId ? "Edit address" : "Add address"}
-        </h3>
-        <Field id="addr-name" label="Full name">
-          <TextInput
-            id="addr-name"
-            value={form.contactName}
-            onChange={(e) => setForm((p) => ({ ...p, contactName: e.target.value }))}
-            required
-          />
-        </Field>
-        <Field id="addr-phone" label="Phone">
-          <TextInput
-            id="addr-phone"
-            type="tel"
-            inputMode="numeric"
-            value={form.contactPhone}
-            onChange={(e) => setForm((p) => ({ ...p, contactPhone: e.target.value }))}
-            required
-          />
-        </Field>
-        <Field id="addr-country" label="Country">
-          <SelectInput
-            id="addr-country"
-            value={form.country}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, country: e.target.value, state: "", district: "" }))
-            }
-            required
-          >
-            <option value="">Select country</option>
-            {countries.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.name}
-              </option>
-            ))}
-          </SelectInput>
-        </Field>
-        <Field id="addr-state" label="State">
-          <SelectInput
-            id="addr-state"
-            value={form.state}
-            disabled={!form.country}
-            onChange={(e) => setForm((p) => ({ ...p, state: e.target.value, district: "" }))}
-            required
-          >
-            <option value="">{form.country ? "Select state" : "Select country first"}</option>
-            {states.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.name}
-              </option>
-            ))}
-          </SelectInput>
-        </Field>
-        <Field id="addr-district" label="District">
-          <SelectInput
-            id="addr-district"
-            value={form.district}
-            disabled={!form.state || districts.length === 0}
-            onChange={(e) => setForm((p) => ({ ...p, district: e.target.value }))}
-            required={districts.length > 0}
-          >
-            <option value="">
-              {!form.state
-                ? "Select state first"
-                : districts.length === 0
-                  ? "No districts available"
-                  : "Select district"}
-            </option>
-            {districts.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.name}
-              </option>
-            ))}
-          </SelectInput>
-        </Field>
-        <Field id="addr-city" label="City / Town">
-          <TextInput
-            id="addr-city"
-            value={form.city}
-            onChange={(e) => setForm((p) => ({ ...p, city: e.target.value }))}
-            required
-          />
-        </Field>
-        <Field id="addr-line1" label="Address line 1">
-          <TextInput
-            id="addr-line1"
-            maxLength={100}
-            placeholder="House / flat, street"
-            value={form.addressLine1}
-            onChange={(e) => setForm((p) => ({ ...p, addressLine1: e.target.value }))}
-            required
-          />
-        </Field>
-        <Field id="addr-line2" label="Address line 2">
-          <TextInput
-            id="addr-line2"
-            maxLength={100}
-            placeholder="Apartment, suite, floor (optional)"
-            value={form.addressLine2}
-            onChange={(e) => setForm((p) => ({ ...p, addressLine2: e.target.value }))}
-          />
-        </Field>
-        <Field id="addr-landmark" label="Nearest landmark">
-          <TextInput
-            id="addr-landmark"
-            maxLength={50}
-            placeholder="Optional"
-            value={form.landmark}
-            onChange={(e) => setForm((p) => ({ ...p, landmark: e.target.value }))}
-          />
-        </Field>
-        <Field id="addr-pin" label="PIN code">
-          <TextInput
-            id="addr-pin"
-            inputMode="numeric"
-            maxLength={6}
-            value={form.pincode}
-            onChange={(e) =>
-              setForm((p) => ({
-                ...p,
-                pincode: e.target.value.replace(/\D/g, "").slice(0, 6),
-              }))
-            }
-            required
-          />
-        </Field>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            className="accent-primary"
-            checked={form.isDefault}
-            onChange={(e) => setForm((p) => ({ ...p, isDefault: e.target.checked }))}
-          />
-          Set as default
-        </label>
-        <div className="flex flex-wrap gap-3">
-          <Button type="submit" disabled={saving}>
-            {saving ? "Saving…" : editingId ? "Update address" : "Save address"}
-          </Button>
-          {editingId ? (
-            <button
-              type="button"
-              className="text-sm underline-offset-4 hover:underline"
-              onClick={cancelEdit}
-            >
-              Cancel
-            </button>
-          ) : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-      </form>
+
+        <form
+          onSubmit={onSubmit}
+          className="h-fit space-y-4 rounded-2xl border border-border bg-surface p-6 shadow-xs sm:p-7"
+        >
+          <div className="border-b border-border/70 pb-3">
+            <h3 className="font-serif text-lg font-normal tracking-tight text-foreground sm:text-xl">
+              {editingId ? "Edit Address" : "Add New Address"}
+            </h3>
+          </div>
+
+          <Field id="addr-name" label="Full name">
+            <TextInput
+              id="addr-name"
+              value={form.contactName}
+              onChange={(e) => setForm((p) => ({ ...p, contactName: e.target.value }))}
+              required
+            />
+          </Field>
+          <Field id="addr-phone" label="Phone number">
+            <TextInput
+              id="addr-phone"
+              type="tel"
+              inputMode="numeric"
+              value={form.contactPhone}
+              onChange={(e) => setForm((p) => ({ ...p, contactPhone: e.target.value }))}
+              required
+            />
+          </Field>
+          <Field id="addr-country" label="Country">
+            <SelectInput
+              id="addr-country"
+              value={form.country}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, country: e.target.value, state: "", district: "" }))
+              }
+              required
+            >
+              <option value="">Select country</option>
+              {countries.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </SelectInput>
+          </Field>
+          <Field id="addr-state" label="State">
+            <SelectInput
+              id="addr-state"
+              value={form.state}
+              disabled={!form.country}
+              onChange={(e) => setForm((p) => ({ ...p, state: e.target.value, district: "" }))}
+              required
+            >
+              <option value="">{form.country ? "Select state" : "Select country first"}</option>
+              {states.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </SelectInput>
+          </Field>
+          <Field id="addr-district" label="District">
+            <SelectInput
+              id="addr-district"
+              value={form.district}
+              disabled={!form.state || districts.length === 0}
+              onChange={(e) => setForm((p) => ({ ...p, district: e.target.value }))}
+              required={districts.length > 0}
+            >
+              <option value="">
+                {!form.state
+                  ? "Select state first"
+                  : districts.length === 0
+                    ? "No districts available"
+                    : "Select district"}
+              </option>
+              {districts.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </SelectInput>
+          </Field>
+          <Field id="addr-city" label="City / Town">
+            <TextInput
+              id="addr-city"
+              value={form.city}
+              onChange={(e) => setForm((p) => ({ ...p, city: e.target.value }))}
+              required
+            />
+          </Field>
+          <Field id="addr-line1" label="Address line 1">
+            <TextInput
+              id="addr-line1"
+              maxLength={100}
+              placeholder="House / Flat / Building, Street"
+              value={form.addressLine1}
+              onChange={(e) => setForm((p) => ({ ...p, addressLine1: e.target.value }))}
+              required
+            />
+          </Field>
+          <Field id="addr-line2" label="Address line 2">
+            <TextInput
+              id="addr-line2"
+              maxLength={100}
+              placeholder="Apartment, suite, floor (optional)"
+              value={form.addressLine2}
+              onChange={(e) => setForm((p) => ({ ...p, addressLine2: e.target.value }))}
+            />
+          </Field>
+          <Field id="addr-landmark" label="Nearest landmark">
+            <TextInput
+              id="addr-landmark"
+              maxLength={50}
+              placeholder="Optional landmark"
+              value={form.landmark}
+              onChange={(e) => setForm((p) => ({ ...p, landmark: e.target.value }))}
+            />
+          </Field>
+          <Field id="addr-pin" label="PIN code">
+            <TextInput
+              id="addr-pin"
+              inputMode="numeric"
+              maxLength={6}
+              value={form.pincode}
+              onChange={(e) =>
+                setForm((p) => ({
+                  ...p,
+                  pincode: e.target.value.replace(/\D/g, "").slice(0, 6),
+                }))
+              }
+              required
+            />
+          </Field>
+          <label className="flex items-center gap-2 text-sm text-foreground pt-1 cursor-pointer">
+            <input
+              type="checkbox"
+              className="accent-primary h-4 w-4 rounded"
+              checked={form.isDefault}
+              onChange={(e) => setForm((p) => ({ ...p, isDefault: e.target.checked }))}
+            />
+            <span>Set as default address</span>
+          </label>
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <Button type="submit" disabled={saving}>
+              {saving ? "Saving…" : editingId ? "Update address" : "Save address"}
+            </Button>
+            {editingId ? (
+              <button
+                type="button"
+                className="text-xs font-medium text-muted-foreground underline-offset-4 hover:underline hover:text-foreground sm:text-sm"
+                onClick={cancelEdit}
+              >
+                Cancel
+              </button>
+            ) : null}
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
