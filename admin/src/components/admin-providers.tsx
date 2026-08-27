@@ -5,12 +5,14 @@ import { usePathname, useRouter } from "next/navigation";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { AdminShell } from "@/components/admin-shell";
 import { ToastProvider } from "@/components/toast-provider";
+import { UnauthorizedState } from "@/components/unauthorized-state";
+import { canAccessAdminPath, isPublicAdminPath } from "@/lib/nav";
 
 function Guard({ children }: { children: React.ReactNode }) {
-  const { user, ready } = useAuth();
+  const { user, ready, hasPermission, isSuperAdmin } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const isLogin = pathname === "/admin/login";
+  const isLogin = isPublicAdminPath(pathname);
 
   useEffect(() => {
     if (!ready) return;
@@ -35,7 +37,11 @@ function Guard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return <AdminShell>{children}</AdminShell>;
+  const allowed = canAccessAdminPath(pathname, { hasPermission, isSuperAdmin });
+
+  return (
+    <AdminShell>{allowed ? children : <UnauthorizedState />}</AdminShell>
+  );
 }
 
 export function AdminProviders({ children }: { children: React.ReactNode }) {

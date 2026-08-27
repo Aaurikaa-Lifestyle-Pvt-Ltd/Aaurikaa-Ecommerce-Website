@@ -20,18 +20,23 @@ import {
   setAdminSession,
   type AdminSessionUser,
 } from "@/lib/api/token-store";
+import { hasPermission as checkPermission } from "@/lib/admin-permissions";
 
 interface AuthUser {
   email: string;
   name: string;
   id?: string;
   isSuperAdmin?: boolean;
+  permissions?: string[];
 }
 
 interface AuthContextValue {
   user: AuthUser | null;
   ready: boolean;
   configured: boolean;
+  permissions: string[];
+  isSuperAdmin: boolean;
+  hasPermission: (domain: string, action: string) => boolean;
   login: (
     email: string,
     password: string,
@@ -47,6 +52,7 @@ function toAuthUser(user: AdminSessionUser): AuthUser {
     email: user.email,
     name: user.name,
     isSuperAdmin: user.isSuperAdmin,
+    permissions: user.permissions ?? [],
   };
 }
 
@@ -100,9 +106,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const isSuperAdmin = Boolean(user?.isSuperAdmin);
+  const permissions = user?.permissions ?? [];
+
+  const hasPermission = useCallback(
+    (domain: string, action: string) => checkPermission(user, domain, action),
+    [user],
+  );
+
   const value = useMemo(
-    () => ({ user, ready, configured, login, logout }),
-    [user, ready, configured, login, logout],
+    () => ({
+      user,
+      ready,
+      configured,
+      permissions,
+      isSuperAdmin,
+      hasPermission,
+      login,
+      logout,
+    }),
+    [user, ready, configured, permissions, isSuperAdmin, hasPermission, login, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

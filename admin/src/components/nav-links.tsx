@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { adminNav, isNavActive } from "@/lib/nav";
+import { useAuth } from "@/lib/auth";
+import { adminNav, filterAdminNav, isNavActive } from "@/lib/nav";
 import { cn } from "@/lib/cn";
 
 export function NavLinks({
@@ -13,12 +14,14 @@ export function NavLinks({
   variant?: "drawer" | "sidebar";
 }) {
   const pathname = usePathname();
+  const { hasPermission, isSuperAdmin } = useAuth();
   const isSidebar = variant === "sidebar";
+  const items = filterAdminNav(adminNav, { hasPermission, isSuperAdmin });
 
   return (
     <nav className="flex flex-col gap-0.5 p-3" aria-label="Admin">
-      {adminNav.map((item) => {
-        const active = isNavActive(pathname, item.href, "exact" in item ? item.exact : false);
+      {items.map((item) => {
+        const active = isNavActive(pathname, item.href, item.exact);
         return (
           <Link
             key={item.href}

@@ -132,8 +132,9 @@ test("banners admin keeps slider/offer contracts and fixed homepage slots", () =
 
 test("admin nav removes Brands and includes Inventory, Shipping, Account, and Reviews", () => {
   const nav = fs.readFileSync(path.join(ROOT, "src/lib/nav.ts"), "utf8");
-  assert.equal(nav.includes('/admin/brands'), false);
-  assert.equal(nav.includes("Brands"), false);
+  // Brands stays off the sidebar; orphan /admin/brands may still appear in route guards.
+  assert.equal(nav.includes('label: "Brands"'), false);
+  assert.equal(/adminNav[\s\S]*href:\s*"\/admin\/brands"/.test(nav), false);
   assert.equal(nav.includes('/admin/inventory'), true);
   assert.equal(nav.includes('/admin/shipping'), true);
   assert.equal(nav.includes('label: "Shipping"'), true);

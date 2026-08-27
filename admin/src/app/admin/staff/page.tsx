@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Button,
   Card,
@@ -16,12 +16,16 @@ import {
   fetchPermissionCatalog,
   fetchStaffUsers,
   updateStaffUser,
+  type PermissionCatalogForUi,
   type PermissionDomain,
+  type PermissionUiGroup,
   type StaffUser,
 } from "@/lib/api/staff";
 import { ApiError } from "@/lib/api/errors";
+import { formatPermissionKey } from "@/lib/admin-permissions";
 import { toast, toastMessageFromUnknown } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
+import { cn } from "@/lib/cn";
 
 export default function StaffPage() {
   const usersQuery = useAdminResource(() => fetchStaffUsers(), []);
@@ -32,15 +36,16 @@ export default function StaffPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [displayLabel, setDisplayLabel] = useState("");
   const [permissions, setPermissions] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  function togglePermission(key: string) {
-    setPermissions((current) =>
-      current.includes(key) ? current.filter((item) => item !== key) : [...current, key],
-    );
-  }
+  const catalogData: PermissionCatalogForUi = catalogQuery.data ?? {
+    catalog: [],
+    groups: [],
+    suggestedDisplayLabels: [],
+  };
 
   function openCreate() {
     setAdding(true);
@@ -49,6 +54,7 @@ export default function StaffPage() {
     setUsername("");
     setEmail("");
     setPassword("");
+    setDisplayLabel("");
     setPermissions([]);
     setFormError(null);
   }
@@ -57,6 +63,7 @@ export default function StaffPage() {
     if (user.isSuperAdmin) return;
     setEditingUser(user);
     setAdding(false);
+    setDisplayLabel(user.displayLabel ?? "");
     setPermissions([...(user.permissions ?? [])]);
     setFormError(null);
   }
@@ -65,12 +72,20 @@ export default function StaffPage() {
     setSaving(true);
     setFormError(null);
     try {
-      await createStaffUser({ name, username, email, password, permissions });
+      await createStaffUser({
+        name,
+        username,
+        email,
+        password,
+        permissions,
+        displayLabel: displayLabel.trim() || undefined,
+      });
       setAdding(false);
       setName("");
       setUsername("");
       setEmail("");
       setPassword("");
+      setDisplayLabel("");
       setPermissions([]);
       toast.success("Staff user created");
       await usersQuery.reload();
@@ -86,9 +101,13 @@ export default function StaffPage() {
     setSaving(true);
     setFormError(null);
     try {
-      await updateStaffUser(editingUser.id, { permissions });
+      await updateStaffUser(editingUser.id, {
+        permissions,
+        displayLabel: displayLabel.trim() || null,
+      });
       setEditingUser(null);
       setPermissions([]);
+      setDisplayLabel("");
       toast.success("Permissions updated");
       await usersQuery.reload();
     } catch (err) {
@@ -108,8 +127,6 @@ export default function StaffPage() {
       toast.error(toastMessageFromUnknown(err, "Unable to update staff user."));
     }
   }
-
-  const catalog = catalogQuery.data ?? [];
 
   return (
     <div>
@@ -145,8 +162,23 @@ export default function StaffPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </Field>
+            <Field label="Role label (optional)" htmlFor="displayLabel">
+              <Input
+                id="displayLabel"
+                list="staff-role-suggestions"
+                value={displayLabel}
+                onChange={(e) => setDisplayLabel(e.target.value)}
+                placeholder="e.g. Catalog Manager"
+              />
+            </Field>
           </div>
-          <PermissionPicker catalog={catalog} selected={permissions} onToggle={togglePermission} />
+          <RoleSuggestions labels={catalogData.suggestedDisplayLabels} />
+          <PermissionPicker
+            catalog={catalogData.catalog}
+            groups={catalogData.groups}
+            selected={permissions}
+            onChange={setPermissions}
+          />
           <div className="mt-3 flex gap-2">
             <Button onClick={() => void createUser()} disabled={saving}>
               {saving ? "Saving…" : "Create"}
@@ -160,9 +192,26 @@ export default function StaffPage() {
 
       {editingUser ? (
         <Card className="mb-4 p-4">
-          <p className="text-sm font-semibold">Edit permissions — {editingUser.name}</p>
+          <p className="text-sm font-semibold">Edit access — {editingUser.name}</p>
           <p className="mt-1 text-sm text-muted-foreground">{editingUser.email}</p>
-          <PermissionPicker catalog={catalog} selected={permissions} onToggle={togglePermission} />
+          <div className="mt-3 max-w-md">
+            <Field label="Role label (optional)" htmlFor="edit-displayLabel">
+              <Input
+                id="edit-displayLabel"
+                list="staff-role-suggestions"
+                value={displayLabel}
+                onChange={(e) => setDisplayLabel(e.target.value)}
+                placeholder="e.g. Support Staff"
+              />
+            </Field>
+            <RoleSuggestions labels={catalogData.suggestedDisplayLabels} />
+          </div>
+          <PermissionPicker
+            catalog={catalogData.catalog}
+            groups={catalogData.groups}
+            selected={permissions}
+            onChange={setPermissions}
+          />
           <div className="mt-3 flex gap-2">
             <Button onClick={() => void savePermissions()} disabled={saving}>
               {saving ? "Saving…" : "Save permissions"}
@@ -172,6 +221,7 @@ export default function StaffPage() {
               onClick={() => {
                 setEditingUser(null);
                 setPermissions([]);
+                setDisplayLabel("");
               }}
             >
               Cancel
@@ -192,17 +242,18 @@ export default function StaffPage() {
         <Card>
           <ul className="divide-y divide-border">
             {(usersQuery.data ?? []).map((user) => (
-              <li key={user.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3.5">
-                <div>
+              <li
+                key={user.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5"
+              >
+                <div className="min-w-0">
                   <p className="font-medium">{user.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {user.email}
-                    {user.isSuperAdmin ? " · Super Admin" : ""}
-                    {user.isActive === false ? " · inactive" : ""}
-                    {!user.isSuperAdmin && (user.permissions?.length ?? 0) > 0
-                      ? ` · ${user.permissions!.length} permissions`
-                      : ""}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <RoleBadge user={user} />
+                    <StatusPill active={user.isActive !== false} />
+                    <AccessSummary user={user} />
+                  </div>
                 </div>
                 {user.isSuperAdmin ? null : (
                   <div className="flex flex-wrap gap-2">
@@ -227,39 +278,198 @@ export default function StaffPage() {
   );
 }
 
+function RoleSuggestions({ labels }: { labels: string[] }) {
+  if (labels.length === 0) return null;
+  return (
+    <datalist id="staff-role-suggestions">
+      {labels.map((label) => (
+        <option key={label} value={label} />
+      ))}
+    </datalist>
+  );
+}
+
+function RoleBadge({ user }: { user: StaffUser }) {
+  const label = user.isSuperAdmin
+    ? "Super Admin"
+    : user.displayLabel?.trim() || "Staff";
+  return (
+    <span className="inline-flex rounded-md bg-muted px-2 py-0.5 text-xs font-semibold text-foreground">
+      Role: {label}
+    </span>
+  );
+}
+
+function StatusPill({ active }: { active: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex rounded-md px-2 py-0.5 text-xs font-semibold",
+        active ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-900",
+      )}
+    >
+      Status: {active ? "Active" : "Inactive"}
+    </span>
+  );
+}
+
+function AccessSummary({ user }: { user: StaffUser }) {
+  if (user.isSuperAdmin) {
+    return (
+      <span className="inline-flex rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+        Access: Full
+      </span>
+    );
+  }
+  const count = user.permissions?.length ?? 0;
+  return (
+    <span className="inline-flex rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+      Permissions: {count === 0 ? "None" : `${count} assigned`}
+    </span>
+  );
+}
+
 function PermissionPicker({
   catalog,
+  groups,
   selected,
-  onToggle,
+  onChange,
 }: {
   catalog: PermissionDomain[];
+  groups: PermissionUiGroup[];
   selected: string[];
-  onToggle: (key: string) => void;
+  onChange: (next: string[]) => void;
 }) {
+  const selectedSet = useMemo(() => new Set(selected), [selected]);
+  const catalogById = useMemo(
+    () => Object.fromEntries(catalog.map((domain) => [domain.id, domain])),
+    [catalog],
+  );
+
+  if (catalog.length === 0) {
+    return <p className="mt-4 text-sm text-muted-foreground">Loading permissions…</p>;
+  }
+
+  if (groups.length > 0) {
+    const groupedIds = new Set(groups.flatMap((g) => g.domains));
+    const ungrouped = catalog.filter((d) => !groupedIds.has(d.id));
+
+    return (
+      <div className="mt-4 space-y-5">
+        {groups.map((group) => {
+          const domains = group.domains.map((id) => catalogById[id]).filter(Boolean);
+          if (domains.length === 0) return null;
+          return (
+            <section key={group.id}>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {group.label}
+              </h3>
+              <div className="mt-2 space-y-3">
+                {domains.map((domain) => (
+                  <DomainPermissionBlock
+                    key={domain.id}
+                    domain={domain}
+                    selected={selected}
+                    selectedSet={selectedSet}
+                    onChange={onChange}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })}
+        {ungrouped.length > 0 ? (
+          <section>
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Other
+            </h3>
+            <div className="mt-2 space-y-3">
+              {ungrouped.map((domain) => (
+                <DomainPermissionBlock
+                  key={domain.id}
+                  domain={domain}
+                  selected={selected}
+                  selectedSet={selectedSet}
+                  onChange={onChange}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className="mt-4 space-y-3">
       {catalog.map((domain) => (
-        <div key={domain.id}>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            {domain.label}
-          </p>
-          <div className="mt-1 flex flex-wrap gap-3">
-            {domain.actions.map((action) => {
-              const key = `${domain.id}:${action.id}`;
-              return (
-                <label key={key} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(key)}
-                    onChange={() => onToggle(key)}
-                  />
-                  {action.label}
-                </label>
-              );
-            })}
-          </div>
-        </div>
+        <DomainPermissionBlock
+          key={domain.id}
+          domain={domain}
+          selected={selected}
+          selectedSet={selectedSet}
+          onChange={onChange}
+        />
       ))}
+    </div>
+  );
+}
+
+function DomainPermissionBlock({
+  domain,
+  selected,
+  selectedSet,
+  onChange,
+}: {
+  domain: PermissionDomain;
+  selected: string[];
+  selectedSet: Set<string>;
+  onChange: (next: string[]) => void;
+}) {
+  const keys = domain.actions.map((action) => formatPermissionKey(domain.id, action.id));
+  const allSelected = keys.length > 0 && keys.every((key) => selectedSet.has(key));
+
+  function togglePermission(key: string) {
+    onChange(
+      selectedSet.has(key) ? selected.filter((item) => item !== key) : [...selected, key],
+    );
+  }
+
+  function toggleDomain() {
+    onChange(
+      allSelected
+        ? selected.filter((item) => !keys.includes(item))
+        : [...new Set([...selected, ...keys])],
+    );
+  }
+
+  return (
+    <div className="rounded-[var(--radius-sm)] border border-border bg-surface px-3 py-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="text-sm font-medium text-foreground">{domain.label}</p>
+        <button
+          type="button"
+          onClick={toggleDomain}
+          className="shrink-0 text-xs font-medium text-accent hover:underline"
+        >
+          {allSelected ? "Clear all" : "Select all"}
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-3">
+        {domain.actions.map((action) => {
+          const key = formatPermissionKey(domain.id, action.id);
+          return (
+            <label key={key} className="flex cursor-pointer items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={selectedSet.has(key)}
+                onChange={() => togglePermission(key)}
+              />
+              {action.label}
+            </label>
+          );
+        })}
+      </div>
     </div>
   );
 }

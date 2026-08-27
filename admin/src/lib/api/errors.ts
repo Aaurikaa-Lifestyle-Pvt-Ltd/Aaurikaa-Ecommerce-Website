@@ -30,7 +30,11 @@ export class ApiError extends Error {
   }
 
   get isUnauthorized(): boolean {
-    return this.kind === "unauthorized" || isInvalidSessionStatus(this.status, this.message);
+    if (this.kind === "unauthorized") return true;
+    if (isInvalidSessionStatus(this.status, this.message)) return true;
+    // Client may replace the message with a friendly forbidden string; check body too.
+    const raw = messageFromBody(this.details, "");
+    return Boolean(raw) && isInvalidSessionStatus(this.status, raw);
   }
 }
 
@@ -72,11 +76,14 @@ export function isInvalidSessionStatus(status: number, message?: string): boolea
   if (status === 401) return true;
   if (status !== 403) return false;
   const text = (message ?? "").toLowerCase();
+  // Plain RBAC "Access denied" stays forbidden (do not logout).
   return (
     text.includes("no token") ||
     text.includes("invalid token") ||
     text.includes("expired") ||
-    text.includes("token required")
+    text.includes("token required") ||
+    text.includes("revoked") ||
+    text.includes("deactivated")
   );
 }
 
