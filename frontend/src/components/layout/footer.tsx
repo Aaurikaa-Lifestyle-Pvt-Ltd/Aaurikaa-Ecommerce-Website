@@ -130,11 +130,11 @@ export async function Footer() {
   );
 
   return (
-    <footer className="mt-8 border-t border-primary-foreground/10 bg-primary text-primary-foreground [&_.eyebrow]:text-primary-foreground/55">
+    <footer className="w-full mt-8 border-t border-primary-foreground/10 bg-primary text-primary-foreground [&_.eyebrow]:text-primary-foreground/55">
       <Container>
-        <div className="grid grid-cols-1 gap-10 py-16 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 py-16 sm:gap-x-8 md:grid-cols-4 md:gap-8 lg:grid-cols-4">
           {/* Column 1: BRAND */}
-          <div className="flex flex-col">
+          <div className="col-span-2 flex flex-col md:col-span-4 lg:col-span-1">
             <Link
               href="/"
               className="inline-block transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -145,7 +145,7 @@ export async function Footer() {
                 alt={companyName}
                 width={380}
                 height={220}
-                className="h-40 w-auto object-contain object-left sm:h-48 lg:h-52"
+                className="h-40 w-auto max-w-full object-contain object-left sm:h-48 lg:h-52"
                 priority={false}
               />
             </Link>
@@ -160,7 +160,7 @@ export async function Footer() {
 
           {/* Column 2: SHOP */}
           {shopGroup ? (
-            <nav aria-label={shopGroup.title}>
+            <nav aria-label={shopGroup.title} className="col-span-1">
               <p className="eyebrow mb-4">{shopGroup.title}</p>
               <ul className="flex flex-col gap-3">
                 {shopGroup.links.map((link) => (
@@ -179,7 +179,7 @@ export async function Footer() {
 
           {/* Column 3: CUSTOMER CARE */}
           {careGroup ? (
-            <nav aria-label={careGroup.title}>
+            <nav aria-label={careGroup.title} className="col-span-1">
               <p className="eyebrow mb-4">{careGroup.title}</p>
               <ul className="flex flex-col gap-3">
                 {careGroup.links.map((link) => (
@@ -198,7 +198,7 @@ export async function Footer() {
 
           {/* Column 4: ABOUT / LEGAL */}
           {otherGroups.length > 0 ? (
-            <div className="flex flex-col gap-6">
+            <div className="col-span-2 grid grid-cols-2 gap-6 sm:gap-8 md:col-span-2 lg:col-span-1 lg:flex lg:flex-col lg:gap-6">
               {otherGroups.map((group) => (
                 <nav key={group.title} aria-label={group.title}>
                   <p className="eyebrow mb-4">{group.title}</p>

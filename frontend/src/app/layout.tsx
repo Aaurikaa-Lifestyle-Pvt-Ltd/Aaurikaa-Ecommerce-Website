@@ -102,14 +102,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${sans.variable} ${serif.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
+      <body className="min-h-full w-full max-w-full overflow-x-hidden flex flex-col bg-background text-foreground pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
         <ShopperAuthProvider>
           <ToastProvider>
             <WishlistProvider>
               <CartProvider>
                 <Announcement />
                 <Header brandName={headerTitle} navLinks={navLinks} />
-                <main className="flex-1">{children}</main>
+                <main className="flex-1 w-full min-w-0">{children}</main>
                 <Footer />
                 <MobileBottomNav />
                 <MiniCart />
