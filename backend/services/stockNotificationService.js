@@ -45,7 +45,7 @@ function isProductAvailableForPurchase(product) {
 function buildProductUrl(product) {
   const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
   const slug = product?.slug || product?._id;
-  return `${baseUrl}/product/${slug}`;
+  return `${baseUrl}/products/${slug}`;
 }
 
 function formatVariantLabel(variantCombination) {
