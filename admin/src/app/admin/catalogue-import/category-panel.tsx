@@ -14,6 +14,7 @@ import {
   type SpreadsheetFormat,
 } from "@/lib/api/catalogue-import";
 import { issuesFromUnknown, type ImportIssue } from "@/lib/catalogue-import-errors";
+import { toast } from "@/lib/toast";
 import { IssueTable, StepList, SummaryGrid, TemplateNotes } from "./import-review";
 
 const STEPS = ["Template", "Upload", "Review", "Confirm", "Result"];
@@ -132,10 +133,26 @@ export function CategoryImportExportPanel({ spec }: { spec: ImportTemplateSpec |
             onClick={() =>
               void run("validate", async () => {
                 if (!file) throw new Error("Choose a file first.");
+                toast.info("Validating category spreadsheet…");
                 const payload = await validateAdminCategoryImport(file);
-                setSummary(summaryFromCategoryPayload(payload));
-                setIssues(issuesFromUnknown(payload.errors));
+                const nextSummary = summaryFromCategoryPayload(payload);
+                const nextIssues = issuesFromUnknown(payload.errors);
+                setSummary(nextSummary);
+                setIssues(nextIssues);
                 setResult(null);
+                const hasBlockers =
+                  nextSummary.invalid > 0 || nextIssues.length > 0 || nextSummary.valid === 0;
+                if (hasBlockers) {
+                  toast.warning(
+                    `Validation found ${nextSummary.invalid || nextIssues.length} issue${
+                      (nextSummary.invalid || nextIssues.length) === 1 ? "" : "s"
+                    }. Fix before importing.`,
+                  );
+                } else {
+                  toast.success(
+                    `Validation passed for ${nextSummary.valid} categor${nextSummary.valid === 1 ? "y" : "ies"}.`,
+                  );
+                }
               })
             }
           >
@@ -172,15 +189,20 @@ export function CategoryImportExportPanel({ spec }: { spec: ImportTemplateSpec |
                   onClick={() =>
                     void run("import", async () => {
                       if (!file) throw new Error("Choose a file first.");
+                      toast.info("Category import started");
                       const payload = await importAdminCategories(file);
                       const failed = payload.failed ?? 0;
-                      setResult(
-                        failed
-                          ? `Imported ${payload.imported ?? 0} rows with ${failed} row-level error${failed === 1 ? "" : "s"}.`
-                          : `Imported ${payload.imported ?? summary.valid} category rows.`,
-                      );
+                      const message = failed
+                        ? `Imported ${payload.imported ?? 0} rows with ${failed} row-level error${failed === 1 ? "" : "s"}.`
+                        : `Imported ${payload.imported ?? summary.valid} category rows.`;
+                      setResult(message);
                       if (payload.errors?.length) {
                         setIssues(issuesFromUnknown(payload.errors));
+                      }
+                      if (failed) {
+                        toast.warning(message);
+                      } else {
+                        toast.success(message);
                       }
                     })
                   }

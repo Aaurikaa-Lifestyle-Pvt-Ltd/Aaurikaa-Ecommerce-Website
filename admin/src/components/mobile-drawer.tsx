@@ -37,7 +37,7 @@ export function MobileDrawer({
         <div className="flex h-[var(--header-height)] items-center justify-between border-b border-border px-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">
-              IMAGINEAIRY
+              AAURIKAA
             </p>
             <p className="text-sm font-semibold text-foreground">Admin</p>
           </div>

@@ -39,6 +39,7 @@ import {
 import { LoremIpsum } from "lorem-ipsum";
 import { uploadAdminMedia } from "@/lib/api/media";
 import { getTiptapExtensions } from "@/lib/rich-text/tiptap-extensions";
+import { toast } from "@/lib/toast";
 import {
   normalizeToTiptapDoc,
   sanitizeHref,
@@ -255,7 +256,7 @@ export function ProductStructuredEditor({
     if (hrefInput === null) return;
     const href = sanitizeHref(hrefInput);
     if (!href) {
-      window.alert("Invalid URL. Allowed: internal /path, http(s), mailto, tel");
+      toast.warning("Invalid URL. Allowed: internal /path, http(s), mailto, tel");
       return;
     }
     const styleInput = window.prompt(
@@ -279,7 +280,7 @@ export function ProductStructuredEditor({
     const hrefRaw = window.prompt("CTA link", "/products");
     const href = sanitizeHref(hrefRaw || "");
     if (!href) {
-      window.alert("Invalid CTA link");
+      toast.warning("Invalid CTA link");
       return;
     }
     const linkType = href.startsWith("/") ? "internal" : "external";
@@ -592,7 +593,7 @@ export function ProductStructuredEditor({
     if (!editor) return;
     const url = sanitizeHref(ctaForm.url);
     if (!url) {
-      window.alert("Invalid URL. Allowed: /path, http(s), mailto, tel");
+      toast.warning("Invalid URL. Allowed: /path, http(s), mailto, tel");
       return;
     }
     editor

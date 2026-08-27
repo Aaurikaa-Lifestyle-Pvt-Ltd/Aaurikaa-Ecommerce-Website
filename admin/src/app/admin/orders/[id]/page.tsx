@@ -12,7 +12,6 @@ import {
   Field,
   LoadingState,
   PageHeader,
-  SaveToast,
   Select,
 } from "@/components/ui";
 import { StatusBadge } from "@/components/status-badge";
@@ -28,6 +27,7 @@ import { ApiError } from "@/lib/api/errors";
 import { formatDateTime, formatMoney } from "@/lib/format";
 import { FULFILMENT_STATUSES, type MappedAdminOrder } from "@/lib/mappers/order";
 import { isRemoteSrc } from "@/lib/mappers/media";
+import { toast, toastMessageFromUnknown } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 
 export default function OrderDetailPage() {
@@ -75,10 +75,8 @@ function OrderDetailView({
   onReload: () => Promise<void>;
 }) {
   const [status, setStatus] = useState(seed.backendStatus || "pending");
-  const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [shipError, setShipError] = useState<string | null>(null);
   const [shippingBusy, setShippingBusy] = useState(false);
 
   async function saveStatus() {
@@ -86,8 +84,7 @@ function OrderDetailView({
     setSaveError(null);
     try {
       await updateAdminOrderStatus(seed.id, status);
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 1600);
+      toast.success("Order status updated");
       await onReload();
     } catch (err) {
       setSaveError(err instanceof ApiError ? err.message : "Unable to update order status.");
@@ -204,11 +201,15 @@ function OrderDetailView({
                 disabled={shippingBusy}
                 onClick={() => {
                   setShippingBusy(true);
-                  setShipError(null);
                   syncAdminShiprocket(seed.id)
-                    .then(() => onReload())
+                    .then(async () => {
+                      toast.success("Shiprocket synced");
+                      await onReload();
+                    })
                     .catch((err: unknown) => {
-                      setShipError(err instanceof ApiError ? err.message : "Unable to sync Shiprocket.");
+                      toast.error(
+                        toastMessageFromUnknown(err, "Unable to sync Shiprocket."),
+                      );
                     })
                     .finally(() => setShippingBusy(false));
                 }}
@@ -221,11 +222,15 @@ function OrderDetailView({
                 disabled={shippingBusy}
                 onClick={() => {
                   setShippingBusy(true);
-                  setShipError(null);
                   generateAdminAwb(seed.id)
-                    .then(() => onReload())
+                    .then(async () => {
+                      toast.success("AWB generated");
+                      await onReload();
+                    })
                     .catch((err: unknown) => {
-                      setShipError(err instanceof ApiError ? err.message : "Unable to generate AWB.");
+                      toast.error(
+                        toastMessageFromUnknown(err, "Unable to generate AWB."),
+                      );
                     })
                     .finally(() => setShippingBusy(false));
                 }}
@@ -238,15 +243,17 @@ function OrderDetailView({
                 disabled={shippingBusy}
                 onClick={() => {
                   setShippingBusy(true);
-                  setShipError(null);
                   const existingLabel =
                     seed.shiprocketLabelUrl ||
                     seed.shipments?.find((s) => s.shiprocketLabelUrl)?.shiprocketLabelUrl ||
                     null;
                   downloadAdminShiprocketLabel(seed.id, existingLabel)
+                    .then(() => {
+                      toast.success("Shipping label downloaded");
+                    })
                     .catch((err: unknown) => {
-                      setShipError(
-                        err instanceof ApiError ? err.message : "Unable to download shipping label.",
+                      toast.error(
+                        toastMessageFromUnknown(err, "Unable to download shipping label."),
                       );
                     })
                     .finally(() => setShippingBusy(false));
@@ -255,11 +262,6 @@ function OrderDetailView({
                 Download label
               </Button>
             </div>
-            {shipError ? (
-              <p className="text-sm text-danger" role="alert">
-                {shipError}
-              </p>
-            ) : null}
           </div>
         </Card>
 
@@ -418,8 +420,6 @@ function OrderDetailView({
           </div>
         </Card>
       </div>
-
-      <SaveToast show={saved} message="Order status updated" />
     </div>
   );
 }

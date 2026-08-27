@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast, toastMessageFromUnknown } from "@/lib/toast";
 
 export type UseAutoSaveOptions<
   T extends Record<string, unknown>,
@@ -137,6 +138,7 @@ export function useAutoSave<
         if (err instanceof DOMException && err.name === "AbortError") return;
         if (err instanceof Error && err.name === "AbortError") return;
         console.error("[useAutoSave]", err);
+        toast.error(toastMessageFromUnknown(err, "Unable to autosave draft."));
       } finally {
         if (abortControllerRef.current === controller) {
           abortControllerRef.current = null;

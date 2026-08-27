@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/toast";
 import { useShopperAuth } from "@/lib/auth/shopper-provider";
-import { Field, TextInput } from "@/components/checkout/checkout-field";
+import { Field, PasswordInput, TextInput } from "@/components/checkout/checkout-field";
 import { getGoogleClientId, isGoogleAuthConfigured } from "@/lib/api/shopper-auth";
 import { cn } from "@/lib/cn";
 
@@ -433,9 +433,8 @@ export function ShopperAuthPanel({
             />
           </Field>
           <Field id="login-password" label="Password">
-            <TextInput
+            <PasswordInput
               id="login-password"
-              type="password"
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -527,9 +526,8 @@ export function ShopperAuthPanel({
             />
           </Field>
           <Field id="reg-password" label="Password">
-            <TextInput
+            <PasswordInput
               id="reg-password"
-              type="password"
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -635,9 +633,8 @@ export function ShopperAuthPanel({
             />
           </Field>
           <Field id="reset-new-password" label="New password">
-            <TextInput
+            <PasswordInput
               id="reset-new-password"
-              type="password"
               autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -645,9 +642,8 @@ export function ShopperAuthPanel({
             />
           </Field>
           <Field id="reset-confirm-password" label="Confirm password">
-            <TextInput
+            <PasswordInput
               id="reset-confirm-password"
-              type="password"
               autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -694,9 +690,8 @@ export function ShopperAuthPanel({
             label="Password"
             hint="One-time verification to link Google — never silent"
           >
-            <TextInput
+            <PasswordInput
               id="google-link-password"
-              type="password"
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

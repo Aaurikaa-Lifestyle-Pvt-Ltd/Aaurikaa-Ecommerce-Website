@@ -33,6 +33,7 @@ import { cn } from "@/lib/cn";
 import { formatTaxonomyTaxLabel, previewTaxonomySlug } from "@/lib/mappers/category";
 import { isRemoteSrc } from "@/lib/mappers/media";
 import { resolveTaxonomyTaxWrite } from "@/lib/tax-rate-input";
+import { toast, toastMessageFromUnknown } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 import type { AdminCategoryHierarchyRow, EntityStatus, TaxonomyTaxType } from "@/types/admin";
 
@@ -390,7 +391,6 @@ export default function CategoriesPage() {
   const [overrideTaxRate, setOverrideTaxRate] = useState("");
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
   const [openMenuKey, setOpenMenuKey] = useState<string | null>(null);
 
   function resetFormFields() {
@@ -577,7 +577,9 @@ export default function CategoriesPage() {
           });
           break;
       }
+      const wasCreate = formMode.kind.startsWith("create");
       closeForm();
+      toast.success(wasCreate ? "Category level created" : "Category level saved");
       await hierarchyQuery.reload();
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : "Unable to save.");
@@ -592,14 +594,14 @@ export default function CategoriesPage() {
     label: string,
   ) {
     if (!window.confirm(`Delete “${label}”? This cannot be undone.`)) return;
-    setActionError(null);
     try {
       if (level === "category") await deleteAdminCategory(id);
       else if (level === "subcategory") await deleteAdminSubcategory(id);
       else await deleteAdminChildCategory(id);
+      toast.success("Category level deleted");
       await hierarchyQuery.reload();
     } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : "Unable to delete.");
+      toast.error(toastMessageFromUnknown(err, "Unable to delete."));
     }
   }
 
@@ -838,12 +840,6 @@ export default function CategoriesPage() {
             </Button>
           </div>
         </Card>
-      ) : null}
-
-      {actionError ? (
-        <p className="mb-3 text-sm text-danger" role="alert">
-          {actionError}
-        </p>
       ) : null}
 
       {hierarchyQuery.loading ? (

@@ -24,6 +24,7 @@ import {
   type MerchWriteInput,
 } from "@/lib/api/merchandising";
 import { ApiError } from "@/lib/api/errors";
+import { toast } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 
 type FieldKey =
@@ -158,6 +159,7 @@ export function MerchandisingEditor({
       }
       setAdding(false);
       setEditing(null);
+      toast.success(editing ? "Item updated" : "Item created");
       await query.reload();
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : "Unable to save.");
@@ -176,6 +178,7 @@ export function MerchandisingEditor({
         setEditing(null);
         setAdding(false);
       }
+      toast.success("Item deleted");
       await query.reload();
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : "Unable to delete.");

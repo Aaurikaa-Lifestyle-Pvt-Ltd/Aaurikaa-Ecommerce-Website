@@ -10,7 +10,7 @@ import {
   Input,
   LoadingState,
   PageHeader,
-  SaveToast,
+  PasswordInput,
 } from "@/components/ui";
 import {
   changeAdminPassword,
@@ -19,6 +19,7 @@ import {
 } from "@/lib/api/admin-auth";
 import { setAdminSession, getAdminToken, type AdminSessionUser } from "@/lib/api/token-store";
 import { ApiError } from "@/lib/api/errors";
+import { toast } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 
 export default function SettingsPage() {
@@ -62,8 +63,6 @@ function AccountForm({
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [saved, setSaved] = useState(false);
-  const [passwordSaved, setPasswordSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -82,8 +81,7 @@ function AccountForm({
       if (token) {
         setAdminSession(token, { ...user, ...updated, name: updated.name || name });
       }
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 1600);
+      toast.success("Profile saved");
       await onReload();
     } catch (err) {
       setSaveError(err instanceof ApiError ? err.message : "Unable to update profile.");
@@ -108,8 +106,7 @@ function AccountForm({
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setPasswordSaved(true);
-      window.setTimeout(() => setPasswordSaved(false), 1600);
+      toast.success("Password updated");
     } catch (err) {
       setPasswordError(err instanceof ApiError ? err.message : "Unable to change password.");
     } finally {
@@ -165,27 +162,24 @@ function AccountForm({
         />
         <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
           <Field label="Current password" htmlFor="old-password" className="sm:col-span-2">
-            <Input
+            <PasswordInput
               id="old-password"
-              type="password"
               autoComplete="current-password"
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
             />
           </Field>
           <Field label="New password" htmlFor="new-password">
-            <Input
+            <PasswordInput
               id="new-password"
-              type="password"
               autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
           </Field>
           <Field label="Confirm new password" htmlFor="confirm-password">
-            <Input
+            <PasswordInput
               id="confirm-password"
-              type="password"
               autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -203,9 +197,6 @@ function AccountForm({
           </div>
         </div>
       </Card>
-
-      <SaveToast show={saved} message="Profile saved" />
-      <SaveToast show={passwordSaved} message="Password updated" />
     </div>
   );
 }

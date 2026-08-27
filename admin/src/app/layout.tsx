@@ -9,10 +9,15 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "IMAGINEAIRY Admin",
-    template: "%s · IMAGINEAIRY Admin",
+    default: "AAURIKAA Admin",
+    template: "%s · AAURIKAA Admin",
   },
-  description: "Mobile-first ecommerce admin demo for IMAGINEAIRY.",
+  description: "Operations and management console for AAURIKAA.",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: ["/images/logo/aaurikaa-emblem.png"],
+    apple: "/images/logo/aaurikaa-emblem.png",
+  },
 };
 
 export default function RootLayout({

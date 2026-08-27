@@ -12,13 +12,13 @@ import {
   PageHeader,
   Select,
 } from "@/components/ui";
-import { ApiError } from "@/lib/api/errors";
 import {
   deleteAdminReview,
   fetchAdminReviews,
   rejectAdminReview,
   type AdminReview,
 } from "@/lib/api/reviews";
+import { toast, toastMessageFromUnknown } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 
 function formatDate(value?: string): string {
@@ -57,7 +57,6 @@ export default function ReviewsSafetyPage() {
   const [ratingFilter, setRatingFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
 
   const query = useAdminResource(
     () =>
@@ -108,14 +107,12 @@ export default function ReviewsSafetyPage() {
       return;
     }
     setBusyId(review.id);
-    setActionError(null);
     try {
       await rejectAdminReview(review.id, "Removed as inappropriate content");
+      toast.success("Review hidden");
       await query.reload();
     } catch (err: unknown) {
-      setActionError(
-        err instanceof ApiError ? err.message : "Unable to hide this review.",
-      );
+      toast.error(toastMessageFromUnknown(err, "Unable to hide this review."));
     } finally {
       setBusyId(null);
     }
@@ -130,14 +127,12 @@ export default function ReviewsSafetyPage() {
       return;
     }
     setBusyId(review.id);
-    setActionError(null);
     try {
       await deleteAdminReview(review.id);
+      toast.success("Review deleted");
       await query.reload();
     } catch (err: unknown) {
-      setActionError(
-        err instanceof ApiError ? err.message : "Unable to delete this review.",
-      );
+      toast.error(toastMessageFromUnknown(err, "Unable to delete this review."));
     } finally {
       setBusyId(null);
     }
@@ -215,12 +210,6 @@ export default function ReviewsSafetyPage() {
           content from the storefront, or Delete to remove permanently.
         </p>
       </Card>
-
-      {actionError ? (
-        <p className="mb-3 text-sm text-danger" role="alert">
-          {actionError}
-        </p>
-      ) : null}
 
       {query.loading ? (
         <Card>

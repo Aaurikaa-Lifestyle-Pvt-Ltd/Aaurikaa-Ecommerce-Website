@@ -20,6 +20,7 @@ import {
   updateFreeShippingRule,
   type AdminFreeShippingRule,
 } from "@/lib/api/shipping";
+import { toast } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 
 type Draft = {
@@ -102,6 +103,7 @@ export default function ShippingPage() {
       setAdding(false);
       setEditing(null);
       setDraft({ ...EMPTY_DRAFT });
+      toast.success(editing ? "Shipping rule updated" : "Shipping rule created");
       await rulesQuery.reload();
     } catch (err) {
       setFormError(

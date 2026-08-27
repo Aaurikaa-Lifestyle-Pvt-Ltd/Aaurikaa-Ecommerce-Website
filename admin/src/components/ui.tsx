@@ -1,5 +1,18 @@
+"use client";
+
 import { cn } from "@/lib/cn";
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, Ref, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import { toast } from "@/lib/toast";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ButtonHTMLAttributes,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type Ref,
+  type SelectHTMLAttributes,
+  type TextareaHTMLAttributes,
+} from "react";
 
 export function Button({
   className,
@@ -45,6 +58,65 @@ export function Input({
       )}
       {...props}
     />
+  );
+}
+
+export function PasswordInput({
+  className,
+  ...props
+}: InputHTMLAttributes<HTMLInputElement>) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input
+        type={show ? "text" : "password"}
+        className={cn(
+          "h-11 w-full rounded-[var(--radius-sm)] border border-input bg-surface pl-3 pr-10 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-accent focus:ring-2 focus:ring-ring/20",
+          className,
+        )}
+        {...props}
+      />
+      <button
+        type="button"
+        tabIndex={-1}
+        onClick={() => setShow((prev) => !prev)}
+        className="absolute right-0 top-0 flex h-11 w-10 items-center justify-center text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+        aria-label={show ? "Hide password" : "Show password"}
+        title={show ? "Hide password" : "Show password"}
+      >
+        {show ? (
+          <svg
+            className="size-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+            <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+            <path d="M17.479 17.499A10.75 10.75 0 0 1 2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.146-4.99" />
+            <line x1="2" y1="2" x2="22" y2="22" />
+          </svg>
+        ) : (
+          <svg
+            className="size-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        )}
+      </button>
+    </div>
   );
 }
 
@@ -228,14 +300,17 @@ export function ErrorState({
   );
 }
 
+/**
+ * @deprecated Prefer `toast.success(message)` from `@/lib/toast`.
+ * Bridge: when `show` flips to true, emits one global success toast.
+ */
 export function SaveToast({ show, message = "Saved" }: { show: boolean; message?: string }) {
-  if (!show) return null;
-  return (
-    <div
-      role="status"
-      className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg animate-rise-in"
-    >
-      {message}
-    </div>
-  );
+  const wasShown = useRef(false);
+  useEffect(() => {
+    if (show && !wasShown.current) {
+      toast.success(message);
+    }
+    wasShown.current = show;
+  }, [show, message]);
+  return null;
 }

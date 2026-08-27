@@ -23,6 +23,7 @@ import {
 import { ApiError } from "@/lib/api/errors";
 import { formatDateTime } from "@/lib/format";
 import { isRemoteSrc } from "@/lib/mappers/media";
+import { toast, toastMessageFromUnknown } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 import type { AdminMediaAsset, MediaType } from "@/types/admin";
 
@@ -43,7 +44,6 @@ export default function GalleryPage() {
   const [editName, setEditName] = useState("");
   const [editAlt, setEditAlt] = useState("");
   const [savingMeta, setSavingMeta] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 24;
 
@@ -73,6 +73,7 @@ export default function GalleryPage() {
         await uploadAdminMedia({ file, displayName: file.name });
       }
       setPage(1);
+      toast.success(files.length === 1 ? "Media uploaded" : `${files.length} files uploaded`);
       await mediaQuery.reload();
     } catch (err) {
       setUploadError(err instanceof ApiError ? err.message : "Upload failed.");
@@ -85,22 +86,21 @@ export default function GalleryPage() {
     setPreview(asset);
     setEditName(asset.displayName);
     setEditAlt(asset.altText);
-    setActionError(null);
   }
 
   async function saveMeta() {
     if (!preview) return;
     setSavingMeta(true);
-    setActionError(null);
     try {
       const updated = await updateAdminMedia(preview.id, {
         displayName: editName,
         altText: editAlt,
       });
       if (updated) setPreview(updated);
+      toast.success("Media details saved");
       await mediaQuery.reload();
     } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : "Unable to update media.");
+      toast.error(toastMessageFromUnknown(err, "Unable to update media."));
     } finally {
       setSavingMeta(false);
     }
@@ -112,13 +112,13 @@ export default function GalleryPage() {
       return;
     }
     setSavingMeta(true);
-    setActionError(null);
     try {
       await deleteAdminMedia(preview.id);
       setPreview(null);
+      toast.success("Media deleted");
       await mediaQuery.reload();
     } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : "Unable to delete media.");
+      toast.error(toastMessageFromUnknown(err, "Unable to delete media."));
     } finally {
       setSavingMeta(false);
     }
@@ -128,8 +128,9 @@ export default function GalleryPage() {
     if (!preview?.url) return;
     try {
       await navigator.clipboard.writeText(preview.url);
+      toast.success("URL copied");
     } catch {
-      setActionError("Unable to copy URL.");
+      toast.error("Unable to copy URL.");
     }
   }
 
@@ -318,11 +319,6 @@ export default function GalleryPage() {
                   />
                 </Field>
               </div>
-              {actionError ? (
-                <p className="text-sm text-danger" role="alert">
-                  {actionError}
-                </p>
-              ) : null}
               <div className="flex flex-wrap gap-2">
                 <Button onClick={() => void saveMeta()} disabled={savingMeta}>
                   {savingMeta ? "Saving…" : "Save details"}

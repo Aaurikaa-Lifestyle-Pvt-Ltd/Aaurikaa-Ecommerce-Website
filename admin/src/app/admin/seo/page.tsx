@@ -11,7 +11,6 @@ import {
   Input,
   LoadingState,
   PageHeader,
-  SaveToast,
   Textarea,
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
@@ -28,6 +27,7 @@ import {
   updateAdminProduct,
 } from "@/lib/api/products";
 import { fetchSeoSettings, updateSeoSettings, type SeoPayload } from "@/lib/api/settings";
+import { toast } from "@/lib/toast";
 import { ApiError } from "@/lib/api/errors";
 import { toBackendProductStatus } from "@/lib/mappers/product";
 import { useAdminResource } from "@/lib/use-admin-resource";
@@ -106,7 +106,6 @@ function GlobalSeoForm({ initial }: { initial: SeoPayload }) {
   const [title, setTitle] = useState(initial.title ?? "");
   const [description, setDescription] = useState(initial.description ?? "");
   const [keywords, setKeywords] = useState(initial.keywords ?? "");
-  const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -115,8 +114,7 @@ function GlobalSeoForm({ initial }: { initial: SeoPayload }) {
     setSaveError(null);
     try {
       await updateSeoSettings({ title, description, keywords });
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 1600);
+      toast.success("SEO settings saved");
     } catch (err) {
       setSaveError(err instanceof ApiError ? err.message : "Unable to save SEO settings.");
     } finally {
@@ -157,7 +155,6 @@ function GlobalSeoForm({ initial }: { initial: SeoPayload }) {
           </Button>
         </div>
       </Card>
-      <SaveToast show={saved} message="SEO settings saved" />
     </>
   );
 }
@@ -270,7 +267,6 @@ function ProductSeoForm({
   const [metaDescription, setMetaDescription] = useState(product.seoDescription ?? "");
   const [primaryKeyword, setPrimaryKeyword] = useState(product.primaryKeyword ?? "");
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   async function save() {
@@ -308,8 +304,7 @@ function ProductSeoForm({
         metaKeywords: product.metaKeywords,
         primaryKeyword: resolvedPrimary,
       });
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 1600);
+      toast.success("Product SEO saved");
       onSaved();
     } catch (err) {
       setSaveError(err instanceof ApiError ? err.message : "Unable to save product SEO.");
@@ -356,7 +351,6 @@ function ProductSeoForm({
           </Button>
         </div>
       </Card>
-      <SaveToast show={saved} message="Product SEO saved" />
     </>
   );
 }
@@ -428,7 +422,6 @@ function CategorySeoForm({
   const [title, setTitle] = useState(category.title ?? "");
   const [description, setDescription] = useState(category.description ?? "");
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   async function save() {
@@ -442,8 +435,7 @@ function CategorySeoForm({
         title,
         description,
       });
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 1600);
+      toast.success("Category SEO saved");
       onSaved();
     } catch (err) {
       setSaveError(err instanceof ApiError ? err.message : "Unable to save category SEO.");
@@ -478,7 +470,6 @@ function CategorySeoForm({
           </Button>
         </div>
       </Card>
-      <SaveToast show={saved} message="Category SEO saved" />
     </>
   );
 }
@@ -551,7 +542,6 @@ function MerchSeoForm({
   const [seoTitle, setSeoTitle] = useState(item.seoTitle ?? "");
   const [seoDescription, setSeoDescription] = useState(item.seoDescription ?? "");
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   async function save() {
@@ -571,8 +561,7 @@ function MerchSeoForm({
         seoTitle,
         seoDescription,
       });
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 1600);
+      toast.success("SEO saved");
       onSaved();
     } catch (err) {
       setSaveError(err instanceof ApiError ? err.message : "Unable to save SEO.");
@@ -614,7 +603,6 @@ function MerchSeoForm({
           </Button>
         </div>
       </Card>
-      <SaveToast show={saved} message="SEO saved" />
     </>
   );
 }

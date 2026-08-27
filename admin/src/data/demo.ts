@@ -64,16 +64,16 @@ export const defaultCms: CmsContent = {
 };
 
 export const defaultSeo: SeoSettings = {
-  metaTitle: "IMAGINEAIRY — Premium Imitation Jewellery",
+  metaTitle: "AAURIKAA — Handcrafted Demi-Fine & Fashion Jewellery",
   metaDescription:
-    "Discover premium imitation jewellery — modern, editorial pieces for everyday moments and special occasions.",
-  canonicalUrl: "https://imagineairy.example",
+    "Discover handcrafted demi-fine and fashion jewellery — modern, artisanal pieces for everyday elegance and special occasions.",
+  canonicalUrl: "https://aaurikaa.com",
   socialImage: "/images/hero-desktop-v2.png",
 };
 
 export const defaultSettings: StoreSettings = {
-  storeName: "IMAGINEAIRY",
-  email: "hello@imagineairy.example",
+  storeName: "AAURIKAA",
+  email: "care@aaurikaa.com",
   phone: "+00 00000 00000",
   whatsapp: "https://wa.me/",
   currency: "INR",

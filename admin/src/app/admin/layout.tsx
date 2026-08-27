@@ -4,7 +4,7 @@ import { AdminProviders } from "@/components/admin-providers";
 export const metadata: Metadata = {
   title: {
     default: "Dashboard",
-    template: "%s · IMAGINEAIRY Admin",
+    template: "%s · AAURIKAA Admin",
   },
 };
 

@@ -19,7 +19,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <div className="flex h-[var(--header-height)] items-center border-b border-white/10 px-5">
           <Link href="/admin" className="block">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-teal-300">
-              IMAGINEAIRY
+              AAURIKAA
             </p>
             <p className="text-sm font-semibold text-white">Admin Console</p>
           </Link>
@@ -46,7 +46,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
           <div className="min-w-0 flex-1 lg:hidden">
             <p className="truncate text-sm font-semibold tracking-tight text-foreground">
-              IMAGINEAIRY Admin
+              AAURIKAA Admin
             </p>
           </div>
 

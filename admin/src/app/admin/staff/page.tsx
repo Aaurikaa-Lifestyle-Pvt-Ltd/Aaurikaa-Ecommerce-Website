@@ -9,6 +9,7 @@ import {
   Input,
   LoadingState,
   PageHeader,
+  PasswordInput,
 } from "@/components/ui";
 import {
   createStaffUser,
@@ -19,6 +20,7 @@ import {
   type StaffUser,
 } from "@/lib/api/staff";
 import { ApiError } from "@/lib/api/errors";
+import { toast, toastMessageFromUnknown } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 
 export default function StaffPage() {
@@ -70,6 +72,7 @@ export default function StaffPage() {
       setEmail("");
       setPassword("");
       setPermissions([]);
+      toast.success("Staff user created");
       await usersQuery.reload();
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : "Unable to create staff user.");
@@ -86,6 +89,7 @@ export default function StaffPage() {
       await updateStaffUser(editingUser.id, { permissions });
       setEditingUser(null);
       setPermissions([]);
+      toast.success("Permissions updated");
       await usersQuery.reload();
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : "Unable to update permissions.");
@@ -96,12 +100,12 @@ export default function StaffPage() {
 
   async function toggleActive(user: StaffUser) {
     if (user.isSuperAdmin) return;
-    setFormError(null);
     try {
       await updateStaffUser(user.id, { isActive: !user.isActive });
+      toast.success(user.isActive === false ? "Staff user activated" : "Staff user deactivated");
       await usersQuery.reload();
     } catch (err) {
-      setFormError(err instanceof ApiError ? err.message : "Unable to update staff user.");
+      toast.error(toastMessageFromUnknown(err, "Unable to update staff user."));
     }
   }
 
@@ -135,9 +139,8 @@ export default function StaffPage() {
               <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </Field>
             <Field label="Password" htmlFor="password">
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />

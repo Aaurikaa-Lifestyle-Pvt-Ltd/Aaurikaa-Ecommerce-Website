@@ -27,8 +27,8 @@ import {
 } from "@/lib/api/products";
 import { fetchAdminCategories } from "@/lib/api/categories";
 import { isRemoteSrc } from "@/lib/mappers/media";
-import { ApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/cn";
+import { toast, toastMessageFromUnknown } from "@/lib/toast";
 import type { AdminProduct } from "@/types/admin";
 
 const TABS = [
@@ -72,7 +72,6 @@ export default function ProductsPage() {
   const [page, setPage] = useState(1);
   const [draft, setDraft] = useState<FilterDraft>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<FilterDraft>(EMPTY_FILTERS);
-  const [actionError, setActionError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const [sortBy, sortOrder] = applied.sort.split(":") as [string, "asc" | "desc"];
@@ -113,20 +112,17 @@ export default function ProductsPage() {
   function applyFilters() {
     setApplied({ ...draft });
     setPage(1);
-    setActionError(null);
   }
 
   function clearFilters() {
     setDraft(EMPTY_FILTERS);
     setApplied(EMPTY_FILTERS);
     setPage(1);
-    setActionError(null);
   }
 
   function switchTab(next: (typeof TABS)[number]["value"]) {
     setTab(next);
     setPage(1);
-    setActionError(null);
   }
 
   async function runRowAction(
@@ -134,16 +130,20 @@ export default function ProductsPage() {
     action: "trash" | "restore" | "delete",
   ) {
     setBusyId(id);
-    setActionError(null);
     try {
       if (action === "trash") await trashAdminProduct(id);
       else if (action === "restore") await restoreAdminProduct(id);
       else await deleteAdminProduct(id);
+      toast.success(
+        action === "trash"
+          ? "Product moved to trash"
+          : action === "restore"
+            ? "Product restored"
+            : "Product deleted permanently",
+      );
       await productsQuery.reload();
     } catch (err) {
-      setActionError(
-        err instanceof ApiError ? err.message : "Unable to update product.",
-      );
+      toast.error(toastMessageFromUnknown(err, "Unable to update product."));
     } finally {
       setBusyId(null);
     }
@@ -258,12 +258,6 @@ export default function ProductsPage() {
           </Button>
         </div>
       </Card>
-
-      {actionError ? (
-        <p className="mb-3 text-sm text-danger" role="alert">
-          {actionError}
-        </p>
-      ) : null}
 
       {productsQuery.loading ? (
         <Card>

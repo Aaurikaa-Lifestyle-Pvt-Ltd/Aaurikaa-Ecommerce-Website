@@ -37,7 +37,7 @@ export const products: AdminProduct[] = [
     taxRate: 0,
     taxIncluded: false,
     hsnCode: "",
-    seoTitle: "Lumen Pearl Drop Earrings | IMAGINEAIRY",
+    seoTitle: "Lumen Pearl Drop Earrings | AAURIKAA",
     seoDescription: "Sculpted pearl drop earrings for day-to-evening wear.",
   },
   {
@@ -69,7 +69,7 @@ export const products: AdminProduct[] = [
     taxRate: 0,
     taxIncluded: false,
     hsnCode: "",
-    seoTitle: "Aurora Layered Choker | IMAGINEAIRY",
+    seoTitle: "Aurora Layered Choker | AAURIKAA",
     seoDescription: "Layered gold-tone choker with an architectural line.",
   },
   {
@@ -105,7 +105,7 @@ export const products: AdminProduct[] = [
     taxRate: 0,
     taxIncluded: false,
     hsnCode: "",
-    seoTitle: "Celeste Stacking Band | IMAGINEAIRY",
+    seoTitle: "Celeste Stacking Band | AAURIKAA",
     seoDescription: "Slim pave stacking band in multiple sizes.",
   },
   {
@@ -136,7 +136,7 @@ export const products: AdminProduct[] = [
     taxRate: 0,
     taxIncluded: false,
     hsnCode: "",
-    seoTitle: "Vesper Cuff Bracelet | IMAGINEAIRY",
+    seoTitle: "Vesper Cuff Bracelet | AAURIKAA",
     seoDescription: "Twisted textured open cuff bracelet.",
   },
   {
@@ -168,7 +168,7 @@ export const products: AdminProduct[] = [
     taxRate: 0,
     taxIncluded: false,
     hsnCode: "",
-    seoTitle: "Solene Crystal Studs | IMAGINEAIRY",
+    seoTitle: "Solene Crystal Studs | AAURIKAA",
     seoDescription: "Bright crystal cluster studs for everyday polish.",
   },
   {
@@ -199,7 +199,7 @@ export const products: AdminProduct[] = [
     taxRate: 0,
     taxIncluded: false,
     hsnCode: "",
-    seoTitle: "Nova Pendant Necklace | IMAGINEAIRY",
+    seoTitle: "Nova Pendant Necklace | AAURIKAA",
     seoDescription: "Layered pendant necklace — currently sold out.",
   },
   {
@@ -231,7 +231,7 @@ export const products: AdminProduct[] = [
     taxRate: 0,
     taxIncluded: false,
     hsnCode: "",
-    seoTitle: "Lyra Tennis Bracelet | IMAGINEAIRY",
+    seoTitle: "Lyra Tennis Bracelet | AAURIKAA",
     seoDescription: "Classic tennis bracelet with continuous stones.",
   },
   {
@@ -262,7 +262,7 @@ export const products: AdminProduct[] = [
     taxRate: 0,
     taxIncluded: false,
     hsnCode: "",
-    seoTitle: "Thea Baguette Studs | IMAGINEAIRY",
+    seoTitle: "Thea Baguette Studs | AAURIKAA",
     seoDescription: "Geometric baguette stud earrings.",
   },
   {
@@ -293,7 +293,7 @@ export const products: AdminProduct[] = [
     taxRate: 0,
     taxIncluded: false,
     hsnCode: "",
-    seoTitle: "Marlowe Rope Chain | IMAGINEAIRY",
+    seoTitle: "Marlowe Rope Chain | AAURIKAA",
     seoDescription: "Warm-toned rope chain for everyday layering.",
   },
   {
@@ -328,7 +328,7 @@ export const products: AdminProduct[] = [
     taxRate: 0,
     taxIncluded: false,
     hsnCode: "",
-    seoTitle: "Orla Signet Ring | IMAGINEAIRY",
+    seoTitle: "Orla Signet Ring | AAURIKAA",
     seoDescription: "Polished signet ring with a smooth face.",
   },
   {
@@ -359,7 +359,7 @@ export const products: AdminProduct[] = [
     taxRate: 0,
     taxIncluded: false,
     hsnCode: "",
-    seoTitle: "Elara Twisted Hoops | IMAGINEAIRY",
+    seoTitle: "Elara Twisted Hoops | AAURIKAA",
     seoDescription: "Fine twisted hoop earrings.",
   },
   {
@@ -390,7 +390,7 @@ export const products: AdminProduct[] = [
     taxRate: 0,
     taxIncluded: false,
     hsnCode: "",
-    seoTitle: "Mira Locket Pendant | IMAGINEAIRY",
+    seoTitle: "Mira Locket Pendant | AAURIKAA",
     seoDescription: "Delicate locket pendant on a fine chain.",
   },
 ];

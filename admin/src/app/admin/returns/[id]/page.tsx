@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Button, Card, CardHeader, ErrorState, LoadingState, PageHeader, Select, Textarea } from "@/components/ui";
-import { ApiError } from "@/lib/api/errors";
 import {
   confirmAfterSalesReceipt,
   fetchAdminReturn,
@@ -18,6 +17,7 @@ import {
   resolutionReasonLabel,
   resolveReturnActionVisibility,
 } from "@/lib/returns-actions";
+import { toast, toastMessageFromUnknown } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 
 const RESOLUTION_CODES = [
@@ -75,16 +75,15 @@ function ReturnDetailView({
   const [resolution, setResolution] = useState<"replacement" | "repair" | "rejected">("replacement");
   const [reasonCode, setReasonCode] = useState<string>(RESOLUTION_CODES[0]);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  async function run(action: () => Promise<unknown>) {
+  async function run(action: () => Promise<unknown>, successMessage: string) {
     setBusy(true);
-    setError(null);
     try {
       await action();
+      toast.success(successMessage);
       await onReload();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to update this case.");
+      toast.error(toastMessageFromUnknown(err, "Unable to update this case."));
     } finally {
       setBusy(false);
     }
@@ -182,7 +181,9 @@ function ReturnDetailView({
                 type="button"
                 variant="secondary"
                 disabled={busy}
-                onClick={() => void run(() => retryAfterSalesPickup(seed._id))}
+                onClick={() =>
+                  void run(() => retryAfterSalesPickup(seed._id), "Pickup retry requested")
+                }
               >
                 Retry pickup
               </Button>
@@ -205,8 +206,14 @@ function ReturnDetailView({
                     <Button
                       disabled={busy}
                       onClick={() =>
-                        void run(() =>
-                          reviewAfterSales(seed._id, { action: "accept", returnRequired: true, note }),
+                        void run(
+                          () =>
+                            reviewAfterSales(seed._id, {
+                              action: "accept",
+                              returnRequired: true,
+                              note,
+                            }),
+                          "Return accepted; reverse pickup requested",
                         )
                       }
                     >
@@ -216,7 +223,10 @@ function ReturnDetailView({
                       variant="secondary"
                       disabled={busy}
                       onClick={() =>
-                        void run(() => reviewAfterSales(seed._id, { action: "reject", note }))
+                        void run(
+                          () => reviewAfterSales(seed._id, { action: "reject", note }),
+                          "Return request rejected",
+                        )
                       }
                     >
                       Reject
@@ -227,7 +237,12 @@ function ReturnDetailView({
                   <Button
                     variant="secondary"
                     disabled={busy}
-                    onClick={() => void run(() => confirmAfterSalesReceipt(seed._id, note))}
+                    onClick={() =>
+                      void run(
+                        () => confirmAfterSalesReceipt(seed._id, note),
+                        "Receipt confirmed",
+                      )
+                    }
                   >
                     Confirm receipt
                   </Button>
@@ -253,19 +268,19 @@ function ReturnDetailView({
                 <Button
                   disabled={busy}
                   onClick={() =>
-                    void run(() =>
-                      resolveAfterSales(seed._id, { resolution, reasonCode, note }),
+                    void run(
+                      () => resolveAfterSales(seed._id, { resolution, reasonCode, note }),
+                      resolution === "replacement"
+                        ? "Resolution recorded: replacement"
+                        : resolution === "repair"
+                          ? "Resolution recorded: repair"
+                          : "Resolution recorded: rejected",
                     )
                   }
                 >
                   Record resolution
                 </Button>
               </>
-            ) : null}
-            {error ? (
-              <p className="text-sm text-danger" role="alert">
-                {error}
-              </p>
             ) : null}
           </div>
         </Card>

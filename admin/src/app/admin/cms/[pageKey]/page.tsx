@@ -12,7 +12,6 @@ import {
   Input,
   LoadingState,
   PageHeader,
-  SaveToast,
   Select,
   Textarea,
 } from "@/components/ui";
@@ -22,6 +21,7 @@ import { fetchStaticPage, saveStaticPage } from "@/lib/api/cms";
 import { isMarketplaceCmsPageKey } from "@/lib/cms-pages";
 import { storefrontPreviewPath } from "@/lib/cms-preview";
 import { ApiError } from "@/lib/api/errors";
+import { toast } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 
 type PageStatus = "draft" | "published" | "trashed";
@@ -115,7 +115,6 @@ function CmsEditor({
   const [seoDescription, setSeoDescription] = useState(initial.page?.seo?.metaDescription ?? "");
   const [zones, setZones] = useState<Record<string, unknown>>(startingZones);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const preview = storefrontPreviewPath(pageKey, initial.page?.slug);
@@ -135,8 +134,7 @@ function CmsEditor({
         zones: prepared,
       });
       setZones(prepared);
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 1600);
+      toast.success("Page saved");
       await onReload();
     } catch (err) {
       setSaveError(err instanceof ApiError ? err.message : "Unable to save this page.");
@@ -226,7 +224,6 @@ function CmsEditor({
           />
         ))}
       </div>
-      <SaveToast show={saved} message="Page saved" />
     </div>
   );
 }

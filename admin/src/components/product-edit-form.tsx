@@ -10,9 +10,9 @@ import {
   Field,
   Input,
   PageHeader,
-  SaveToast,
   Select,
 } from "@/components/ui";
+import { toast } from "@/lib/toast";
 import { CategoryTaxonomyFields } from "@/components/category-taxonomy-fields";
 import {
   ProductGalleryMediaField,
@@ -191,7 +191,6 @@ export function ProductEditForm({
         }
       : EMPTY_VARIANTS,
   );
-  const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [draftPromptHandled, setDraftPromptHandled] = useState(false);
@@ -527,8 +526,13 @@ export function ProductEditForm({
       if (action === "publish") setStatus("Published");
       else if (action === "unpublish") setStatus("Draft");
 
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 1600);
+      toast.success(
+        action === "publish"
+          ? "Product published"
+          : action === "unpublish"
+            ? "Product unpublished"
+            : "Product saved",
+      );
       await onReload?.();
     } catch (err) {
       setSaveError(
@@ -841,8 +845,6 @@ export function ProductEditForm({
           onQandasChange={setQandas}
         />
       </div>
-
-      <SaveToast show={saved} message="Product saved" />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { AdminShell } from "@/components/admin-shell";
+import { ToastProvider } from "@/components/toast-provider";
 
 function Guard({ children }: { children: React.ReactNode }) {
   const { user, ready } = useAuth();
@@ -40,7 +41,9 @@ function Guard({ children }: { children: React.ReactNode }) {
 export function AdminProviders({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
-      <Guard>{children}</Guard>
+      <ToastProvider>
+        <Guard>{children}</Guard>
+      </ToastProvider>
     </AuthProvider>
   );
 }

@@ -30,6 +30,7 @@ import {
   type SpinSegmentType,
 } from "@/lib/api/spin-campaigns";
 import { formatDateTime } from "@/lib/format";
+import { toast } from "@/lib/toast";
 
 function toDateInputValue(iso: string | null): string {
   if (!iso) return "";
@@ -352,10 +353,12 @@ export default function SpinCampaignDetailPage() {
           setFormError("Campaign was not created.");
           return;
         }
+        toast.success("Campaign created");
         router.replace(`/admin/spin-campaigns/${created.id}`);
         return;
       }
       await updateSpinCampaign(campaignId, { ...payload, status });
+      toast.success("Campaign saved");
       await loadCampaign();
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : "Unable to save campaign.");
@@ -371,6 +374,15 @@ export default function SpinCampaignDetailPage() {
     try {
       await updateSpinCampaignStatus(campaignId, next);
       setStatus(next);
+      toast.success(
+        next === "active"
+          ? "Campaign activated"
+          : next === "ended"
+            ? "Campaign ended"
+            : next === "disabled"
+              ? "Campaign disabled"
+              : "Campaign set to draft",
+      );
       await loadCampaign();
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : "Unable to update status.");
@@ -388,6 +400,7 @@ export default function SpinCampaignDetailPage() {
     setFormError(null);
     try {
       await deleteSpinCampaign(campaignId);
+      toast.success("Campaign deleted");
       router.push("/admin/spin-campaigns");
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : "Unable to delete campaign.");

@@ -27,6 +27,7 @@ import {
 } from "@/lib/api/catalogue-import";
 import { fetchAdminCategories } from "@/lib/api/categories";
 import { issuesFromUnknown, type ImportIssue } from "@/lib/catalogue-import-errors";
+import { toast } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 import { IssueTable, StepList, SummaryGrid, TemplateNotes } from "./import-review";
 
@@ -164,6 +165,7 @@ export function ProductImportExportPanel({ spec }: { spec: ImportTemplateSpec | 
               onClick={() =>
                 void run("validate", async () => {
                   if (!file) throw new Error("Choose a file first.");
+                  toast.info("Validating product spreadsheet…");
                   const payload = await validateAdminProductBulkUpload(file, mode);
                   const nextSummary = summaryFromProductPayload(payload);
                   const nextIssues = issuesFromUnknown(payload.errors);
@@ -176,6 +178,19 @@ export function ProductImportExportPanel({ spec }: { spec: ImportTemplateSpec | 
                   );
                   setConfirmed(false);
                   setResult(null);
+                  const hasBlockers =
+                    nextSummary.invalid > 0 || nextIssues.length > 0 || nextSummary.valid === 0;
+                  if (hasBlockers) {
+                    toast.warning(
+                      `Validation found ${nextSummary.invalid || nextIssues.length} issue${
+                        (nextSummary.invalid || nextIssues.length) === 1 ? "" : "s"
+                      }. Fix before importing.`,
+                    );
+                  } else {
+                    toast.success(
+                      `Validation passed for ${nextSummary.valid} product${nextSummary.valid === 1 ? "" : "s"}.`,
+                    );
+                  }
                 })
               }
             >
@@ -226,15 +241,21 @@ export function ProductImportExportPanel({ spec }: { spec: ImportTemplateSpec | 
                   onClick={() =>
                     void run("import", async () => {
                       if (!file) throw new Error("Choose a file first.");
+                      toast.info("Product import started");
                       const payload = await uploadAdminProductBulk(file, mode);
                       setConfirmed(true);
                       setBatchId(payload.batchId ? String(payload.batchId) : null);
                       const upsert = payload.upsert;
-                      setResult(
-                        upsert
-                          ? `Imported. Inserted ${upsert.inserted ?? 0}, updated ${upsert.updated ?? 0}, skipped ${upsert.skipped ?? 0}.`
-                          : `Imported ${payload.count ?? summary.valid} products${payload.batchId ? ` (batch ${payload.batchId})` : ""}.`,
-                      );
+                      const message = upsert
+                        ? `Imported. Inserted ${upsert.inserted ?? 0}, updated ${upsert.updated ?? 0}, skipped ${upsert.skipped ?? 0}.`
+                        : `Imported ${payload.count ?? summary.valid} products${payload.batchId ? ` (batch ${payload.batchId})` : ""}.`;
+                      setResult(message);
+                      const skipped = upsert?.skipped ?? 0;
+                      if (skipped > 0) {
+                        toast.warning(message);
+                      } else {
+                        toast.success(message);
+                      }
                     })
                   }
                 >
@@ -408,11 +429,16 @@ export function ProductImportExportPanel({ spec }: { spec: ImportTemplateSpec | 
             onClick={() =>
               void run("json-import", async () => {
                 if (!jsonFile) throw new Error("Choose a JSON file first.");
+                toast.info("JSON backup import started");
                 const payload = await readJsonFile(jsonFile);
                 const imported = await importAdminProductsJson(payload);
-                setResult(
-                  `JSON backup restored: inserted ${imported.inserted ?? 0}, skipped ${imported.skipped ?? 0}, failed ${imported.failed ?? 0}.`,
-                );
+                const message = `JSON backup restored: inserted ${imported.inserted ?? 0}, skipped ${imported.skipped ?? 0}, failed ${imported.failed ?? 0}.`;
+                setResult(message);
+                if ((imported.failed ?? 0) > 0) {
+                  toast.warning(message);
+                } else {
+                  toast.success(message);
+                }
               })
             }
           >

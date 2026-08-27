@@ -16,6 +16,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { fetchAdminCoupons, saveAdminCoupon } from "@/lib/api/coupons";
 import { ApiError } from "@/lib/api/errors";
 import { formatDate } from "@/lib/format";
+import { toast } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 import type { AdminCoupon, EntityStatus } from "@/types/admin";
 
@@ -63,6 +64,7 @@ export default function CouponsPage() {
       });
       setAdding(false);
       setEditing(null);
+      toast.success(editing ? "Coupon updated" : "Coupon created");
       await couponsQuery.reload();
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : "Unable to save coupon.");

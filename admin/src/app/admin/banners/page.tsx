@@ -34,6 +34,7 @@ import {
 } from "@/lib/api/promotions";
 import { ApiError } from "@/lib/api/errors";
 import { isRemoteSrc } from "@/lib/mappers/media";
+import { toast } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 
 type SlideDraft = {
@@ -164,6 +165,7 @@ export default function BannersPage() {
         });
       }
       closeEditor();
+      toast.success(existing ? "Slide updated" : "Slide created");
       await slidersQuery.reload();
     } catch (err) {
       setBannerError(err instanceof ApiError ? err.message : "Unable to save slide.");
@@ -179,6 +181,7 @@ export default function BannersPage() {
     try {
       await deleteAdminSlider(slider.id);
       if (editor?.mode === "edit" && editor.slider.id === slider.id) closeEditor();
+      toast.success("Slide deleted");
       await slidersQuery.reload();
     } catch (err) {
       setBannerError(err instanceof ApiError ? err.message : "Unable to delete slide.");
@@ -223,6 +226,7 @@ export default function BannersPage() {
       await updateAdminSlider(a.id, { ...baseA, displayOrder: tempOrder });
       await updateAdminSlider(b.id, { ...baseB, displayOrder: orderA });
       await updateAdminSlider(a.id, { ...baseA, displayOrder: orderB });
+      toast.success("Slides reordered");
       await slidersQuery.reload();
     } catch (err) {
       setBannerError(err instanceof ApiError ? err.message : "Unable to reorder slides.");
@@ -245,6 +249,7 @@ export default function BannersPage() {
     try {
       await createAdminOffer(announcement.trim());
       setAnnouncement("");
+      toast.success("Announcement added");
       await offersQuery.reload();
     } catch (err) {
       setOfferError(err instanceof ApiError ? err.message : "Unable to save announcement.");
@@ -265,6 +270,7 @@ export default function BannersPage() {
       await updateAdminOffer(editingOffer.id, { text: offerDraft.trim(), isActive: true });
       setEditingOffer(null);
       setOfferDraft("");
+      toast.success("Announcement updated");
       await offersQuery.reload();
     } catch (err) {
       setOfferError(err instanceof ApiError ? err.message : "Unable to update announcement.");
@@ -278,6 +284,7 @@ export default function BannersPage() {
     setOfferError(null);
     try {
       await updateAdminOffer(offer.id, { isActive });
+      toast.success(isActive ? "Announcement activated" : "Announcement deactivated");
       await offersQuery.reload();
     } catch (err) {
       setOfferError(err instanceof ApiError ? err.message : "Unable to update announcement.");
@@ -296,6 +303,7 @@ export default function BannersPage() {
         setEditingOffer(null);
         setOfferDraft("");
       }
+      toast.success("Announcement deleted");
       await offersQuery.reload();
     } catch (err) {
       setOfferError(err instanceof ApiError ? err.message : "Unable to delete announcement.");

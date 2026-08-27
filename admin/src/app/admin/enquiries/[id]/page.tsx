@@ -11,12 +11,12 @@ import {
   Field,
   LoadingState,
   PageHeader,
-  SaveToast,
   Select,
   Textarea,
 } from "@/components/ui";
 import { fetchAdminEnquiry, patchAdminEnquiry } from "@/lib/api/enquiries";
 import { ApiError } from "@/lib/api/errors";
+import { toast } from "@/lib/toast";
 import { useAdminResource } from "@/lib/use-admin-resource";
 
 export default function EnquiryDetailPage() {
@@ -26,7 +26,6 @@ export default function EnquiryDetailPage() {
   const [status, setStatus] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const currentStatus = status || enquiry?.status || "submitted";
@@ -36,8 +35,7 @@ export default function EnquiryDetailPage() {
     setSaveError(null);
     try {
       await patchAdminEnquiry(params.id, { status: currentStatus, adminNotes: notes });
-      setSaved(true);
-      window.setTimeout(() => setSaved(false), 1600);
+      toast.success("Enquiry updated");
       await query.reload();
     } catch (err) {
       setSaveError(err instanceof ApiError ? err.message : "Unable to update enquiry.");
@@ -112,7 +110,6 @@ export default function EnquiryDetailPage() {
           </Button>
         </div>
       </Card>
-      <SaveToast show={saved} message="Enquiry updated" />
     </div>
   );
 }
