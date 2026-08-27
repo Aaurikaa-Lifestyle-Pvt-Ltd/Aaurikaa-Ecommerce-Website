@@ -9,7 +9,6 @@ import { formatMoney } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
 import { IconHeart } from "@/components/ui/icons";
-import { StarDisplay } from "@/components/ui/star-rating";
 import { useCart } from "@/components/cart";
 import { isRemoteSrc } from "@/lib/mappers/media";
 import { useShopperAuth } from "@/lib/auth/shopper-provider";
@@ -253,31 +252,41 @@ export function ProductCard({
             <span className="line-clamp-1">{product.name}</span>
           </Link>
         </h3>
-        <div className="flex items-center gap-2 text-sm">
-          <span className={cn(soldOut && "text-muted-foreground")}>
-            {formatMoney(product.price)}
-          </span>
-          {hasDiscount ? (
-            <>
-              <span className="text-xs text-muted-foreground line-through">
-                {formatMoney(product.compareAtPrice!)}
+        <div className="flex items-center justify-between gap-2 text-sm">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <span className={cn(soldOut && "text-muted-foreground")}>
+              {formatMoney(product.price)}
+            </span>
+            {hasDiscount ? (
+              <>
+                <span className="text-xs text-muted-foreground line-through">
+                  {formatMoney(product.compareAtPrice!)}
+                </span>
+                <span className="text-xs font-medium text-sale">
+                  {discountPct}% off
+                </span>
+              </>
+            ) : null}
+          </div>
+          {product.reviewCount != null &&
+          product.reviewCount > 0 &&
+          product.avgRating != null ? (
+            <span
+              className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs tabular-nums"
+              aria-label={`Rating ${product.avgRating.toFixed(1)} from ${product.reviewCount} ${product.reviewCount === 1 ? "review" : "reviews"}`}
+            >
+              <span className="leading-none text-accent" aria-hidden>
+                ★
               </span>
-              <span className="text-xs font-medium text-sale">
-                {discountPct}% off
+              <span className="font-medium text-foreground">
+                {product.avgRating.toFixed(1)}
               </span>
-            </>
+              <span className="text-muted-foreground">
+                ({product.reviewCount})
+              </span>
+            </span>
           ) : null}
         </div>
-        {product.reviewCount != null &&
-        product.reviewCount > 0 &&
-        product.avgRating != null ? (
-          <div className="flex items-center gap-1.5">
-            <StarDisplay rating={product.avgRating} size="sm" />
-            <span className="text-xs text-muted-foreground tabular-nums">
-              ({product.reviewCount})
-            </span>
-          </div>
-        ) : null}
         {product.taxIncluded === true ? (
           <p className="text-xs text-muted-foreground">(Inclusive of all taxes)</p>
         ) : product.taxIncluded === false ? (

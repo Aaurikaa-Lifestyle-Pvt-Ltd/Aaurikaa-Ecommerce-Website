@@ -99,9 +99,11 @@ test("star rating UI provides display and interactive input without select", () 
     false,
   );
 
-  assert.match(card, /StarDisplay/);
+  assert.equal(/StarDisplay/.test(card), false);
   assert.match(card, /product\.avgRating/);
   assert.match(card, /product\.reviewCount/);
+  assert.match(card, /avgRating\.toFixed\(1\)/);
+  assert.match(card, /justify-between/);
 
   assert.match(reviewsUi, /StarDisplay/);
   assert.match(reviewsUi, /Verified purchase/i);
