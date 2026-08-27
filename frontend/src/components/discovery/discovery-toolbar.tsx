@@ -57,21 +57,19 @@ export function DiscoveryToolbar({
   const [priceExpanded, setPriceExpanded] = useState(true);
   const [statusExpanded, setStatusExpanded] = useState(true);
 
-  // Price bounds range slider
+  // Price bounds range — local draft until Apply
   const minLimit = priceBounds?.minPrice ?? 0;
   const maxLimit = priceBounds?.maxPrice ?? 20000;
-  const [sliderValue, setSliderValue] = useState<number>(query.maxPrice ?? maxLimit);
+  const [draftMin, setDraftMin] = useState<number>(query.minPrice ?? minLimit);
+  const [draftMax, setDraftMax] = useState<number>(query.maxPrice ?? maxLimit);
 
   const titleId = useId();
   const popoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (query.maxPrice !== undefined) {
-      setSliderValue(query.maxPrice);
-    } else if (priceBounds?.maxPrice != null) {
-      setSliderValue(priceBounds.maxPrice);
-    }
-  }, [query.maxPrice, priceBounds?.maxPrice]);
+    setDraftMin(query.minPrice ?? (priceBounds?.minPrice ?? 0));
+    setDraftMax(query.maxPrice ?? (priceBounds?.maxPrice ?? 20000));
+  }, [query.minPrice, query.maxPrice, priceBounds?.minPrice, priceBounds?.maxPrice]);
 
   function navigate(next: DiscoveryQuery) {
     router.push(
@@ -81,12 +79,38 @@ export function DiscoveryToolbar({
   }
 
   function resetFilters() {
-    setSliderValue(priceBounds?.maxPrice ?? 20000);
+    setDraftMin(priceBounds?.minPrice ?? 0);
+    setDraftMax(priceBounds?.maxPrice ?? 20000);
     if (resetHref) {
       router.push(resetHref, { scroll: false });
       return;
     }
     navigate(clearDiscoveryFilters(query));
+  }
+
+  function clampPrice(value: number, floor: number, ceiling: number): number {
+    if (!Number.isFinite(value)) return floor;
+    return Math.min(ceiling, Math.max(floor, Math.round(value)));
+  }
+
+  function applyPriceFilter() {
+    const nextMin = clampPrice(draftMin, minLimit, maxLimit);
+    const nextMax = clampPrice(draftMax, minLimit, maxLimit);
+    const lo = Math.min(nextMin, nextMax);
+    const hi = Math.max(nextMin, nextMax);
+    setDraftMin(lo);
+    setDraftMax(hi);
+    navigate({
+      ...query,
+      minPrice: lo <= minLimit ? undefined : lo,
+      maxPrice: hi >= maxLimit ? undefined : hi,
+    });
+  }
+
+  function clearPriceFilter() {
+    setDraftMin(minLimit);
+    setDraftMax(maxLimit);
+    navigate({ ...query, minPrice: undefined, maxPrice: undefined });
   }
 
   const filtersActive = hasActiveFilters(query);
@@ -163,10 +187,7 @@ export function DiscoveryToolbar({
     }
     activeChips.push({
       label,
-      onRemove: () => {
-        setSliderValue(maxLimit);
-        navigate({ ...query, minPrice: undefined, maxPrice: undefined });
-      },
+      onRemove: () => clearPriceFilter(),
     });
   }
   if (query.inStockOnly) {
@@ -269,27 +290,55 @@ export function DiscoveryToolbar({
               </button>
               {activePopover === "price" && (
                 <div className="absolute left-0 mt-2 z-30 w-72 rounded-card border border-border bg-surface p-5 shadow-card">
-                  <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Price Bounds (₹)</h4>
+                  <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Price range (₹)
+                  </h4>
+                  <p className="mb-3 text-[11px] text-muted-foreground">
+                    Catalogue range ₹{minLimit.toLocaleString("en-IN")} – ₹
+                    {maxLimit.toLocaleString("en-IN")}
+                  </p>
+                  <div className="mb-4 grid grid-cols-2 gap-3">
+                    <label className="block text-[11px] text-muted-foreground">
+                      Min
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={minLimit}
+                        max={maxLimit}
+                        value={draftMin}
+                        onChange={(e) => setDraftMin(Number(e.target.value))}
+                        className="mt-1 h-9 w-full rounded-control border border-border bg-surface px-2.5 text-xs text-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      />
+                    </label>
+                    <label className="block text-[11px] text-muted-foreground">
+                      Max
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={minLimit}
+                        max={maxLimit}
+                        value={draftMax}
+                        onChange={(e) => setDraftMax(Number(e.target.value))}
+                        className="mt-1 h-9 w-full rounded-control border border-border bg-surface px-2.5 text-xs text-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      />
+                    </label>
+                  </div>
                   <div className="mb-4">
-                    <div className="flex justify-between text-xs text-muted-foreground mb-2">
-                      <span>Min: ₹{minLimit}</span>
-                      <span>Max: ₹{sliderValue}</span>
-                    </div>
                     <input
                       type="range"
                       min={minLimit}
                       max={maxLimit}
-                      value={sliderValue}
-                      onChange={(e) => setSliderValue(Number(e.target.value))}
+                      value={Math.min(Math.max(draftMax, minLimit), maxLimit)}
+                      onChange={(e) => setDraftMax(Number(e.target.value))}
                       className="w-full accent-accent bg-muted h-1 rounded-full cursor-pointer"
+                      aria-label="Maximum price"
                     />
                   </div>
                   <div className="flex justify-between items-center border-t border-border/60 pt-3">
                     <button
                       type="button"
                       onClick={() => {
-                        setSliderValue(maxLimit);
-                        navigate({ ...query, minPrice: undefined, maxPrice: undefined });
+                        clearPriceFilter();
                         setActivePopover(null);
                       }}
                       className="text-xs text-muted-foreground hover:text-foreground hover:underline"
@@ -299,11 +348,7 @@ export function DiscoveryToolbar({
                     <button
                       type="button"
                       onClick={() => {
-                        navigate({
-                          ...query,
-                          minPrice: undefined,
-                          maxPrice: sliderValue === maxLimit ? undefined : sliderValue,
-                        });
+                        applyPriceFilter();
                         setActivePopover(null);
                       }}
                       className="h-8 rounded-control bg-primary px-3 text-xs text-white hover:bg-primary/90"
@@ -612,21 +657,49 @@ export function DiscoveryToolbar({
                     </button>
                     
                     {priceExpanded && (
-                      <div className="pt-2">
-                        <div className="flex justify-between text-xs text-muted-foreground mb-2">
-                          <span>Min: ₹{minLimit}</span>
-                          <span>Max: ₹{sliderValue}</span>
+                      <div className="pt-2 space-y-3">
+                        <p className="text-[11px] text-muted-foreground">
+                          Catalogue range ₹{minLimit.toLocaleString("en-IN")} – ₹
+                          {maxLimit.toLocaleString("en-IN")}
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <label className="block text-[11px] text-muted-foreground">
+                            Min (₹)
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              min={minLimit}
+                              max={maxLimit}
+                              value={draftMin}
+                              onChange={(e) => setDraftMin(Number(e.target.value))}
+                              className="mt-1 h-9 w-full rounded-control border border-border bg-surface px-2.5 text-xs text-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            />
+                          </label>
+                          <label className="block text-[11px] text-muted-foreground">
+                            Max (₹)
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              min={minLimit}
+                              max={maxLimit}
+                              value={draftMax}
+                              onChange={(e) => setDraftMax(Number(e.target.value))}
+                              className="mt-1 h-9 w-full rounded-control border border-border bg-surface px-2.5 text-xs text-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            />
+                          </label>
                         </div>
                         <input
                           type="range"
                           min={minLimit}
                           max={maxLimit}
-                          value={sliderValue}
-                          onChange={(e) => setSliderValue(Number(e.target.value))}
+                          value={Math.min(Math.max(draftMax, minLimit), maxLimit)}
+                          onChange={(e) => setDraftMax(Number(e.target.value))}
                           className="w-full accent-accent bg-muted h-1.5 rounded-full cursor-pointer"
+                          aria-label="Maximum price"
                         />
-                        <div className="mt-3 text-center text-xs font-semibold text-accent">
-                          Price range: Up to ₹{sliderValue}
+                        <div className="text-center text-xs font-semibold text-accent">
+                          ₹{Math.min(draftMin, draftMax).toLocaleString("en-IN")} – ₹
+                          {Math.max(draftMin, draftMax).toLocaleString("en-IN")}
                         </div>
                       </div>
                     )}
@@ -682,11 +755,9 @@ export function DiscoveryToolbar({
                 <button
                   type="button"
                   onClick={() => {
-                    navigate({
-                      ...query,
-                      minPrice: undefined,
-                      maxPrice: sliderValue === maxLimit ? undefined : sliderValue,
-                    });
+                    if (showPrice) {
+                      applyPriceFilter();
+                    }
                     setFiltersOpen(false);
                   }}
                   className="flex-1 h-11 rounded-control bg-primary text-xs font-semibold uppercase tracking-wider text-white hover:bg-primary/95 flex items-center justify-center gap-2 shadow-soft"

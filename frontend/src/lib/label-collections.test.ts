@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   fetchProductsForLabelSlug,
   isLabelCollectionSlug,
+  labelSlugPriceBoundsQuery,
   mergeLabelCollections,
   virtualLabelCollection,
 } from "./label-collections.ts";
@@ -113,4 +114,19 @@ test("fetchProductsForLabelSlug honours explicit shopper sortBy", async () => {
   );
   assert.equal(calls.length, 1);
   assert.equal(calls[0]?.sortBy, "price-low");
+});
+
+test("labelSlugPriceBoundsQuery mirrors label listing scope", () => {
+  assert.deepEqual(
+    labelSlugPriceBoundsQuery("new-arrivals", {
+      page: 1,
+      inStock: "true",
+      maxPrice: 2000,
+    }),
+    { page: 1, inStock: "true", maxPrice: 2000, label: "new" },
+  );
+  assert.deepEqual(
+    labelSlugPriceBoundsQuery("best-sellers", { page: 1, onSale: "true" }),
+    { page: 1, onSale: "true" },
+  );
 });

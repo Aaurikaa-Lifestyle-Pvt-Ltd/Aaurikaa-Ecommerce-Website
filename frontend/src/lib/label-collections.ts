@@ -108,3 +108,21 @@ export async function fetchProductsForLabelSlug(
 
   return empty;
 }
+
+/**
+ * Backend list query extras for a label destination's price-bounds request.
+ * Mirrors {@link fetchProductsForLabelSlug} scope (minus pagination/sort).
+ */
+export function labelSlugPriceBoundsQuery(
+  slug: string,
+  listQuery: Record<string, string | number | undefined> = {},
+): Record<string, string | number | undefined> {
+  if (slug === "new-arrivals") {
+    return { ...listQuery, label: "new" };
+  }
+  if (slug === "best-sellers") {
+    return { ...listQuery };
+  }
+  return listQuery;
+}
+

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   getCollectionBySlug,
+  getCollectionPriceBounds,
   getCollections,
   getProductsByCollection,
 } from "@/lib/data";
@@ -54,7 +55,10 @@ export default async function CollectionListingPage({
   if (!collection) notFound();
 
   const query = parseDiscoveryQuery(await searchParams);
-  const page = await getProductsByCollection(slug, query);
+  const [page, priceBounds] = await Promise.all([
+    getProductsByCollection(slug, query),
+    getCollectionPriceBounds(slug, query),
+  ]);
   const filtered = hasActiveFilters(query);
 
   return (
@@ -72,6 +76,9 @@ export default async function CollectionListingPage({
       totalPages={page.totalPages}
       currentPage={page.currentPage}
       query={query}
+      priceBounds={priceBounds}
+      filterMode="taxonomy"
+      resetHref={collection.href}
       empty={{
         title: filtered
           ? "No products match these filters"

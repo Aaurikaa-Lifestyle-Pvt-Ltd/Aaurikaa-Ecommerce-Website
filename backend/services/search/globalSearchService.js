@@ -16,7 +16,7 @@ const {
 } = require("./searchUtils");
 const { resolveMatchingEntities } = require("./searchEntityResolver");
 const { appendSearchFilter } = require("./productSearchQueryBuilder");
-const { applyMerchandisingCollectionFilter } = require("../../utils/productLabels");
+const { applyMerchandisingCollectionFilter, pruneEmptyAnd, buildEffectivePriceExpr } = require("../../utils/productLabels");
 const { isMarketplaceSurfaceEnabled } = require("../../config/aaurikaaFoundation");
 
 /** Default limit for legacy flat product suggestions (`GET /api/products/search`). */
@@ -169,13 +169,13 @@ function mergeStorefrontProductFilters(filter, query = {}) {
   if (minPrice != null && minPrice !== "" && !isNaN(Number(minPrice))) {
     filter.$and = filter.$and || [];
     filter.$and.push({
-      $expr: { $gte: [{ $ifNull: ["$salePrice", "$regularPrice"] }, Number(minPrice)] },
+      $expr: { $gte: [buildEffectivePriceExpr(), Number(minPrice)] },
     });
   }
   if (maxPrice != null && maxPrice !== "" && !isNaN(Number(maxPrice))) {
     filter.$and = filter.$and || [];
     filter.$and.push({
-      $expr: { $lte: [{ $ifNull: ["$salePrice", "$regularPrice"] }, Number(maxPrice)] },
+      $expr: { $lte: [buildEffectivePriceExpr(), Number(maxPrice)] },
     });
   }
   if (rating != null && rating !== "" && Number(rating) > 0) {
@@ -186,7 +186,7 @@ function mergeStorefrontProductFilters(filter, query = {}) {
     filter.$and.push(buildInStockListingClause());
   }
 
-  return filter;
+  return pruneEmptyAnd(filter);
 }
 
 /**
@@ -303,19 +303,8 @@ async function runProductListQuery(filter, { sort, skip, limit }) {
       { $match: matchedFilter },
       {
         $addFields: {
-          effectivePrice: {
-            $cond: {
-              if: {
-                $and: [
-                  { $gt: ["$salePrice", 0] },
-                  { $gt: ["$regularPrice", "$salePrice"] }
-                ]
-              },
-              then: "$salePrice",
-              else: { $ifNull: ["$regularPrice", 0] }
-            }
-          }
-        }
+          effectivePrice: buildEffectivePriceExpr(),
+        },
       },
       { $sort: { effectivePrice: sortDir, _id: 1 } },
       { $skip: skip },
@@ -396,8 +385,8 @@ async function getCataloguePriceBounds(query = {}, options = {}) {
     {
       $group: {
         _id: null,
-        minPrice: { $min: { $ifNull: ["$salePrice", "$regularPrice"] } },
-        maxPrice: { $max: { $ifNull: ["$salePrice", "$regularPrice"] } },
+        minPrice: { $min: buildEffectivePriceExpr() },
+        maxPrice: { $max: buildEffectivePriceExpr() },
       },
     },
   ]);

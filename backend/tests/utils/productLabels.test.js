@@ -17,6 +17,8 @@ describe('productLabels (WS-4 / 1.9)', () => {
     expect(isOnSale({ regularPrice: 100, salePrice: 100 })).toBe(false);
     expect(isOnSale({ regularPrice: 100 })).toBe(false);
     expect(isOnSale({})).toBe(false);
+    // salePrice 0 is "no sale", not free — must not match on-sale filters.
+    expect(isOnSale({ regularPrice: 4290, salePrice: 0 })).toBe(false);
   });
 
   test('New uses createdAt recency and is omitted without createdAt', () => {
@@ -61,11 +63,15 @@ describe('productLabels (WS-4 / 1.9)', () => {
 
     const newFilter = applyMerchandisingCollectionFilter({}, { label: 'new' }, now);
     expect(newFilter.createdAt.$gte).toBeInstanceOf(Date);
+    // Must not leave an empty $and — Mongo rejects `{ $and: [] }`.
+    expect(newFilter.$and).toBeUndefined();
 
     const dealFilter = applyMerchandisingCollectionFilter({}, { label: 'deal' });
     expect(dealFilter['bulkDiscount.enabled']).toBe(true);
+    expect(dealFilter.$and).toBeUndefined();
 
     const featuredFilter = applyMerchandisingCollectionFilter({}, { featured: 'true' });
     expect(featuredFilter.isFeatured).toBe(true);
+    expect(featuredFilter.$and).toBeUndefined();
   });
 });

@@ -210,10 +210,22 @@ describe("globalSearchService helpers", () => {
     const dealFilter = buildPublishedProductFilter();
     mergeStorefrontProductFilters(dealFilter, { label: "deal" });
     expect(dealFilter["bulkDiscount.enabled"]).toBe(true);
+    expect(dealFilter.$and).toBeUndefined();
 
     const featuredByLabel = buildPublishedProductFilter();
     mergeStorefrontProductFilters(featuredByLabel, { label: "featured" });
     expect(featuredByLabel.isFeatured).toBe(true);
+    expect(featuredByLabel.$and).toBeUndefined();
+
+    const newFilter = buildPublishedProductFilter();
+    mergeStorefrontProductFilters(newFilter, { label: "new" });
+    expect(newFilter.createdAt).toEqual({ $gte: expect.any(Date) });
+    expect(newFilter.$and).toBeUndefined();
+
+    const newInStock = buildPublishedProductFilter();
+    mergeStorefrontProductFilters(newInStock, { label: "new", inStock: "true" });
+    expect(newInStock.createdAt).toEqual({ $gte: expect.any(Date) });
+    expect(Array.isArray(newInStock.$and) && newInStock.$and.length).toBeGreaterThan(0);
   });
 
   it("applies taxonomy scope preferring child > sub > category", () => {
@@ -517,6 +529,57 @@ describe("globalSearchService integration (entity-aware q)", () => {
     );
     expect(names).not.toContain("Out Of Stock Ring");
     expect(names).not.toContain("Office Chair");
+  });
+
+  it("ignores salePrice 0 for onSale and price filters (treat as no sale)", async () => {
+    await Product.create([
+      {
+        name: "Zero Sale Price Earrings",
+        sku: "gss-zero-sale",
+        regularPrice: 4290,
+        salePrice: 0,
+        status: "published",
+        approvalStatus: "approved",
+        category: category._id,
+      },
+      {
+        name: "Real Sale Ring",
+        sku: "gss-real-sale",
+        regularPrice: 1690,
+        salePrice: 1390,
+        status: "published",
+        approvalStatus: "approved",
+        category: category._id,
+      },
+    ]);
+
+    const onSale = await searchProducts({
+      onSale: "true",
+      category: String(category._id),
+    });
+    const onSaleNames = onSale.products.map((p) => p.name);
+    expect(onSaleNames).toContain("Real Sale Ring");
+    expect(onSaleNames).not.toContain("Zero Sale Price Earrings");
+
+    const underMax = await searchProducts({
+      maxPrice: "1680",
+      category: String(category._id),
+    });
+    const underMaxNames = underMax.products.map((p) => p.name);
+    expect(underMaxNames).toContain("Real Sale Ring");
+    expect(underMaxNames).not.toContain("Zero Sale Price Earrings");
+
+    const combined = await searchProducts({
+      onSale: "true",
+      maxPrice: "1680",
+      category: String(category._id),
+    });
+    expect(combined.products.map((p) => p.name)).toEqual(
+      expect.arrayContaining(["Real Sale Ring"])
+    );
+    expect(combined.products.map((p) => p.name)).not.toContain(
+      "Zero Sale Price Earrings"
+    );
   });
 
   describe("Price sorting regression", () => {

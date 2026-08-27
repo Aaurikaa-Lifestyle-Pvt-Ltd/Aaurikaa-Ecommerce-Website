@@ -61,6 +61,7 @@ import {
 import {
   fetchProductsForLabelSlug,
   isLabelCollectionSlug,
+  labelSlugPriceBoundsQuery,
   mergeLabelCollections,
   virtualLabelCollection,
 } from "@/lib/label-collections";
@@ -394,6 +395,56 @@ export async function getRelatedProducts(
     (p) => p.id !== product.id && !related.some((r) => r.id === p.id),
   );
   return [...related, ...fillers].slice(0, limit);
+}
+
+/** Price bounds for a collection PLP (label destinations + curated sets). */
+export async function getCollectionPriceBounds(
+  slug: string,
+  query: DiscoveryQuery = defaultDiscoveryQuery(),
+): Promise<PriceBounds> {
+  if (isApiCatalogue()) {
+    try {
+      if (isLabelCollectionSlug(slug)) {
+        return await fetchProductsPriceBounds(
+          labelSlugPriceBoundsQuery(slug, toBackendListQuery(query)),
+        );
+      }
+      const result = await fetchPublicCollectionBySlug(slug);
+      const amounts = (result?.products ?? [])
+        .map((p) => p.price?.amount)
+        .filter((n): n is number => typeof n === "number" && Number.isFinite(n));
+      if (amounts.length === 0) return { minPrice: null, maxPrice: null };
+      return {
+        minPrice: Math.min(...amounts),
+        maxPrice: Math.max(...amounts),
+      };
+    } catch {
+      return { minPrice: null, maxPrice: null };
+    }
+  }
+  const scoped = mockProducts.filter((p) => p.collectionIds?.includes(slug));
+  if (scoped.length === 0) return { minPrice: null, maxPrice: null };
+  const amounts = scoped.map((p) => p.price.amount);
+  return {
+    minPrice: Math.min(...amounts),
+    maxPrice: Math.max(...amounts),
+  };
+}
+
+/** Price bounds for an occasion PLP (from associated products). */
+export async function getOccasionPriceBounds(
+  slug: string,
+): Promise<PriceBounds> {
+  const products = await getProductsByOccasion(slug);
+  if (products.length === 0) return { minPrice: null, maxPrice: null };
+  const amounts = products
+    .map((p) => p.price?.amount)
+    .filter((n): n is number => typeof n === "number" && Number.isFinite(n));
+  if (amounts.length === 0) return { minPrice: null, maxPrice: null };
+  return {
+    minPrice: Math.min(...amounts),
+    maxPrice: Math.max(...amounts),
+  };
 }
 
 /**

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import {
   getOccasionBySlug,
   getOccasionIndex,
+  getOccasionPriceBounds,
   getProductsByOccasion,
 } from "@/lib/data";
 import {
@@ -56,7 +57,10 @@ export default async function OccasionListingPage({
 
   const query = parseDiscoveryQuery(await searchParams);
   const scoped = await getProductsByOccasion(slug);
-  const page = applyDiscoveryPage(scoped, query);
+  const [page, priceBounds] = await Promise.all([
+    Promise.resolve(applyDiscoveryPage(scoped, query)),
+    getOccasionPriceBounds(slug),
+  ]);
   const filtered = hasActiveFilters(query);
 
   return (
@@ -74,6 +78,9 @@ export default async function OccasionListingPage({
       totalPages={page.totalPages}
       currentPage={page.currentPage}
       query={query}
+      priceBounds={priceBounds}
+      filterMode="taxonomy"
+      resetHref={occasion.href}
       empty={{
         title: filtered
           ? "No products match these filters"

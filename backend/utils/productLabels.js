@@ -18,12 +18,42 @@ function toNumber(value) {
   return Number.isFinite(n) ? n : null;
 }
 
-/** Same condition as ProductCard savings overlay: regularPrice > salePrice. */
+/**
+ * Same condition as storefront card sale badge / savings overlay:
+ * a positive salePrice strictly below regularPrice. Zero salePrice is not on sale.
+ */
 function isOnSale(product = {}) {
   const regularPrice = toNumber(product.regularPrice);
   const salePrice = toNumber(product.salePrice);
   if (regularPrice == null || salePrice == null) return false;
-  return regularPrice > salePrice;
+  return salePrice > 0 && regularPrice > salePrice;
+}
+
+/**
+ * Mongo `$expr` fragment: true when product has a real sale price.
+ * Must ignore salePrice 0 / null (those are "no sale", not free).
+ */
+function buildOnSaleExpr() {
+  return {
+    $and: [
+      { $gt: [{ $ifNull: ["$salePrice", 0] }, 0] },
+      { $gt: [{ $ifNull: ["$regularPrice", 0] }, "$salePrice"] },
+    ],
+  };
+}
+
+/**
+ * Mongo expression for the shopper-facing unit price.
+ * Matches listing sort + storefront mapper: valid sale, else regular.
+ */
+function buildEffectivePriceExpr() {
+  return {
+    $cond: {
+      if: buildOnSaleExpr(),
+      then: "$salePrice",
+      else: { $ifNull: ["$regularPrice", 0] },
+    },
+  };
 }
 
 function getNewArrivalCutoff(now = new Date(), days = NEW_ARRIVAL_DAYS) {
@@ -76,22 +106,15 @@ function normalizeCollectionKey(query = {}) {
 /**
  * Apply a merchandising collection onto an existing storefront Mongo filter.
  * Reuses listing architecture; does not create a separate catalogue.
+ * Only introduces `$and` when a clause is actually pushed (Mongo rejects `[]`).
  */
 function applyMerchandisingCollectionFilter(filter, query = {}, now = new Date()) {
   const key = normalizeCollectionKey(query);
   if (!key) return filter;
 
-  filter.$and = filter.$and || [];
-
   if (key === LABEL_KEYS.SALE) {
-    filter.$and.push({
-      $expr: {
-        $gt: [
-          { $ifNull: ["$regularPrice", 0] },
-          { $ifNull: ["$salePrice", "$regularPrice"] },
-        ],
-      },
-    });
+    filter.$and = filter.$and || [];
+    filter.$and.push({ $expr: buildOnSaleExpr() });
     return filter;
   }
 
@@ -113,6 +136,14 @@ function applyMerchandisingCollectionFilter(filter, query = {}, now = new Date()
   return filter;
 }
 
+/** Drop empty `$and` so Mongo never sees `{ $and: [] }`. */
+function pruneEmptyAnd(filter) {
+  if (filter && Array.isArray(filter.$and) && filter.$and.length === 0) {
+    delete filter.$and;
+  }
+  return filter;
+}
+
 module.exports = {
   NEW_ARRIVAL_DAYS,
   LABEL_KEYS,
@@ -124,4 +155,7 @@ module.exports = {
   getNewArrivalCutoff,
   normalizeCollectionKey,
   applyMerchandisingCollectionFilter,
+  pruneEmptyAnd,
+  buildOnSaleExpr,
+  buildEffectivePriceExpr,
 };
