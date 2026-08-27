@@ -32,8 +32,8 @@ export function WearYourStory() {
           {/* Image Column: rendered first on mobile, second on desktop */}
           <div className="order-1 relative aspect-[4/3] w-full overflow-hidden rounded-card bg-muted md:order-2">
             <Image
-              src="/images/collections/pearl-edit.png"
-              alt="Wear Your Story lifestyle jewellery"
+              src="/images/brand/wear-your-story.jpg"
+              alt="Woman wearing AAURIKAA jewellery in a soft editorial portrait"
               fill
               sizes="(min-width: 768px) 46vw, 92vw"
               className="object-cover transition-transform duration-700 hover:scale-105"

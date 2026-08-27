@@ -34,7 +34,7 @@ export async function TrustStrip({ items }: TrustStripProps) {
   if (!benefits.length) return null;
 
   return (
-    <section className="border-y border-border/80 bg-muted/40 py-10 sm:py-12">
+    <section className="border-y border-border/80 bg-[#f4eee4] py-10 sm:py-12">
       <Container>
         <h2 className="sr-only">Shopping with confidence</h2>
         <ul className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4 md:gap-8">

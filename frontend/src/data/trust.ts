@@ -2,16 +2,14 @@ import type { TrustItem } from "@/types/commerce";
 
 /**
  * Demo trust / service benefits (brief §24).
- * Aligned with storefront policies already surfaced in site config
- * (complimentary shipping threshold, returns, contact). Language stays
- * cautious — no unsupported guarantees.
+ * Storefront assurance strip — language stays cautious; no unsupported guarantees.
  */
 export const trustItems: TrustItem[] = [
   {
     id: "shipping",
     icon: "shipping",
-    title: "Complimentary Shipping",
-    description: "On orders over ₹1,499.",
+    title: "Thoughtfully Packed",
+    description: "Every order is prepared with care.",
   },
   {
     id: "returns",

@@ -36,13 +36,13 @@ export async function BrandStory({
             reverse && "md:[&>*:first-child]:order-2",
           )}
         >
-          <div className="relative aspect-4/5 overflow-hidden rounded-card bg-muted sm:aspect-3/4 md:aspect-4/5">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-card bg-muted sm:aspect-[5/4] md:aspect-[4/3]">
             <Image
               src={story.image.src}
               alt={story.image.alt}
               fill
               sizes="(min-width: 768px) 42vw, 92vw"
-              className="object-cover"
+              className="object-cover object-top sm:object-center"
             />
           </div>
 
