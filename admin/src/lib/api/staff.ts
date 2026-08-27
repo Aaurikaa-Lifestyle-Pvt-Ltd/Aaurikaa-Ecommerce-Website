@@ -1,36 +1,26 @@
 import { apiRequest, unwrapData } from "./client";
+import {
+  shapePermissionCatalogForAaurikaa,
+  type PermissionCatalogForUi,
+  type PermissionDomain,
+  type PermissionUiGroup,
+  type StaffUser,
+} from "../staff-catalog";
 
-export type StaffUser = {
-  id: string;
-  name: string;
-  username?: string;
-  email: string;
-  isSuperAdmin?: boolean;
-  isActive?: boolean;
-  permissions?: string[];
-  displayLabel?: string | null;
-};
+export type {
+  PermissionCatalogForUi,
+  PermissionDomain,
+  PermissionUiGroup,
+  StaffUser,
+} from "../staff-catalog";
 
-export type PermissionDomain = {
-  id: string;
-  label: string;
-  description?: string;
-  actions: Array<{ id: string; label: string }>;
-};
-
-export type PermissionUiGroup = {
-  id: string;
-  label: string;
-  domains: string[];
-};
-
-export type PermissionCatalogForUi = {
-  catalog: PermissionDomain[];
-  groups: PermissionUiGroup[];
-  suggestedDisplayLabels: string[];
-};
-
-const HIDDEN_STAFF_DOMAINS = new Set(["sellers", "finance"]);
+export {
+  HIDDEN_STAFF_DOMAINS,
+  filterStaffRoleSuggestions,
+  isHiddenStaffDomain,
+  isHiddenStaffPermissionKey,
+  shapePermissionCatalogForAaurikaa,
+} from "../staff-catalog";
 
 export async function fetchStaffUsers(): Promise<StaffUser[]> {
   const response = await apiRequest<{ data?: { users?: StaffUser[] } }>("/api/admin/users");
@@ -45,21 +35,7 @@ export async function fetchPermissionCatalog(): Promise<PermissionCatalogForUi> 
       suggestedDisplayLabels?: string[];
     };
   }>("/api/admin/permissions/catalog");
-  const data = unwrapData(response) ?? {};
-  const catalog = (data.catalog ?? []).filter((domain) => !HIDDEN_STAFF_DOMAINS.has(domain.id));
-  const catalogIds = new Set(catalog.map((d) => d.id));
-  const groups = (data.groups ?? [])
-    .map((group) => ({
-      ...group,
-      domains: group.domains.filter((id) => !HIDDEN_STAFF_DOMAINS.has(id) && catalogIds.has(id)),
-    }))
-    .filter((group) => group.domains.length > 0);
-
-  return {
-    catalog,
-    groups,
-    suggestedDisplayLabels: data.suggestedDisplayLabels ?? [],
-  };
+  return shapePermissionCatalogForAaurikaa(unwrapData(response) ?? {});
 }
 
 export async function createStaffUser(input: {

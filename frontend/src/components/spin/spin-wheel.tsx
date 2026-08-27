@@ -4,12 +4,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { PublicSpinSegment } from "@/lib/api/spin";
 import { cn } from "@/lib/cn";
 
-// AAURIKAA premium styling tokens mapped for segment colors
-const SEGMENT_STYLES = [
-  { bg: "var(--accent)", text: "var(--accent-foreground)" },
-  { bg: "var(--primary)", text: "var(--primary-foreground)" },
-  { bg: "var(--background)", text: "var(--foreground)" },
-  { bg: "var(--muted)", text: "var(--foreground)" },
+// AAURIKAA luxury color palette with guaranteed high-contrast text pairings
+const WHEEL_PALETTE = [
+  { fill: "#1a1714", text: "#fbfaf8", border: "#a6875c" }, // Noir with Ivory text
+  { fill: "#a6875c", text: "#ffffff", border: "#1a1714" }, // Champagne Gold with White text
+  { fill: "#faf8f4", text: "#1a1714", border: "#dcd5c9" }, // Pearl Ivory with Deep Charcoal text
+  { fill: "#2b251f", text: "#e8dfd3", border: "#a6875c" }, // Espresso with Champagne text
+  { fill: "#c4a476", text: "#1a1714", border: "#1a1714" }, // Soft Gold with Dark text
+  { fill: "#f1ece4", text: "#1a1714", border: "#dcd5c9" }, // Warm Cream with Deep Charcoal text
 ];
 
 type SpinWheelProps = {
@@ -19,6 +21,27 @@ type SpinWheelProps = {
   onSpinComplete?: () => void;
   className?: string;
 };
+
+function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
+  const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+  return {
+    x: centerX + radius * Math.cos(angleInRadians),
+    y: centerY + radius * Math.sin(angleInRadians),
+  };
+}
+
+function describeArc(x: number, y: number, radius: number, startAngle: number, endAngle: number) {
+  const start = polarToCartesian(x, y, radius, endAngle);
+  const end = polarToCartesian(x, y, radius, startAngle);
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+  return [
+    "M", x, y,
+    "L", start.x, start.y,
+    "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
+    "Z",
+  ].join(" ");
+}
 
 export function SpinWheel({
   segments,
@@ -30,20 +53,8 @@ export function SpinWheel({
   const [rotation, setRotation] = useState(0);
   const completedRef = useRef<string | null>(null);
 
-  const sliceAngle = segments.length > 0 ? 360 / segments.length : 360;
-
-  const gradient = useMemo(() => {
-    if (segments.length === 0) {
-      return "conic-gradient(var(--color-muted) 0deg 360deg)";
-    }
-    const stops = segments.map((_, index) => {
-      const start = index * sliceAngle;
-      const end = (index + 1) * sliceAngle;
-      const style = SEGMENT_STYLES[index % SEGMENT_STYLES.length];
-      return `${style.bg} ${start}deg ${end}deg`;
-    });
-    return `conic-gradient(from -90deg, ${stops.join(", ")})`;
-  }, [segments, sliceAngle]);
+  const numSegments = segments.length || 6;
+  const sliceAngle = 360 / numSegments;
 
   useEffect(() => {
     if (!spinning || !targetSegmentId || segments.length === 0) return;
@@ -52,10 +63,11 @@ export function SpinWheel({
     const index = segments.findIndex((segment) => segment.id === targetSegmentId);
     if (index < 0) return;
 
-    const centerAngle = index * sliceAngle + sliceAngle / 2;
-    const pointerOffset = 270;
-    const baseTurns = 5 * 360;
-    const targetRotation = baseTurns + (pointerOffset - centerAngle);
+    // Center angle of the winning slice (measured clockwise from 12 o'clock)
+    const sliceCenter = index * sliceAngle + sliceAngle / 2;
+    // Pointer is at top (0° / 12 o'clock)
+    const baseSpins = 5 * 360;
+    const targetRotation = baseSpins + (360 - sliceCenter);
 
     completedRef.current = targetSegmentId;
     setRotation(targetRotation);
@@ -67,98 +79,114 @@ export function SpinWheel({
     return () => window.clearTimeout(timer);
   }, [spinning, targetSegmentId, segments, sliceAngle, onSpinComplete]);
 
-  // Generate gold bezel beads (watch-dial diamond markers)
+  // Generate 16 luxury bezel beads around the perimeter
   const bezelBeads = useMemo(() => {
     const beads = [];
-    const count = 12;
+    const count = 16;
     for (let i = 0; i < count; i++) {
-      const angle = (i * 360) / count - 90;
-      const rad = (angle * Math.PI) / 180;
-      const x = 50 + 47.5 * Math.cos(rad);
-      const y = 50 + 47.5 * Math.sin(rad);
-      beads.push({ x, y, id: i });
+      const angle = (i * 360) / count;
+      const pt = polarToCartesian(160, 160, 150, angle);
+      beads.push({ x: pt.x, y: pt.y, id: i });
     }
     return beads;
   }, []);
 
   return (
-    <div className={cn("relative mx-auto aspect-square w-full max-w-[320px]", className)}>
-      {/* Pointer */}
+    <div className={cn("relative mx-auto aspect-square w-full max-w-[340px]", className)}>
+      {/* Top Center Pointer Needle */}
       <div
-        className="pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-2 flex flex-col items-center"
+        className="pointer-events-none absolute left-1/2 top-0 z-30 -translate-x-1/2 -translate-y-2.5 flex flex-col items-center drop-shadow-md"
         aria-hidden
       >
-        <div className="h-3 w-3 rounded-full bg-accent border border-accent-foreground/20 shadow-sm" />
-        <div className="h-0 w-0 border-x-[8px] border-t-[20px] border-x-transparent border-t-accent -mt-1 drop-shadow-md" />
+        <div className="size-3.5 rounded-full border-2 border-[#8c6f46] bg-[#a6875c] shadow-sm" />
+        <div className="h-0 w-0 -mt-1 border-x-[8px] border-t-[20px] border-x-transparent border-t-[#8c6f46]" />
       </div>
 
-      {/* Static Luxury Bezel Frame */}
-      <div className="relative h-full w-full rounded-full border-[5px] border-accent bg-background p-1.5 shadow-[0_12px_36px_rgba(26,23,20,0.15)] flex items-center justify-center">
-        {/* Diamond beads on static bezel */}
-        {bezelBeads.map((bead) => (
-          <span
-            key={bead.id}
-            className="absolute h-1 w-1 rounded-full bg-accent/40"
-            style={{ left: `${bead.x}%`, top: `${bead.y}%` }}
-          />
-        ))}
-
-        {/* Rotating Wheel Container */}
-        <div
-          className="relative h-full w-full rounded-full overflow-hidden spin-wheel-transition border border-accent/20"
+      {/* SVG Wheel Display */}
+      <div className="relative h-full w-full rounded-full border-[5px] border-[#a6875c] bg-[#faf8f4] p-1 shadow-[0_16px_40px_-8px_rgba(26,23,20,0.22)]">
+        <svg
+          viewBox="0 0 320 320"
+          className="h-full w-full rounded-full overflow-hidden"
           style={{
-            background: gradient,
             transform: `rotate(${rotation}deg)`,
+            transition: spinning ? "transform 4.2s cubic-bezier(0.12, 0.99, 0.28, 1)" : "none",
           }}
-          aria-hidden
         >
-          {/* Radial segment separators (spokes) */}
-          {segments.map((segment, index) => (
-            <div
-              key={`divider-${segment.id}`}
-              className="absolute left-1/2 top-1/2 h-[50%] w-[1.5px] bg-accent/20 origin-top -translate-x-1/2"
+          <defs>
+            <radialGradient id="centerHubGradient" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#d8be96" />
+              <stop offset="70%" stopColor="#a6875c" />
+              <stop offset="100%" stopColor="#7a5e35" />
+            </radialGradient>
+            <filter id="hubShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3" />
+            </filter>
+          </defs>
+
+          {/* Slices */}
+          {segments.map((segment, index) => {
+            const startAngle = index * sliceAngle;
+            const endAngle = (index + 1) * sliceAngle;
+            const pathD = describeArc(160, 160, 154, startAngle, endAngle);
+            const theme = WHEEL_PALETTE[index % WHEEL_PALETTE.length];
+            const textAngle = startAngle + sliceAngle / 2;
+            const textPos = polarToCartesian(160, 160, 102, textAngle);
+
+            return (
+              <g key={segment.id}>
+                {/* Wedge path */}
+                <path
+                  d={pathD}
+                  fill={theme.fill}
+                  stroke="#a6875c"
+                  strokeWidth="1.2"
+                  strokeOpacity="0.4"
+                />
+
+                {/* Text label with exact contrast */}
+                <g transform={`translate(${textPos.x}, ${textPos.y}) rotate(${textAngle})`}>
+                  <text
+                    x="0"
+                    y="0"
+                    fill={theme.text}
+                    fontSize={numSegments > 6 ? "9.5" : "11"}
+                    fontWeight="700"
+                    fontFamily="inherit"
+                    letterSpacing="0.06em"
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    transform="rotate(90)"
+                    style={{ textTransform: "uppercase" }}
+                  >
+                    {segment.label}
+                  </text>
+                </g>
+              </g>
+            );
+          })}
+
+          {/* Central Decorative Hub */}
+          <circle cx="160" cy="160" r="32" fill="url(#centerHubGradient)" filter="url(#hubShadow)" />
+          <circle cx="160" cy="160" r="28" fill="none" stroke="#fbfaf8" strokeWidth="1.5" strokeOpacity="0.6" />
+          <polygon
+            points="160,146 163.5,156.5 174,160 163.5,163.5 160,174 156.5,163.5 146,160 156.5,156.5"
+            fill="#fbfaf8"
+            opacity="0.95"
+          />
+        </svg>
+
+        {/* Static Diamond Marker Beads on Bezel */}
+        <div className="pointer-events-none absolute inset-0">
+          {bezelBeads.map((bead) => (
+            <span
+              key={bead.id}
+              className="absolute size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#a6875c] shadow-[0_0_2px_rgba(255,255,255,0.8)]"
               style={{
-                transform: `rotate(${index * sliceAngle}deg) translateX(-50%)`,
+                left: `${(bead.x / 320) * 100}%`,
+                top: `${(bead.y / 320) * 100}%`,
               }}
             />
           ))}
-
-          {/* Segment Labels */}
-          {segments.map((segment, index) => {
-            const angle = index * sliceAngle + sliceAngle / 2 - 90;
-            const radius = 34;
-            const x = 50 + radius * Math.cos((angle * Math.PI) / 180);
-            const y = 50 + radius * Math.sin((angle * Math.PI) / 180);
-            
-            const style = SEGMENT_STYLES[index % SEGMENT_STYLES.length];
-            const textRotation = index * sliceAngle + sliceAngle / 2;
-
-            return (
-              <span
-                key={segment.id}
-                className="absolute max-w-[30%] -translate-x-1/2 -translate-y-1/2 text-center text-[10px] font-semibold tracking-wider uppercase leading-tight transition-colors duration-300 sm:text-xs"
-                style={{
-                  left: `${x}%`,
-                  top: `${y}%`,
-                  color: style.text,
-                  transform: `translate(-50%, -50%) rotate(${textRotation}deg)`,
-                }}
-              >
-                {segment.label}
-              </span>
-            );
-          })}
-        </div>
-
-        {/* Central Dome (Static center piece) */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-accent-foreground/20 bg-gradient-to-b from-accent to-accent-foreground shadow-md flex items-center justify-center">
-          <svg
-            className="h-5 w-5 text-accent-foreground/90 drop-shadow-sm"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
-            <path d="M12 2l2.4 6.6 6.6 2.4-6.6 2.4-2.4 6.6-2.4-6.6-6.6-2.4 6.6-2.4z" />
-          </svg>
         </div>
       </div>
     </div>

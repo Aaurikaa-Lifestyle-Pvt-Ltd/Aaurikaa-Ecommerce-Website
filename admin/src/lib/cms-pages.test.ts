@@ -83,11 +83,14 @@ test("settings API still exposes SEO and site helpers for other hubs", () => {
 });
 
 test("staff permission catalog keeps cms and site_settings visible", () => {
-  const staffApi = fs.readFileSync(path.join(import.meta.dirname, "api/staff.ts"), "utf8");
-  assert.equal(staffApi.includes('"sellers"'), true);
-  assert.equal(staffApi.includes('"finance"'), true);
-  assert.equal(/HIDDEN_STAFF_DOMAINS[\s\S]*cms/.test(staffApi), false);
-  assert.equal(/HIDDEN_STAFF_DOMAINS[\s\S]*site_settings/.test(staffApi), false);
+  const staffCatalog = fs.readFileSync(
+    path.join(import.meta.dirname, "staff-catalog.ts"),
+    "utf8",
+  );
+  assert.equal(staffCatalog.includes('"sellers"'), true);
+  assert.equal(staffCatalog.includes('"finance"'), true);
+  assert.equal(/HIDDEN_STAFF_DOMAINS[\s\S]*cms/.test(staffCatalog), false);
+  assert.equal(/HIDDEN_STAFF_DOMAINS[\s\S]*site_settings/.test(staffCatalog), false);
 });
 
 test("staff page allows editing permissions for non-super-admin users", () => {

@@ -83,13 +83,19 @@ test("catalogue import UI does not expose seller picker", () => {
 });
 
 test("staff permission UI source hides marketplace seller domain assignment", () => {
-  const staff = fs.readFileSync(
+  const staffApi = fs.readFileSync(
     path.join(ROOT, "src/lib/api/staff.ts"),
     "utf8",
   );
-  assert.equal(staff.includes('HIDDEN_STAFF_DOMAINS'), true);
-  assert.equal(staff.includes('"sellers"'), true);
-  assert.equal(staff.includes('"finance"'), true);
+  const staffCatalog = fs.readFileSync(
+    path.join(ROOT, "src/lib/staff-catalog.ts"),
+    "utf8",
+  );
+  assert.equal(staffApi.includes("HIDDEN_STAFF_DOMAINS"), true);
+  assert.equal(staffApi.includes("shapePermissionCatalogForAaurikaa"), true);
+  assert.equal(staffCatalog.includes("HIDDEN_STAFF_DOMAINS"), true);
+  assert.equal(staffCatalog.includes('"sellers"'), true);
+  assert.equal(staffCatalog.includes('"finance"'), true);
 });
 
 test("merchandising admin does not expose seller selection or jewellery taxonomy seeds", () => {
