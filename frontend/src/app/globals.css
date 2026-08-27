@@ -95,6 +95,20 @@ body {
   display: none;
 }
 
+/*
+ * Homepage Section Spacing Rhythm:
+ * Scoped exclusively to the homepage sections container.
+ * When consecutive content sections share the unbordered page background,
+ * collapse the top padding of the following section so that the visual distance
+ * between sections equals the intentional 1x section padding (56px / 64px)
+ * rather than doubling to 112px / 128px from uncollapsed top+bottom paddings.
+ */
+.homepage-sections > section.py-14 + section.py-14 {
+  padding-top: 0;
+}
+
+
+
 @keyframes announcement-fade {
   from {
     opacity: 0;

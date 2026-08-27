@@ -20,7 +20,7 @@ import { trustItems } from "@/data/trust";
  */
 export function HomepageSections() {
   return (
-    <>
+    <div className="homepage-sections">
       {homepageSections.map((section, index) => (
         <HomepageSectionRenderer
           key={
@@ -35,7 +35,7 @@ export function HomepageSections() {
           section={section}
         />
       ))}
-    </>
+    </div>
   );
 }
 
