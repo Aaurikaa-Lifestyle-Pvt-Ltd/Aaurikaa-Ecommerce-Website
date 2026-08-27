@@ -14,22 +14,55 @@ const {
 } = require("../services/reviewModerationService");
 const { verifyDeliveredPurchase } = require("../services/reviewEligibilityService");
 
-/** Select only non-personal fields when populating reviewer: shopName (Seller), username (Shopper/Admin) */
-const REVIEWER_POPULATE_SELECT = "username shopName";
+/** Fields used to build a public displayName (never email). */
+const REVIEWER_POPULATE_SELECT = "username shopName firstName lastName";
 
 /**
  * Shape a review for frontend: expose only reviewer.role and reviewer.displayName.
- * displayName = shopName for Seller, username for Shopper/Admin. No email, name, or other personal fields.
+ * Prefer denormalized reviewer.name (written at create via getReviewerInfo),
+ * then populated profile fields. Never expose email.
  */
 function shapeReviewForFrontend(review) {
-  const r = review && typeof review.toObject === "function" ? review.toObject() : (review ? { ...review } : null);
+  const r =
+    review && typeof review.toObject === "function"
+      ? review.toObject()
+      : review
+        ? { ...review }
+        : null;
   if (!r || !r.reviewer) return r;
+
   const role = r.reviewer.role;
   const userId = r.reviewer.userId;
-  const displayName =
-    role === "seller"
-      ? (userId && (userId.shopName || userId.username)) || "Shop"
-      : (userId && userId.username) || "User";
+  const populated =
+    userId &&
+    typeof userId === "object" &&
+    (userId.username != null ||
+      userId.shopName != null ||
+      userId.firstName != null ||
+      userId.lastName != null)
+      ? userId
+      : null;
+
+  const denormalizedName =
+    typeof r.reviewer.name === "string" ? r.reviewer.name.trim() : "";
+  const populatedFullName = populated
+    ? [populated.firstName, populated.lastName].filter(Boolean).join(" ").trim()
+    : "";
+
+  let displayName;
+  if (role === "seller") {
+    displayName =
+      (populated && (populated.shopName || populated.username)) ||
+      denormalizedName ||
+      "Shop";
+  } else {
+    displayName =
+      denormalizedName ||
+      populatedFullName ||
+      (populated && populated.username) ||
+      "Customer";
+  }
+
   r.reviewer = { role, displayName };
   return r;
 }

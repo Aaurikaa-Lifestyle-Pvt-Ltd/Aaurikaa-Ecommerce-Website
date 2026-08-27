@@ -165,6 +165,32 @@ function refSlug(
 
 export function mapBackendProduct(raw: BackendProduct | null | undefined): Product | null {
   if (!raw) return null;
+
+  const rawRec = raw as Record<string, unknown>;
+  const rawSeller = rawRec.seller as Record<string, unknown> | undefined;
+  const rawSellerShop = rawRec.sellerShop as Record<string, unknown> | undefined;
+  const isSellerVerified = Boolean(
+    rawSeller?.isVerified ||
+      rawSeller?.isApproved ||
+      rawSellerShop?.isVerified ||
+      rawSellerShop?.isApproved ||
+      rawRec.isSellerVerified,
+  );
+  const merchantTitle =
+    String(
+      rawSeller?.shopName ||
+        rawSellerShop?.shopName ||
+        rawSeller?.firstName ||
+        "",
+    ).trim() || undefined;
+  const seller =
+    isSellerVerified || merchantTitle
+      ? {
+          shopName: merchantTitle,
+          isVerified: isSellerVerified,
+        }
+      : undefined;
+
   const cleaned = stripSellerFields(
     { ...(raw as Record<string, unknown>) },
   ) as BackendProduct;
@@ -263,6 +289,7 @@ export function mapBackendProduct(raw: BackendProduct | null | undefined): Produ
     seoDescription,
     ...(avgRating != null ? { avgRating } : {}),
     ...(reviewCount != null ? { reviewCount } : {}),
+    ...(seller ? { seller } : {}),
     ...(typeof cleaned.taxIncluded === "boolean"
       ? { taxIncluded: cleaned.taxIncluded }
       : {}),

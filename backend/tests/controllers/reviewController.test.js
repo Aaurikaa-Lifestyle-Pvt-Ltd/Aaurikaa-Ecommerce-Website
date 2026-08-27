@@ -540,6 +540,49 @@ describe('Review Controller Tests', () => {
       expect(response.body.data.customerReviews.length).toBe(2);
       expect(response.body.data.summary.avgRating).toBeGreaterThan(0);
       expect(response.body.data.summary.reviewCount).toBe(4);
+      // Public payload exposes displayName from denormalized/profile name — never the "User" stub.
+      const customerNames = response.body.data.customerReviews.map(
+        (r) => r.reviewer.displayName
+      );
+      expect(customerNames).toEqual(
+        expect.arrayContaining(['Test Shopper 1', 'Test Shopper 2'])
+      );
+      expect(customerNames.every((n) => n && n !== 'User')).toBe(true);
+      expect(response.body.data.customerReviews[0].reviewer.email).toBeUndefined();
+      expect(response.body.data.authoritative.seller.reviewer.displayName).toBeTruthy();
+      expect(response.body.data.authoritative.seller.reviewer.displayName).not.toBe('User');
+    });
+
+    it('TC-REV-011b: uses denormalized reviewer.name when populate cannot resolve userId', async () => {
+      const product = await createTestProduct();
+      const orphanId = new mongoose.Types.ObjectId();
+
+      await Review.create({
+        product: product._id,
+        productSku: product.sku,
+        seller: product.seller,
+        reviewer: {
+          userId: orphanId,
+          role: 'shopper',
+          roleModel: 'Shopper',
+          name: 'Asha Verma',
+        },
+        rating: 5,
+        comment: 'Name should come from denormalized field',
+        status: 'approved',
+        verifiedPurchase: true,
+      });
+
+      const response = await request(app).get(
+        `/api/reviews/product/${product._id.toString()}`
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.customerReviews).toHaveLength(1);
+      expect(response.body.data.customerReviews[0].reviewer).toEqual({
+        role: 'shopper',
+        displayName: 'Asha Verma',
+      });
     });
 
     it('TC-REV-012: should return approved reviews for deleted product via productSku', async () => {

@@ -57,7 +57,7 @@ export function StarDisplay({
           return (
             <span
               key={starValue}
-              className={on ? "text-foreground" : "text-muted-foreground/40"}
+              className={on ? "text-accent" : "text-border/70"}
             >
               ★
             </span>
@@ -123,8 +123,8 @@ export function StarRatingInput({
               className={cn(
                 "rounded-sm px-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
                 on
-                  ? "text-foreground"
-                  : "text-muted-foreground/35 hover:text-muted-foreground",
+                  ? "text-accent"
+                  : "text-muted-foreground/35 hover:text-accent/70",
               )}
             >
               ★

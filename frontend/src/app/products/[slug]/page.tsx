@@ -159,14 +159,15 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <div className="min-w-0">
             <ProductPurchase product={product} />
             <ProductDetails product={product} className="mt-10" />
-            <ProductReviews
-              productId={product.id}
-              catalogueAvgRating={product.avgRating}
-              catalogueReviewCount={product.reviewCount}
-              className="mt-10"
-            />
           </div>
         </div>
+
+        <ProductReviews
+          productId={product.id}
+          catalogueAvgRating={product.avgRating}
+          catalogueReviewCount={product.reviewCount}
+          className="mt-14 sm:mt-20"
+        />
       </div>
 
       {related.length > 0 ? (

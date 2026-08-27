@@ -288,16 +288,6 @@ export function ProductPurchase({ product }: ProductPurchaseProps) {
         {product.name}
       </h1>
 
-      {reviewCount != null && reviewCount > 0 && reviewAvgRating != null ? (
-        <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs tracking-wide text-muted-foreground">
-          <StarDisplay rating={reviewAvgRating} size="sm" showValue />
-          <span>
-            {reviewCount}{" "}
-            {reviewCount === 1 ? "review" : "reviews"}
-          </span>
-        </div>
-      ) : null}
-
       {product.sku || selectedVariant?.sku ? (
         <p className="mt-1.5 text-xs tracking-wide text-muted-foreground">
           SKU {selectedVariant?.sku || product.sku}

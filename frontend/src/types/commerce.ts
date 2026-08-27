@@ -111,6 +111,12 @@ export interface Product {
   reviewCount?: number;
   /** When API provides `taxIncluded` — display copy only; prices unchanged. */
   taxIncluded?: boolean;
+  /** Seller verification metadata (for verified seller badge display). */
+  seller?: {
+    shopName?: string;
+    name?: string;
+    isVerified?: boolean;
+  };
 }
 
 /** A browsable catalogue entry point (brief §14). */
