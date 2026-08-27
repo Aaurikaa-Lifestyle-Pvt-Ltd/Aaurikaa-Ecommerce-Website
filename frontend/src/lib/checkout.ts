@@ -79,7 +79,7 @@ export const emptyCheckoutForm: CheckoutFormValues = {
     pinCode: "",
     phone: "",
   },
-  paymentMethod: "cod",
+  paymentMethod: "phonepe",
 };
 
 function isValidEmail(value: string): boolean {

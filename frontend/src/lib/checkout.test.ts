@@ -9,10 +9,10 @@ import {
   validateCheckoutForm,
 } from "./checkout.ts";
 
-test("checkout config exposes COD and PhonePe only - no delivery fee table", () => {
+test("checkout config exposes PhonePe only - no delivery fee table", () => {
   assert.deepEqual(
     paymentOptions.map((option) => option.id),
-    ["cod", "phonepe"],
+    ["phonepe"],
   );
   for (const option of paymentOptions) {
     assert.equal("fee" in option, false);
@@ -22,7 +22,7 @@ test("checkout config exposes COD and PhonePe only - no delivery fee table", () 
 test("checkout form has no client shipping method or demo card fields", () => {
   assert.equal("deliveryMethod" in emptyCheckoutForm, false);
   assert.equal("upiId" in emptyCheckoutForm, false);
-  assert.equal(emptyCheckoutForm.paymentMethod, "cod");
+  assert.equal(emptyCheckoutForm.paymentMethod, "phonepe");
 });
 
 test("checkout place-order confidence links use registry policy paths", () => {

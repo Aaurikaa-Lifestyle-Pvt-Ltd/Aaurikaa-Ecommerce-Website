@@ -7,20 +7,14 @@ export interface PaymentOption {
 }
 
 /**
- * Shopper payment choices only.
- * Shipping amounts are never listed here — zone rates come from
- * POST /api/pricing/calculate and again at order create.
+ * Shopper payment choices.
+ * COD is hidden from customer-facing checkout UI while backend COD capability is preserved.
  */
 export const paymentOptions: PaymentOption[] = [
   {
-    id: "cod",
-    label: "Cash on Delivery",
-    description: "Pay when your order arrives.",
-  },
-  {
     id: "phonepe",
     label: "PhonePe",
-    description: "Pay securely online with PhonePe.",
+    description: "Pay securely online with PhonePe (UPI, Cards, Net Banking).",
   },
 ];
 

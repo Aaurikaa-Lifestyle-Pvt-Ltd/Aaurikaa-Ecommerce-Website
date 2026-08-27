@@ -259,7 +259,7 @@ export function CheckoutView() {
         fullName: prev.shipping.fullName || profileName,
         phone: prev.shipping.phone || user.phone || prev.customer.phone,
       },
-      paymentMethod: "cod",
+      paymentMethod: "phonepe",
     }));
     setAddressesLoading(true);
     fetchShopperAddresses()
@@ -734,6 +734,14 @@ export function CheckoutView() {
               quoteError={quoteError}
               quoting={quoting}
               couponCode={coupon}
+              onApplyCoupon={(code) => {
+                setCoupon(code);
+                writeCheckoutCoupon(code);
+              }}
+              onRemoveCoupon={() => {
+                setCoupon("");
+                writeCheckoutCoupon("");
+              }}
             />
           </div>
         </Container>
@@ -748,8 +756,8 @@ export function CheckoutView() {
           <p className="eyebrow mb-3">{buyNow ? "Buy Now checkout" : "Secure checkout"}</p>
           <h1 className="font-serif text-3xl tracking-tight sm:text-4xl">Checkout</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            Cash on Delivery and PhonePe create a shopper order. Prices, GST,
-            shipping, coupons, and the payable total are calculated by the backend.
+            Pay securely with PhonePe. Prices, GST, shipping, coupons, and the
+            payable total are calculated by the backend.
           </p>
         </header>
 
@@ -1071,39 +1079,6 @@ export function CheckoutView() {
               )}
             </section>
 
-            <section aria-labelledby="checkout-coupon">
-              <h2 id="checkout-coupon" className="font-serif text-2xl tracking-tight">
-                Coupon
-              </h2>
-              <div className="mt-5">
-                <Field id="checkout-coupon-code" label="Promo code">
-                  <TextInput
-                    id="checkout-coupon-code"
-                    value={coupon}
-                    onChange={(e) => {
-                      const next = e.target.value.toUpperCase();
-                      setCoupon(next);
-                      writeCheckoutCoupon(next);
-                    }}
-                  />
-                </Field>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Coupons are applied by the backend pricing quote as you type. Shipping
-                  and tax finalize after you enter a delivery address. Invalid codes
-                  block order create.
-                </p>
-                {quote && coupon.trim() && quote.couponValid === false ? (
-                  <p className="mt-2 text-sm text-sale" role="alert">
-                    This coupon is not valid for the current bag and address.
-                  </p>
-                ) : null}
-                {quote && coupon.trim() && quote.couponValid === true ? (
-                  <p className="mt-2 text-sm text-muted-foreground" role="status">
-                    Coupon applied on the quote. Final validation happens when you place the order.
-                  </p>
-                ) : null}
-              </div>
-            </section>
 
             <section aria-labelledby="checkout-payment">
               <h2 id="checkout-payment" className="font-serif text-2xl tracking-tight">
@@ -1220,6 +1195,14 @@ export function CheckoutView() {
             quoteError={quoteError}
             quoting={quoting}
             couponCode={coupon}
+            onApplyCoupon={(code) => {
+              setCoupon(code);
+              writeCheckoutCoupon(code);
+            }}
+            onRemoveCoupon={() => {
+              setCoupon("");
+              writeCheckoutCoupon("");
+            }}
             className="lg:sticky lg:top-28"
           />
         </form>

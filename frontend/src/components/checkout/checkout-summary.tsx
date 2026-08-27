@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import type { CartItem } from "@/types/cart";
 import type { PricingQuote } from "@/lib/api/pricing";
@@ -16,6 +17,8 @@ interface CheckoutSummaryProps {
   quoteError?: string | null;
   quoting?: boolean;
   couponCode?: string;
+  onApplyCoupon?: (code: string) => void;
+  onRemoveCoupon?: () => void;
 }
 
 function inr(amount: number) {
@@ -79,7 +82,11 @@ export function CheckoutSummary({
   quoteError,
   quoting = false,
   couponCode = "",
+  onApplyCoupon,
+  onRemoveCoupon,
 }: CheckoutSummaryProps) {
+  const [draftCoupon, setDraftCoupon] = useState("");
+
   const couponInvalid =
     Boolean(couponCode.trim()) && quote?.couponValid === false;
   const couponValid =
@@ -90,6 +97,17 @@ export function CheckoutSummary({
     shippingGstRate != null && shippingGstRate > 0
       ? `Shipping GST (${formatPercent(shippingGstRate)}%)`
       : "Shipping GST";
+
+  function handleApply() {
+    const trimmed = draftCoupon.trim().toUpperCase();
+    if (!trimmed) return;
+    onApplyCoupon?.(trimmed);
+  }
+
+  function handleRemove() {
+    setDraftCoupon("");
+    onRemoveCoupon?.();
+  }
 
   return (
     <aside
@@ -133,7 +151,79 @@ export function CheckoutSummary({
         })}
       </ul>
 
-      <div className="mt-6 space-y-3 border-t border-border pt-5">
+      {/* Promo Code inside Order Summary */}
+      <div className="mt-6 border-t border-border pt-5">
+        <label
+          htmlFor="summary-promo-code"
+          className="mb-2 block text-xs font-medium uppercase tracking-wider text-muted-foreground"
+        >
+          Promo code
+        </label>
+        {couponValid ? (
+          <div className="flex items-center justify-between rounded-control border border-border bg-muted/40 px-3.5 py-2.5 text-sm">
+            <div className="min-w-0 pr-2">
+              <span className="font-semibold tracking-wider text-foreground">
+                {couponCode.trim().toUpperCase()}
+              </span>
+              <p className="text-xs text-muted-foreground">
+                Promo code {couponCode.trim().toUpperCase()} applied.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-sale"
+              aria-label="Remove promo code"
+            >
+              <span>Remove</span>
+              <span aria-hidden="true" className="text-sm font-bold leading-none">×</span>
+            </button>
+          </div>
+        ) : (
+          <div>
+            <div className="flex gap-2">
+              <input
+                id="summary-promo-code"
+                type="text"
+                value={draftCoupon}
+                placeholder="Enter promo code"
+                onChange={(e) => setDraftCoupon(e.target.value.toUpperCase())}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleApply();
+                  }
+                }}
+                className="w-full min-w-0 rounded-control border border-input bg-background px-3 py-2 text-xs uppercase placeholder:normal-case placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+              <button
+                type="button"
+                disabled={!draftCoupon.trim() || quoting}
+                onClick={handleApply}
+                className="shrink-0 rounded-control border border-border bg-surface px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Apply
+              </button>
+            </div>
+            {couponInvalid ? (
+              <div className="mt-2 flex items-center justify-between gap-2 text-xs">
+                <p className="text-sale" role="alert">
+                  {invalidCouponMessage(couponCode)}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleRemove}
+                  className="font-medium text-muted-foreground underline-offset-4 hover:underline"
+                >
+                  Clear
+                </button>
+              </div>
+            ) : null}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-5 space-y-3 border-t border-border pt-5">
         {quoting ? (
           <p
             className="flex items-center gap-2 text-sm text-muted-foreground"
@@ -146,16 +236,6 @@ export function CheckoutSummary({
         {quoteError ? (
           <p className="text-sm text-sale" role="alert">
             {quoteError}
-          </p>
-        ) : null}
-        {couponInvalid ? (
-          <p className="text-sm text-sale" role="alert">
-            {invalidCouponMessage(couponCode)}
-          </p>
-        ) : null}
-        {couponValid ? (
-          <p className="text-sm text-muted-foreground" role="status">
-            Promo code {couponCode.trim().toUpperCase()} applied.
           </p>
         ) : null}
         {quote ? (
