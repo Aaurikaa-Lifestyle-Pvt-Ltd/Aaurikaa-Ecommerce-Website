@@ -101,9 +101,6 @@ export function CartView() {
           <aside className="h-fit rounded-card border border-border bg-surface p-5 sm:p-6 lg:sticky lg:top-28">
             <h2 className="font-serif text-xl tracking-tight">Order summary</h2>
             <CartSummary className="mt-5" />
-            <p className="mt-4 text-xs text-muted-foreground">
-              Promo codes are applied at checkout by the backend pricing quote.
-            </p>
             <ButtonLink
               href="/checkout"
               variant="primary"
@@ -112,9 +109,6 @@ export function CartView() {
             >
               Proceed to Checkout
             </ButtonLink>
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              Checkout requires a shopper session. Bag items stay here until you continue.
-            </p>
           </aside>
         </div>
       </Container>

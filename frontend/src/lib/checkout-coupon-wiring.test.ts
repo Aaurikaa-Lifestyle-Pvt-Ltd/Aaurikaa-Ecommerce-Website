@@ -22,7 +22,7 @@ test("checkout quotes with coupon before delivery address is complete", () => {
 test("cart page does not offer a non-applying promo field", () => {
   const cart = readFileSync(join(root, "components/cart/cart-view.tsx"), "utf8");
   assert.equal(/id="cart-coupon"|label="Promo code"/.test(cart), false);
-  assert.match(cart, /Promo codes are applied at checkout/);
+  assert.match(cart, /Coupons are entered at checkout/);
 });
 
 test("checkout summary does not label pending shipping as complimentary", () => {
